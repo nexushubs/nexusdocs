@@ -1,6 +1,6 @@
 {
   "name": "nexushubs-server",
-  "version": "1.0.0-beta",
+  "version": "0.1.0",
   "description": "NexusHubs server, a storage engine proxy for multi provider",
   "main": "index.js",
   "scripts": {
