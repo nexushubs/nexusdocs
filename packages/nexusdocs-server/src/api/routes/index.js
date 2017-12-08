@@ -1,6 +1,6 @@
 import express from 'express';
 
-const api = express();
+const api = express.Router();
 
 const routes = [
   'clients',
@@ -21,7 +21,7 @@ routes.forEach(route => {
 
 api.get('/', (req, res, next) => {
   res.send({
-    version: '1.0',
+    version: req.nds.version,
   });
 });
 

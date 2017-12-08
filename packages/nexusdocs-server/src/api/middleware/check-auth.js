@@ -11,9 +11,11 @@ class Authorization {
   constructor(req, options = {}) {
     this.req = req;
     this.opt = _.defaults(options, {
-      from: 'header',
+      from: 'url',
       signature: {},
+      role: 'user',
     });
+    this.opt.signature.method = req.method;
   }
 
   async authorize() {

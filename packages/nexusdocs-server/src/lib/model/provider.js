@@ -20,7 +20,7 @@ export default class Provider extends BaseModel {
   defaultProjection = {
   }
   
-  beforeAdd(data) {
+  beforeCreate(data) {
     return this.ensureUnique({name: data.name});
   }
 

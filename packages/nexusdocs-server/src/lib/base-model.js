@@ -82,24 +82,20 @@ export default class BaseModel {
     }
   }
 
-  beforeAdd() {
+  beforeCreate(data) {
     // overide this method
   }
 
   async create(data, skipWrapMethod) {
-    const _id = data._id;
     try {
       this.validate(data);
     } catch(err) {
       return Promise.reject(err);
     }
     if (!skipWrapMethod) {
-      await this.beforeAdd(data);
+      await this.beforeCreate(data);
     }
-    data = {
-      _id: _id || this.generateId(),
-      ...data,
-    };
+    data._id = data._id || this.generateId();
     await this.collection.insertOne(data);
     const instance = this.getInstance(data);
     return instance;

@@ -30,6 +30,7 @@ export default class Resumable extends Base {
   };
 
   init(options) {
+    super.init();
     const defaultOptions = {
       // cacheDriver: 'fs',
       paramPrefix: 'resumable',

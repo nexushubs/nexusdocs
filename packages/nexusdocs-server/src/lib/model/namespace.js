@@ -39,7 +39,7 @@ export default class Namespace extends BaseModel {
     return this.create(data, true);
   }
 
-  async beforeAdd(data) {
+  async beforeCreate(data) {
     const { Provider } = this.model();
     const providerDoc = await Provider.collection.find({_id: data.providers_id});
     this.validProvider(providerDoc, data);

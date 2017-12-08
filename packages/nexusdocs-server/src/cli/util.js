@@ -1,22 +1,16 @@
-import { ObjectId } from 'mongodb';
-import Table from 'cli-table';
+import config from 'config';
 import _ from 'lodash';
+import Table from 'cli-table';
+import { ObjectId } from 'mongodb';
 
 import Application from '~/init/application';
 import { ValidationError } from '~/lib/errors';
 
 let app = null;
 
-const options = {
-  cli: true,
-  database: {
-    mongo: 'mongodb://localhost:27017/nexusdocs',
-  },
-};
-
 export async function getApp() {
   if (!app) {
-    app = new Application(options);
+    app = new Application(config.get('cli'));
     app.on('error', err => console.error);
     app.on('start', err => console.log('# NexusDocs server tool started'));
     app.on('stop', err => console.log(`# NexusDocs server tool finished in ${app.time()}s`));
@@ -32,7 +26,8 @@ export async function run(fn) {
   } catch(e) {
     handleError(e);
   } finally {
-    app.stop();
+    console.log('done!');
+    app.stop(true);
   }
 }
 
@@ -52,6 +47,9 @@ export function makeArray(val) {
 export function handleError(err) {
   if (err instanceof ValidationError) {
     console.error('Invalid Input:');
+    _.each(err.errors, e => {
+      delete e.code;
+    });
     console.error(listToTable(err.errors));
     return;
   }    

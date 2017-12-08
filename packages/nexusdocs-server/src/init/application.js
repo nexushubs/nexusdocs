@@ -3,6 +3,7 @@ import EventEmetter from 'events';
 import _ from 'lodash';
 import promisify from 'es6-promisify';
 import decamelize from 'decamelize';
+import camelCase from 'camelcase';
 
 import { connect, db } from '~/init/database';
 import { promisifyAll } from '~/lib/util';
@@ -44,9 +45,9 @@ export default class Application extends EventEmetter {
 
   async _start() {
     try {
-      const { server, database, cli } = this.options;
+      const { hostname, port, database, cli } = this.options;
       // connecting database;
-      this.db = await connect(database.mongodb);
+      this.db = await connect(database);
       // autoload models and services
       await this.autoload();
       if (!cli) {
@@ -54,7 +55,7 @@ export default class Application extends EventEmetter {
         const api = require('~/api').default;
         this.api = api;
         promisifyAll(api, ['listen', 'close']);
-        await api.listen(server.port, server.hostname)
+        await api.listen(port, hostname);
       }
       this.started = true;
       this.emit('start');
@@ -63,7 +64,10 @@ export default class Application extends EventEmetter {
     }
   }
 
-  stop() {
+  stop(force) {
+    if (force) {
+      process.exit(0);
+    }
     if (this.started) {
       this._stop();
     } else {
@@ -79,6 +83,11 @@ export default class Application extends EventEmetter {
       if (this.api) {
         await this.api.close();
       }
+      await Promise.all(_.map(this.services, async (service, name) => {
+        this.emit('stopping service');
+        await service.stop();
+        delete this.services[name];
+      }));
       this.emit('stop');
     } catch(e) {
       this.emit('error', e);
@@ -91,20 +100,18 @@ export default class Application extends EventEmetter {
 
   async autoload() {
     await this.load(this.models, models);
+    this.emit('starting service');
     await this.load(this.services, services);
   }
 
   load(holder, classes) {
     const initials = _.map(classes, (Class, name) => {
-      const instance = new Class();
+      const instance = new Class(name);
       this.bindLoader(instance);
-      // keep both capitalized and lowercased
-      holder[decamelize(name, '-')] = instance;
       holder[name] = instance;
-      if (_.isFunction(instance.init)) {
+      if (instance.init) {
         return instance.init();
       } else {
-        instance.init();
         return Promise.resolve();
       }
     });
@@ -112,29 +119,33 @@ export default class Application extends EventEmetter {
   }
 
   bindLoader(instance) {
-    instance.server = this;
+    instance.nds = this;
     instance.model = this.model;
     instance.service = this.service;
     instance.bindLoader = this.bindLoader;
   }
 
-  /**
-   * @returns
-   */
-  model(name) {
+  _instance(holder, name) {
     if (!name) {
-      return this.models;
+      const instances = {};
+      _.each(holder, (model, name) => {
+        const alias = decamelize(name, '-');
+        instances[name] = model;
+        instances[alias] = model;
+      });
+      return instances;
     } else {
-      return this.models[name];
+      const alias = camelCase(name);
+      return holder[name] || holder[alias];
     }
   }
   
+  model(name) {
+    return this._instance(this.models, name);
+  }
+  
   service(name) {
-    if (!name) {
-      return this.services;
-    } else {
-      return this.services[name];
-    }
+    return this._instance(this.services, name);
   }
 
 }

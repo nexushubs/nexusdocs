@@ -10,8 +10,9 @@ const api = express();
 // bind app handlers
 api.use((req, res, next) => {
   app().bindLoader(req);
+  res.set('X-Powered-By', 'NexusDocs');
   req.data = {};
-  console.log(`${req.method} ${req.url}`);
+  process.stdout.write(`\n${req.method} ${req.url}`);
   next();
 });
 

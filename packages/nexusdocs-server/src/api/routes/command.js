@@ -1,7 +1,10 @@
 import express from 'express';
 import wrap from 'express-wrap-async';
 
-const api = express();
+import { ApiError } from '~/lib/errors';
+import { checkAuth } from '~/api/middleware';
+
+const api = express.Router();
 
 api.get('/', wrap(async (req, res, next) => {
   

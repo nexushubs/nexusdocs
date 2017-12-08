@@ -8,7 +8,11 @@ import { upload, checkAuth } from '~/api/middleware';
 import { parseQueryStringHeaders } from '~/lib/util';
 import { downloadFile } from './files';
 
-const api = express();
+const api = express.Router();
+
+api.use(checkAuth({
+  role: 'admin',
+}));
 
 api.param('namespace', wrap(async (req, res, next) => {
   const { namespace } = req.params;
@@ -109,10 +113,7 @@ api.param('files_id', wrap(async (req, res, next) => {
 api.get([
   '/:namespace/files/:files_id',
   '/:namespace/files/:files_id/download',
-], checkAuth({
-  from: 'url',
-  signature: { method: 'GET'},
-}), downloadFile);
+], checkAuth(), downloadFile);
 
 api.delete('/:namespace/files/:files_id', wrap(async (req, res, next) => {
   const { namespace, file } = req.data;

@@ -1,9 +1,16 @@
 import express from 'express';
 import wrap from 'express-wrap-async';
 
-const api = express();
+const api = express.Router();
+
+import { ApiError } from '~/lib/errors';
+import { checkAuth } from '~/api/middleware';
 
 // TODO
+
+api.use(checkAuth({
+  role: 'admin',
+}));
 
 api.get('/', wrap(async (req, res, next) => {
   

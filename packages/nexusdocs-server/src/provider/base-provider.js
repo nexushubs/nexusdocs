@@ -19,6 +19,12 @@ export default class BaseProvider extends EventEmitter {
     }
   }
 
+  destroy() {
+    if (this._destroy) {
+      return this._destroy();
+    }
+  }
+
   async bucket(bucketName) {
     const { buckets } = this.options;
     if (!buckets.includes(bucketName)) {
@@ -36,6 +42,7 @@ export default class BaseProvider extends EventEmitter {
   }
 
   destroy() {
+    return true;
   }
   
 }

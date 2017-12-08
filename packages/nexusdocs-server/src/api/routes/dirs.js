@@ -3,8 +3,13 @@ import express from 'express';
 import wrap from 'express-wrap-async';
 
 import { ApiError } from '~/lib/errors';
+import { checkAuth } from '~/api/middleware';
 
-const api = express();
+const api = express.Router();
+
+api.use(checkAuth({
+  role: 'admin',
+}));
 
 api.param('namespaces_id', wrap(async (req, res, next) => {
   const { Namespace } = req.model();

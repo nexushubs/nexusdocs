@@ -21,4 +21,8 @@ export default class GridFSProvider extends BaseProvider {
     this.db = await MongoClient.connect(params.database);
   }
 
+  destroy() {
+    return this.db.close();
+  }
+
 }

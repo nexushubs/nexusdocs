@@ -35,5 +35,5 @@ export default class GridFSProviderBucket extends BaseBucket {
   drop() {
     return this.bucket.drop();
   }
-  
+
 }

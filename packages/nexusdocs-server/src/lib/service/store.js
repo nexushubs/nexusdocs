@@ -5,14 +5,19 @@ import Base from '~/lib/base-service';
 
 export default class Store extends Base {
   
-  constructor() {
-    super();
+  constructor(...params) {
+    super(...params);
     this.providerClasses = {};
     this.providers = {};
   }
 
   init() {
+    super.init();
     this.providerClasses = loadClasses('provider');
+  }
+
+  _stop() {
+    return Promise.all(_.map(this.providers, provider => provider.destroy()));
   }
 
   async provider(id, forceReload) {

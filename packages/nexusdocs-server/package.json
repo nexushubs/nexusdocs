@@ -4,6 +4,7 @@
   "description": "NexusHubs server, a storage engine proxy for multi provider",
   "main": "index.js",
   "scripts": {
+    "start": "node lib/app start",
     "build": "babel --out-dir lib src --source-maps",
     "nodemon": "nodemon --delay 1000ms -i src lib/app.js",
     "watch": "babel --out-dir lib src --source-maps --watch",
@@ -34,11 +35,12 @@
   "dependencies": {
     "ali-oss": "^4.11.2",
     "archiver": "^2.1.0",
+    "base32-encode": "^0.1.0",
     "body-parser": "^1.18.2",
     "camelcase": "^4.1.0",
     "cli-table": "^0.3.1",
     "commander": "^2.11.0",
-    "config": "^1.27.0",
+    "config": "^1.28.1",
     "content-disposition": "^0.5.2",
     "cors": "^2.8.4",
     "decamelize": "^1.2.0",
