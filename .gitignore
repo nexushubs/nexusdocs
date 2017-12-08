@@ -1,0 +1,21 @@
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# testing
+lib-cov
+coverage
+
+# nodejs
+node_modules
+
+# application
+.vscode
+
+lerna-debug.log
+npm-debug.log

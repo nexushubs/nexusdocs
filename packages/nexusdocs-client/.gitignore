@@ -1,0 +1,20 @@
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# testing
+lib-cov
+coverage
+
+# nodejs
+node_modules
+
+# application
+/lib
+yarn.lock
+.vscode

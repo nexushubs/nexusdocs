@@ -1,0 +1,53 @@
+{
+  "name": "nexusdocs-client",
+  "version": "1.0.0-beta",
+  "description": "Client SDK for nexusdocs-server",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "npm run build && npm run docs",
+    "build": "babel --out-dir lib src --source-maps",
+    "docs": "jsdoc2md --template README.hbs src/*.js > README.md ",
+    "watch": "babel --out-dir lib src --source-maps --watch",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:nexushubs/nexusdocs.git"
+  },
+  "keywords": [
+    "storage",
+    "file",
+    "system"
+  ],
+  "author": "alphakevin",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-module-resolver": "^2.7.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "chai": "^4.1.2",
+    "eslint": "^4.10.0",
+    "jsdoc-to-markdown": "^3.0.2",
+    "mocha": "^4.0.1",
+    "nock": "^9.1.0",
+    "uuid": "^3.1.0"
+  },
+  "dependencies": {
+    "content-disposition": "^0.5.2",
+    "crypto-js": "^3.1.9-1",
+    "decamelize": "^1.2.0",
+    "json-stable-stringify": "^1.0.1",
+    "lodash": "^4.17.4",
+    "mime-types": "^2.1.17",
+    "qs": "^6.5.1",
+    "request": "^2.83.0",
+    "source-map-support": "^0.5.0",
+    "type-is": "^1.6.15",
+    "url-parse": "^1.2.0"
+  }
+}

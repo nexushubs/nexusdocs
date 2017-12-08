@@ -1,0 +1,17 @@
+{
+  "presets": [
+    ["env", {
+      "targets": {
+        "node": "4.6.2"
+      }
+    }],
+    "stage-3"
+  ],
+  "plugins": [
+    // "babel-plugin-add-module-exports",
+    "transform-class-properties",
+    ["module-resolver", {
+      "root": ["./src"]
+    }]
+  ]
+}
