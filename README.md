@@ -17,3 +17,8 @@ NexusDocs is designed for applications to use multiple cloud storage engine in s
   * [MongoDB GridFS](https://docs.mongodb.com/manual/core/gridfs/)
 * Cloud storage
   * [Aliyun OSS](https://www.alibabacloud.com/product/oss)
+
+----
+## License
+
+[MIT](./LICENSE.md)

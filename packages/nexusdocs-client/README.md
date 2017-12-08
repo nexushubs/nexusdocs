@@ -4,6 +4,12 @@ Client-SDK for [nexusdocs-server](https://github.com/nexushubs/nexusdocs/tree/ma
 
 [NexusDocs Documentation](https://github.com/nexushubs/nexusdocs/wiki)
 
+## Use
+
+```bash
+npm install nexusdocs-client
+```
+
 ## Modules
 
 <dl>
@@ -259,4 +265,4 @@ Delete all files in this namespace
 
 * * *
 
-[LICENSE](/LICENSE.md)
+[LICENSE: MIT](/LICENSE.md)
