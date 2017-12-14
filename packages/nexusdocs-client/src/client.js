@@ -16,7 +16,7 @@ import Signer from './signer';
 /**
  * Class presenting NexusDocs client instance
  * @typicalname nds
- * @property {object} options - Server config
+ * @property {ServerOptions} options - Server options, see [ServerOptions](#Client..ServerOptions)
  */
 class Client {
 
@@ -27,14 +27,7 @@ class Client {
    * ```xml
    * http://<clientKey>:<clientSecret>@<hostname>:<port><endPoint>
    * ```
-   * @param {object|string} options - Server config object or a connection URL
-   * @param {string} [options.hostname=127.0.0.1] - hostname
-   * @param {boolean} [options.secure=false] - Whether to use HTTPS
-   * @param {number} [options.port=4000] - Server Port
-   * @param {string} [options.endPoint=/api] - API endpoint
-   * @param {string} options.clientKey - NDS API key
-   * @param {string} options.clientSecret - NDS API secret
-   * @param {number} options.defaultUrlExpires - default expires time
+   * @param {ServerOptions|string} options - Server options, see [ServerOptions](#Client..ServerOptions)
    */
   constructor(options = {}) {
     this.defaultOptions = {
@@ -130,7 +123,7 @@ class Client {
    * Request NDS and return a Promise
    * @protected
    * @ignore
-   * @param {RequestOptions} options 
+   * @param {RequestOptions} options - See [Namespace~RequestOptions](#Namespace..RequestOptions)
    * @returns {Promise}
    * @fulfil {object} - NDS response object
    * @reject {object} - NDS error object

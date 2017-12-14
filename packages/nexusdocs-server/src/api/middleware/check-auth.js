@@ -89,7 +89,6 @@ class Authorization {
     if (req.is(jsonType) === jsonType) {
       signature.body = sortedJSONStringify(req.body);
     }
-    console.log('!!!!', {signature});
     const signatureStr = sortedJSONStringify(signature);
     return this.hashToken(signatureStr);
   }

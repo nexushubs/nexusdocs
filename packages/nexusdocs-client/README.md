@@ -41,24 +41,24 @@ Create a NexusDocs client instance
 
 | Param | Type |
 | --- | --- |
-| options | <code>object</code> | 
+| options | <code>ServerOptions</code> | 
 
 **Example**  
-ES6 module example
+Create a client
 
 ```javascript
-import createNDSClient from 'nexusdocs-client';
+const createClient = require('nexusdocs-client');
 
-const NDS = createNDSClient({
+// Object style server options:
+const NDS = createClient({
   hostname: '192.168.1.6',
   port: 4001,
-  apiKey: 'API_KEY',
-  apiSecret: 'API_SECRET',
+  apiKey: 'MY_API_KEY',
+  apiSecret: 'MY_API_SECRET',
 });
 
-// URL style options:
-
-const NDS = createNDSClient('http://mykey:mysecret@192.168.1.6:4001/api');
+// URL style server options:
+const NDS = createClient('http://MY_API_KEY:MY_API_SECRET@192.168.1.6:4001/api');
 ```
 <a name="Client"></a>
 
@@ -70,12 +70,15 @@ Class presenting NexusDocs client instance
 
 | Name | Type | Description |
 | --- | --- | --- |
-| options | <code>object</code> | Server config |
+| options | <code>ServerOptions</code> | Server options, see [ServerOptions](#Client..ServerOptions) |
 
 
 * [Client](#Client)
     * [new Client(options)](#new_Client_new)
-    * [.getNamespace(name, [options])](#Client+getNamespace) ⇒ [<code>Namespace</code>](#Namespace)
+    * _instance_
+        * [.getNamespace(name, [options])](#Client+getNamespace) ⇒ [<code>Namespace</code>](#Namespace)
+    * _inner_
+        * [~ServerOptions](#Client..ServerOptions) : <code>object</code>
 
 <a name="new_Client_new"></a>
 
@@ -83,16 +86,9 @@ Class presenting NexusDocs client instance
 Creates an instance of NDS Client.
 
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| options | <code>object</code> \| <code>string</code> |  | Server config object or a connection URL |
-| [options.hostname] | <code>string</code> | <code>&quot;127.0.0.1&quot;</code> | hostname |
-| [options.secure] | <code>boolean</code> | <code>false</code> | Whether to use HTTPS |
-| [options.port] | <code>number</code> | <code>4000</code> | Server Port |
-| [options.endPoint] | <code>string</code> | <code>&quot;/api&quot;</code> | API endpoint |
-| options.clientKey | <code>string</code> |  | NDS API key |
-| options.clientSecret | <code>string</code> |  | NDS API secret |
-| options.defaultUrlExpires | <code>number</code> |  | default expires time |
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>ServerOptions</code> \| <code>string</code> | Server options, see [ServerOptions](#Client..ServerOptions) |
 
 **Example**  
 You can pass a URL sting instead of a config object:
@@ -111,6 +107,25 @@ Get namespace instance
 | --- | --- | --- |
 | name | <code>string</code> | The name |
 | [options] | <code>object</code> | Additional options |
+
+<a name="Client..ServerOptions"></a>
+
+### Client~ServerOptions : <code>object</code>
+Server options
+
+**Kind**: inner typedef of [<code>Client</code>](#Client)  
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| options.clientKey | <code>string</code> |  | NDS API key |
+| options.clientSecret | <code>string</code> |  | NDS API secret |
+| options.hostname | <code>string</code> | <code>&quot;127.0.0.1&quot;</code> | hostname |
+| options.secure | <code>boolean</code> | <code>false</code> | Whether to use HTTPS |
+| options.port | <code>number</code> | <code>4000</code> | Server Port |
+| options.endPoint | <code>string</code> | <code>&quot;/api&quot;</code> | API endpoint |
+| options.defaultUrlExpires | <code>number</code> |  | Default expires seconds |
+| options.defaultRequestExpires | <code>number</code> |  | Default expires seconds |
 
 <a name="Namespace"></a>
 
@@ -133,7 +148,8 @@ Class presenting NexusDocs namespace instance
         * [.createArchive(files)](#Namespace+createArchive) ⇒ <code>Promise</code>
         * [.getArchiveUrl(files, options)](#Namespace+getArchiveUrl)
     * _inner_
-        * [~RequestOptions,](#Namespace..RequestOptions,) : <code>object</code>
+        * [~RequestOptions](#Namespace..RequestOptions) : <code>object</code>
+        * [~FileId](#Namespace..FileId) : <code>string</code>
 
 <a name="new_Namespace_new"></a>
 
@@ -151,7 +167,7 @@ Namespace Class constructor
 Create a namespace instance
 
 ```javascript
-const namespace = nds.getNamespace('a.name.space');
+const namespace = NDS.getNamespace('a.name.space');
 ```
 <a name="Namespace+getUploadUrl"></a>
 
@@ -163,7 +179,7 @@ Get URL for upload
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [options] | <code>object</code> | Additional options |
+| [options] | <code>object</code> | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
 | [options.resumable] | <code>boolean</code> | If upload with resumbable.js |
 | [options.expires] | <code>date</code> | Timestamp the Request will available before |
 
@@ -177,8 +193,8 @@ Get file URL for view or download
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| fileId | <code>string</code> |  | File ID (uuid.v4) |
-| [options] | <code>RequestOptions</code> |  | Additional options |
+| fileId | <code>FileId</code> |  | File identifier, see [FileId](#Namespace..FileId) |
+| [options] | <code>RequestOptions</code> |  | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
 | [options.download] | <code>boolean</code> | <code>false</code> | Download with the original filename |
 | [options.filename] | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
 | [options.response] | <code>object</code> |  | Overwrite response header |
@@ -195,8 +211,9 @@ Get upload stream
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [options] | <code>RequestOptions</code> | Options |
+| [options] | <code>RequestOptions</code> | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
 | [options.stream] | <code>ReadableStream</code> | Provide readable stream directly |
+| [options.fileId] | <code>FileId</code> | Specify fileId, see [FileId](#Namespace..FileId) |
 | [options.filename] | <code>string</code> | Provide filename |
 | [options.contentType] | <code>string</code> | Provide content-type for download |
 | [options.knownLength] | <code>number</code> | Provide stream total length if available |
@@ -232,8 +249,8 @@ Get a readable stream for download
 
 | Param | Type | Description |
 | --- | --- | --- |
-| fileId | <code>string</code> | The file id which is needed for download |
-| [options] | <code>RequestOptions</code> | Additional options |
+| fileId | <code>FileId</code> | The file needed to download later, see [FileId](#Namespace..FileId) |
+| [options] | <code>RequestOptions</code> | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
 
 <a name="Namespace+downloadToLocal"></a>
 
@@ -246,9 +263,9 @@ Download a file to local file-system
 
 | Param | Type | Description |
 | --- | --- | --- |
-| fileId | <code>string</code> | The file id |
+| fileId | <code>FileId</code> | The file id, see [FileId](#Namespace..FileId) |
 | filePath | <code>string</code> | The path of file will be saved |
-| [options] | <code>RequestOptions</code> | Request options |
+| [options] | <code>RequestOptions</code> | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
 
 <a name="Namespace+delete"></a>
 
@@ -261,7 +278,7 @@ Delete a file on the server
 
 | Param | Type | Description |
 | --- | --- | --- |
-| fileId | <code>String</code> | The file will be deleted |
+| fileId | <code>FileId</code> | The file to be deleted, see [FileId](#Namespace..FileId) |
 
 <a name="Namespace+truncate"></a>
 
@@ -278,7 +295,7 @@ Create an archive
 
 | Param | Type | Description |
 | --- | --- | --- |
-| files | <code>Array.&lt;string&gt;</code> | file id array |
+| files | <code>Array.&lt;FileId&gt;</code> | file id array |
 
 <a name="Namespace+getArchiveUrl"></a>
 
@@ -287,12 +304,12 @@ Create an archive
 
 | Param | Type | Description |
 | --- | --- | --- |
-| files | <code>Array.&lt;string&gt;</code> | file id array |
-| options | <code>RequestOptions</code> | RequestOptions |
+| files | <code>Array.&lt;FileId&gt;</code> | file id array, see [FileId](#Namespace..FileId) |
+| options | <code>RequestOptions</code> | RequestOptions, see [RequestOptions](#Namespace..RequestOptions) |
 
-<a name="Namespace..RequestOptions,"></a>
+<a name="Namespace..RequestOptions"></a>
 
-### Namespace~RequestOptions, : <code>object</code>
+### Namespace~RequestOptions : <code>object</code>
 Request options for [request](https://github.com/request/request#requestoptions-callback),
 some properties are added for additional use, see specified method
 
@@ -308,6 +325,16 @@ some properties are added for additional use, see specified method
 | expires | <code>number</code> \| <code>date</code> | Expires time in second, timestamp or Date object, the request will be invalid after this timestamp |
 | signature | <code>object</code> | Additional signature data besides `method`, `url`, `expires` |
 
+<a name="Namespace..FileId"></a>
+
+### Namespace~FileId : <code>string</code>
+File identifier
+
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
+**Example**  
+```js
+Example file id: `e5ac71cf-a0f0-46b5-9070-268ae97bb769`
+```
 
 * * *
 

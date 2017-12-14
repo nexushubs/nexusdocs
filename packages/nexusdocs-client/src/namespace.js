@@ -10,24 +10,12 @@ import Client from './client';
 import { promisifyStream, getTimestamp } from './util';
 
 /**
- * Request options for [request](https://github.com/request/request#requestoptions-callback),
- * some properties are added for additional use, see specified method
- * @typedef {object} Namespace~RequestOptions,
- * @property {string} method - HTTP method of the request
- * @property {string} url - Path of the request, or full url
- * @property {string} [body] - Entire body for PATCH, PUT, POST or DELETE, `json` must be `true` and only plain object is allowed
- * @property {boolean} [json] - Set to `true` when providing `body`
- * @property {number|date} [expires] - Expires time in second, timestamp or Date object, the request will be invalid after this timestamp
- * @property {object} [signature] - Additional signature data besides `method`, `url`, `expires`
- */
-
-/**
  * Class presenting NexusDocs namespace instance
  * 
  * @example Create a namespace instance
  * 
  * ```javascript
- * const namespace = nds.getNamespace('a.name.space');
+ * const namespace = NDS.getNamespace('a.name.space');
  * ```
  * @typicalname namespace
  */
@@ -48,7 +36,7 @@ class Namespace {
 
   /**
    * Get URL for upload
-   * @param {object} [options] - Additional options
+   * @param {object} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @param {boolean} [options.resumable] - If upload with resumbable.js
    * @param {date} [options.expires] - Timestamp the Request will available before
    * @returns {string} URL for upload
@@ -71,8 +59,8 @@ class Namespace {
 
   /**
    * Get file URL for view or download
-   * @param {string} fileId - File ID (uuid.v4)
-   * @param {RequestOptions} [options] - Additional options
+   * @param {FileId} fileId - File identifier, see [FileId](#Namespace..FileId)
+   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @param {boolean} [options.download=false] - Download with the original filename
    * @param {string} [options.filename] - Download with new filename, this will set contentType & contentDisposition
    * @param {object} [options.response] - Overwrite response header
@@ -108,8 +96,9 @@ class Namespace {
 
   /**
    * Get upload stream
-   * @param {RequestOptions} [options] - Options
+   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @param {ReadableStream} [options.stream] - Provide readable stream directly
+   * @param {FileId} [options.fileId] - Specify fileId, see [FileId](#Namespace..FileId)
    * @param {string} [options.filename] - Provide filename
    * @param {string} [options.contentType] - Provide content-type for download
    * @param {number} [options.knownLength] - Provide stream total length if available
@@ -195,8 +184,8 @@ class Namespace {
 
   /**
    * Get a readable stream for download
-   * @param {string} fileId - The file id which is needed for download
-   * @param {RequestOptions} [options] - Additional options 
+   * @param {FileId} fileId - The file needed to download later, see [FileId](#Namespace..FileId)
+   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @returns {ReadableStream} - the readable stream
    */
   openDownloadStream(fileId, options = {}) {
@@ -207,9 +196,9 @@ class Namespace {
 
   /**
    * Download a file to local file-system
-   * @param {string} fileId - The file id
+   * @param {FileId} fileId - The file id, see [FileId](#Namespace..FileId)
    * @param {string} filePath - The path of file will be saved
-   * @param {RequestOptions} [options] - Request options
+   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @returns {Promise}
    * @fulfil {any} Download finished
    * @reject {any} When a error occur
@@ -223,7 +212,7 @@ class Namespace {
   
   /**
    * Delete a file on the server
-   * @param {String} fileId - The file will be deleted
+   * @param {FileId} fileId - The file to be deleted, see [FileId](#Namespace..FileId)
    * @returns {Promise}
    * @fulfil {object} When deletion is finished
    * @reject {any} When a error occur
@@ -250,7 +239,7 @@ class Namespace {
 
   /**
    * Create an archive
-   * @param {string[]} files - file id array
+   * @param {FileId[]} files - file id array
    * @returns {Promise}
    */
   createArchive(files) {
@@ -267,8 +256,8 @@ class Namespace {
 
   /**
    * 
-   * @param {string[]} files - file id array 
-   * @param {RequestOptions} options - RequestOptions
+   * @param {FileId[]} files - file id array, see [FileId](#Namespace..FileId)
+   * @param {RequestOptions} options - RequestOptions, see [RequestOptions](#Namespace..RequestOptions)
    */
   getArchiveUrl(files, options = {}) {
     return this.createArchive(files)
