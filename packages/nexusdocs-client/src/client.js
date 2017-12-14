@@ -15,8 +15,7 @@ import Signer from './signer';
 
 /**
  * Class presenting NexusDocs client instance
- * @typicalname nds
- * @property {ServerOptions} options - Server options, see [ServerOptions](#Client..ServerOptions)
+ * @typicalname client
  */
 class Client {
 

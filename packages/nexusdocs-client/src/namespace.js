@@ -15,7 +15,7 @@ import { promisifyStream, getTimestamp } from './util';
  * @example Create a namespace instance
  * 
  * ```javascript
- * const namespace = NDS.getNamespace('a.name.space');
+ * const namespace = client.getNamespace('a.name.space');
  * ```
  * @typicalname namespace
  */

@@ -39,9 +39,9 @@ Create a NexusDocs client instance
 **Kind**: Exported function  
 **See**: [new Client()](#new_Client_new)  
 
-| Param | Type |
-| --- | --- |
-| options | <code>ServerOptions</code> | 
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>ServerOptions</code> | Server options, see [ServerOptions](#Client..ServerOptions) |
 
 **Example**  
 Create a client
@@ -50,7 +50,7 @@ Create a client
 const createClient = require('nexusdocs-client');
 
 // Object style server options:
-const NDS = createClient({
+const client = createClient({
   hostname: '192.168.1.6',
   port: 4001,
   apiKey: 'MY_API_KEY',
@@ -58,7 +58,7 @@ const NDS = createClient({
 });
 
 // URL style server options:
-const NDS = createClient('http://MY_API_KEY:MY_API_SECRET@192.168.1.6:4001/api');
+const client = createClient('http://MY_API_KEY:MY_API_SECRET@192.168.1.6:4001/api');
 ```
 <a name="Client"></a>
 
@@ -66,12 +66,6 @@ const NDS = createClient('http://MY_API_KEY:MY_API_SECRET@192.168.1.6:4001/api')
 Class presenting NexusDocs client instance
 
 **Kind**: global class  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| options | <code>ServerOptions</code> | Server options, see [ServerOptions](#Client..ServerOptions) |
-
 
 * [Client](#Client)
     * [new Client(options)](#new_Client_new)
@@ -97,7 +91,7 @@ http://<clientKey>:<clientSecret>@<hostname>:<port><endPoint>
 ```
 <a name="Client+getNamespace"></a>
 
-### nds.getNamespace(name, [options]) ⇒ [<code>Namespace</code>](#Namespace)
+### client.getNamespace(name, [options]) ⇒ [<code>Namespace</code>](#Namespace)
 Get namespace instance
 
 **Kind**: instance method of [<code>Client</code>](#Client)  
@@ -167,7 +161,7 @@ Namespace Class constructor
 Create a namespace instance
 
 ```javascript
-const namespace = NDS.getNamespace('a.name.space');
+const namespace = client.getNamespace('a.name.space');
 ```
 <a name="Namespace+getUploadUrl"></a>
 
