@@ -12,6 +12,10 @@ import {
   addUrlParams,
 } from './util';
 
+/**
+ * Class for signing request
+ * @typicalname signer
+ */
 export default class Signer {
 
   constructor(options) {
@@ -56,6 +60,7 @@ export default class Signer {
 
   /**
    * Sign a URL for secured request
+   * @ignore
    * @param {RequestOptions} requestOptions
    */
   signUrl(requestOptions) {
@@ -78,6 +83,7 @@ export default class Signer {
 
   /**
    * Sign a request with body
+   * @ignore
    * @param {ReqestOptions} requestOptions 
    */
   signRequest(requestOptions) {

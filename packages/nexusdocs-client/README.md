@@ -28,26 +28,6 @@ npm install nexusdocs-client
 </dd>
 </dl>
 
-## Functions
-
-<dl>
-<dt><a href="#signUrl">signUrl(requestOptions)</a></dt>
-<dd><p>Sign a URL for secured request</p>
-</dd>
-<dt><a href="#signRequest">signRequest(requestOptions)</a></dt>
-<dd><p>Sign a request with body</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#RequestOptions,">RequestOptions,</a> : <code>Object</code></dt>
-<dd><p>Request options for <a href="https://github.com/request/request#requestoptions-callback">request</a>,
-some properties are added for additional use, see specified method</p>
-</dd>
-</dl>
-
 <a name="module_nexusdocs-client"></a>
 
 ## nexusdocs-client
@@ -141,16 +121,19 @@ Class presenting NexusDocs namespace instance
 
 * [Namespace](#Namespace)
     * [new Namespace(client, name, options)](#new_Namespace_new)
-    * [.getUploadUrl([options])](#Namespace+getUploadUrl) ⇒ <code>string</code>
-    * [.getDownloadUrl(fileId, [options])](#Namespace+getDownloadUrl) ⇒ <code>string</code>
-    * [.openUploadStream([options])](#Namespace+openUploadStream) ⇒ <code>WritableStream</code>
-    * [.uploadFromLocal(filePath)](#Namespace+uploadFromLocal) ⇒ <code>Promise</code>
-    * [.openDownloadStream(fileId, [options])](#Namespace+openDownloadStream) ⇒ <code>ReadableStream</code>
-    * [.downloadToLocal(fileId, filePath, [options])](#Namespace+downloadToLocal) ⇒ <code>Promise</code>
-    * [.delete(fileId)](#Namespace+delete) ⇒ <code>Promise</code>
-    * [.truncate()](#Namespace+truncate) ⇒ <code>Promise</code>
-    * [.createArchive(files)](#Namespace+createArchive) ⇒ <code>Promise</code>
-    * [.getArchiveUrl(files, options)](#Namespace+getArchiveUrl)
+    * _instance_
+        * [.getUploadUrl([options])](#Namespace+getUploadUrl) ⇒ <code>string</code>
+        * [.getDownloadUrl(fileId, [options])](#Namespace+getDownloadUrl) ⇒ <code>string</code>
+        * [.openUploadStream([options])](#Namespace+openUploadStream) ⇒ <code>WritableStream</code>
+        * [.uploadFromLocal(filePath)](#Namespace+uploadFromLocal) ⇒ <code>Promise</code>
+        * [.openDownloadStream(fileId, [options])](#Namespace+openDownloadStream) ⇒ <code>ReadableStream</code>
+        * [.downloadToLocal(fileId, filePath, [options])](#Namespace+downloadToLocal) ⇒ <code>Promise</code>
+        * [.delete(fileId)](#Namespace+delete) ⇒ <code>Promise</code>
+        * [.truncate()](#Namespace+truncate) ⇒ <code>Promise</code>
+        * [.createArchive(files)](#Namespace+createArchive) ⇒ <code>Promise</code>
+        * [.getArchiveUrl(files, options)](#Namespace+getArchiveUrl)
+    * _inner_
+        * [~RequestOptions,](#Namespace..RequestOptions,) : <code>object</code>
 
 <a name="new_Namespace_new"></a>
 
@@ -307,35 +290,13 @@ Create an archive
 | files | <code>Array.&lt;string&gt;</code> | file id array |
 | options | <code>RequestOptions</code> | RequestOptions |
 
-<a name="signUrl"></a>
+<a name="Namespace..RequestOptions,"></a>
 
-## signUrl(requestOptions)
-Sign a URL for secured request
-
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| requestOptions | <code>RequestOptions</code> | 
-
-<a name="signRequest"></a>
-
-## signRequest(requestOptions)
-Sign a request with body
-
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| requestOptions | <code>ReqestOptions</code> | 
-
-<a name="RequestOptions,"></a>
-
-## RequestOptions, : <code>Object</code>
+### Namespace~RequestOptions, : <code>object</code>
 Request options for [request](https://github.com/request/request#requestoptions-callback),
 some properties are added for additional use, see specified method
 
-**Kind**: global typedef  
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
 **Properties**
 
 | Name | Type | Description |
@@ -350,4 +311,6 @@ some properties are added for additional use, see specified method
 
 * * *
 
-[LICENSE: MIT](/LICENSE.md)
+## License
+
+MIT © NexusDocs

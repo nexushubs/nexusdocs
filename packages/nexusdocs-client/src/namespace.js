@@ -12,7 +12,7 @@ import { promisifyStream, getTimestamp } from './util';
 /**
  * Request options for [request](https://github.com/request/request#requestoptions-callback),
  * some properties are added for additional use, see specified method
- * @typedef {Object} RequestOptions,
+ * @typedef {object} Namespace~RequestOptions,
  * @property {string} method - HTTP method of the request
  * @property {string} url - Path of the request, or full url
  * @property {string} [body] - Entire body for PATCH, PUT, POST or DELETE, `json` must be `true` and only plain object is allowed
