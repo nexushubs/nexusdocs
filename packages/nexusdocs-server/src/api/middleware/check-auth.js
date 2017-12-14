@@ -99,7 +99,7 @@ class Authorization {
   }
 
   parseToken(token) {
-    const pattern = /^(\w+):(.+)$/;
+    const pattern = /^(\w+)\.(.+)$/;
     const result = pattern.exec(token);
     if (!result) {
       return null;
@@ -133,7 +133,7 @@ class Authorization {
     const { clientKey, clientSecret } = this.client;
     const signature = crypto.createHmac('sha1', clientSecret).update(str).digest('base64');
     const encodedSignature = urlSafeBase64Encode(signature);
-    return `${clientKey}:${encodedSignature}`;
+    return `${clientKey}.${encodedSignature}`;
   }
 
 }

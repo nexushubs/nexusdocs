@@ -26,7 +26,7 @@ export default class Signer {
     const { clientKey, clientSecret } = this.options;
     const signature = hmacSHA1(str, clientSecret);
     const encodedSignature = urlSafeBase64Encode(Base64.stringify(signature));
-    return `${clientKey}:${encodedSignature}`;
+    return `${clientKey}.${encodedSignature}`;
   }
 
   getSecuredUrl(url, signatureBody) {
