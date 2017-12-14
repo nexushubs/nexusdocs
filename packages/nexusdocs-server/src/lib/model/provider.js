@@ -3,7 +3,7 @@ import { providerType, bucketName } from '~/lib/schema';
 
 export default class Provider extends BaseModel {
 
-  name = 'providers';
+  collectionName = 'providers';
   schema = {
     type: { type: 'string', $providerType: 1 },
     name: { type: 'string', pattern: 'alphaNumeric' },

@@ -1,13 +1,16 @@
 import crypto from 'crypto';
-import mimeTypes from 'mime-types';
+import mime from 'mime-types';
 import { Transform } from 'stream';
+
+import { app } from '~/init/application';
 
 export default class UploadStream extends Transform {
 
   constructor(id, uploadStream, options = {}) {
     super();
+    app().bindLoader(this);
     const { filename, contentType, md5, size } = options;
-    this.startDate = new Date;
+    this.dateStarted = new Date;
     this.id = id;
     this.md5 = md5;
     this.size = size;
@@ -17,6 +20,7 @@ export default class UploadStream extends Transform {
     this.contentType = contentType;
     this.length = 0;
     this.hasher = crypto.createHash('md5');
+    this.metadata = {};
     if (uploadStream) {
       this.initStream();
     } else {
@@ -32,7 +36,6 @@ export default class UploadStream extends Transform {
   }
 
   initStream() {
-    // calculating file size
     this.uploadStream.on('finish', () => {
       this.finish();
     });
@@ -52,12 +55,12 @@ export default class UploadStream extends Transform {
   }
 
   _skipUpload() {
-    this.uploadDate = new Date;
+    this.dateUploaded = new Date;
     this.emit('start', {
       _id: this.id,
       ...this.getFileInfo(),
       status: 'skip',
-      startDate: this.startDate,
+      dateStarted: this.dateStarted,
     })
     this.on('readable', () => {
       let chunk;
@@ -70,8 +73,8 @@ export default class UploadStream extends Transform {
       size: this.size,
       md5: this.md5,
       status: 'skipped',
-      startDate: this.startDate,
-      uploadDate: this.uploadDate,
+      dateStarted: this.dateStarted,
+      dateUploaded: this.dateUploaded,
     });
     this.on('finish', () => {
       // console.log('!!! fake upload finished!');
@@ -92,13 +95,13 @@ export default class UploadStream extends Transform {
       _id: this.id,
       ...this.getFileInfo(),
       status: 'pending',
-      startDate: this.startDate,
+      dateStarted: this.dateStarted,
     };
     this.emit('start', info);
   }
 
   async finish() {
-    this.uploadDate = new Date;
+    this.dateUploaded = new Date;
     this.size = this.length;
     this.md5 = this.hasher.digest('hex');
     const info = {
@@ -107,8 +110,9 @@ export default class UploadStream extends Transform {
       size: this.size,
       md5: this.md5,
       status: 'ok',
-      startDate: this.startDate,
-      uploadDate: this.uploadDate,
+      dateStarted: this.dateStarted,
+      dateUploaded: this.dateUploaded,
+      metadata: this.metadata,
     };
     this.emit('upload', info);
   }

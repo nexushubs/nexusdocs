@@ -1,5 +1,6 @@
-import BaseBucket from '../base-bucket';
 import { GridFSBucket } from 'mongodb';
+
+import BaseBucket from '../../base-bucket';
 
 export default class GridFSProviderBucket extends BaseBucket {
 

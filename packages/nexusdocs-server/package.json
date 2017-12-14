@@ -2,11 +2,11 @@
   "name": "nexushubs-server",
   "version": "0.1.0",
   "description": "NexusHubs server, a storage engine proxy for multi provider",
-  "main": "index.js",
+  "main": "lib/app.js",
   "scripts": {
     "start": "node lib/app start",
     "build": "babel --out-dir lib src --source-maps",
-    "nodemon": "nodemon --delay 1000ms -i src lib/app.js",
+    "nodemon": "nodemon --delay 1000ms -i src lib/app.js start",
     "watch": "babel --out-dir lib src --source-maps --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -54,9 +54,11 @@
     "mkdirp": "^0.5.1",
     "mongodb": "^2.2.33",
     "multer": "^1.3.0",
+    "new-filename": "^1.0.1",
     "schema-inspector": "^1.6.8",
     "source-map-support": "^0.5.0",
     "statuses": "^1.4.0",
+    "unzip": "^0.1.11",
     "uppercamelcase": "^3.0.0",
     "uuid": "^3.1.0"
   }

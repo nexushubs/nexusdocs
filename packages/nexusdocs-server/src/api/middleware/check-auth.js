@@ -10,12 +10,19 @@ class Authorization {
 
   constructor(req, options = {}) {
     this.req = req;
-    this.opt = _.defaults(options, {
+    if (!options.from) {
+      options.from = this.getDefaultFrom(req.method);
+    }
+    this.opt = _.merge({
       from: 'url',
       signature: {},
       role: 'user',
-    });
-    this.opt.signature.method = req.method;
+    }, options);
+    
+  }
+
+  getDefaultFrom(method) {
+    return ['GET', 'HEAD'].includes(method) ? 'url' : 'header';
   }
 
   async authorize() {
@@ -27,57 +34,64 @@ class Authorization {
   }
 
   async _authorize() {
-    const expires = parseInt(this.req.query.e);
-    if (!expires || Date.now() / 1000 > expires) {
-      return 'token expired';
-    }
-    const userToken = this.getUserToken();
-    if (!userToken) {
+    let { expires, token } = this.parseClientToken();
+    if (!token) {
       return 'token not found';
     }
-    const result = this.parseToken(userToken);
+    expires = parseInt(expires);
+    if (!expires) {
+      return 'expire time not provided';
+    }
+    if (Date.now() / 1000 > expires) {
+      return 'token expired';
+    }
+    const result = this.parseToken(token);
     if (!result) {
-      return 'invalid token';
+      return 'invalid token: bad format';
     }
     const { clientKey, hash } = result;
     const client = await this.getClient(clientKey);
     if (!client) {
-      return 'invalid token';
+      return 'invalid client id';
     }
     this.client = client;
-    const serverToken = this.getServerToken();
-    if (userToken !== serverToken) {
-      return 'invalid token';
+    const serverToken = this.getServerToken(expires);
+    if (token !== serverToken) {
+      return 'invalid token: mismatch';
     }
+    this.expires = expires;
+    this.token = token;
     return null;
   }
 
-  getUserToken() {
-    if (this.opt.from === 'header') {
-      return this.getTokenFromHeader();
+  parseClientToken() {
+    const { from } = this.opt;
+    if (from === 'header') {
+      return this.parseFromHeader();
     } else {
-      return this.getTokenFromQuery();
+      return this.parseFromUrl();
     }
   }
 
-  getServerToken() {
-    const { req, opt: { from, signature } } = this;
-    let str;
+  getServerToken(expires) {
+    let { req, opt: { from, signature } } = this;
+    let url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+    url = url.replace(/&token=.+$/, '');
+    const jsonType = 'application/json';
+    signature = {
+      ...signature,
+      url,
+      method: req.method,
+    };
     if (from === 'header') {
-      str = sortedJSONStringify(signature);
-    } else if (from === 'url') {
-      str = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-      str = str.replace(/&token=.+$/, '');
-      const url = new URL(str);
-      const { searchParams } = url;
-      _.each(signature, (value, key) => {
-        searchParams.append(key, value);
-      })
-      searchParams.sort();
-      str = url.toString();
-      console.log(str);
+      signature.expires = expires;
     }
-    return this.hashToken(str);
+    if (req.is(jsonType) === jsonType) {
+      signature.body = sortedJSONStringify(req.body);
+    }
+    console.log('!!!!', {signature});
+    const signatureStr = sortedJSONStringify(signature);
+    return this.hashToken(signatureStr);
   }
 
   getClient(clientKey) {
@@ -95,18 +109,25 @@ class Authorization {
     return {token, clientKey, hash};
   }
 
-  getTokenFromHeader() {
+  parseFromHeader() {
     const tokenHeader = this.req.get('Authorization');
-    const pattern = /^NDS (.+)$/;
+    const pattern = /^NDS expires="([^"]+)",token="([^"]+)"$/;
     const result = pattern.exec(tokenHeader);
-    if (result) {
-      return result[1];
+    if (!result) {
+      return {};
     }
-    return null;
+    return {
+      expires: result[1],
+      token: result[2],
+    };
   }
 
-  getTokenFromQuery() {
-    return this.req.query.token || null;
+  parseFromUrl() {
+    const { query } = this.req;
+    return {
+      expires: query.e,
+      token: query.token,
+    };
   }
 
   hashToken(str) {
@@ -122,11 +143,8 @@ export default function(options) {
   return wrap(async(req, res, next) => {
     const auth = new Authorization(req, options);
     const authorized = await auth.authorize();
-    console.log(auth.error);
     if (!authorized) {
-      const err = new ApiError(401);
-      next(err);
-      return;
+      throw new ApiError(401);
     }
     next();
   })

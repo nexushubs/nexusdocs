@@ -1,10 +1,10 @@
 module.exports = {
-  service: {
-    hostname: 'NDS_HOSTNAME',
-    port: 'NDS_PORT',
+  Application: {
     database: 'NDS_DATABASE',
-  },
-  cli: {
-    database: 'NDS_DATABASE',
+    restful: {
+      enabled: 'NDS_RESTFUL_ENABLED',
+      hostname: 'NDS_RESTFUL_HOSTNAME',
+      port: 'NDS_RESTFUL_PORT',
+    },
   }
 };

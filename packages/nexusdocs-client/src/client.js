@@ -3,12 +3,15 @@ import Namespace from 'namespace';
 import request from 'request';
 import qs from 'qs';
 import parse from 'url-parse';
-import hmacSHA1 from 'crypto-js/hmac-sha1';
-import Base64 from 'crypto-js/enc-base64';
-import stringify from 'json-stable-stringify';
 
-import { urlSafeBase64Encode, sortedJSONStringify, sortObjectKey } from './util';
-
+import {
+  urlSafeBase64Encode,
+  sortedJSONStringify,
+  sortObjectKey,
+  promisifyStream,
+  getTimestamp,
+} from './util';
+import Signer from './signer';
 
 /**
  * Class presenting NexusDocs client instance
@@ -31,7 +34,7 @@ class Client {
    * @param {string} [options.endPoint=/api] - API endpoint
    * @param {string} options.clientKey - NDS API key
    * @param {string} options.clientSecret - NDS API secret
-   * @param {number} options.defaultExpires - default expires time
+   * @param {number} options.defaultUrlExpires - default expires time
    */
   constructor(options = {}) {
     this.defaultOptions = {
@@ -41,7 +44,8 @@ class Client {
       endPoint: '/api',
       clientKey: '',
       clientSecret: '',
-      defaultExpires: 3600,
+      defaultUrlExpires: 3600,
+      defaultRequestExpires: 60,
     };
     if (_.isString(options)) {
       const parsed = parse(options, true);
@@ -53,35 +57,20 @@ class Client {
       options.endPoint = pathname
       options.clientKey = username;
       options.clientSecret = password;
-      if (query.defaultExpires) {
-        options.defaultExpires = query.defaultExpires
+      if (query.defaultUrlExpires) {
+        options.defaultUrlExpires = query.defaultUrlExpires
       }
     }
     this.options = _.defaults(options, this.defaultOptions);
-  }
-
-  getToken(str) {
-    const { clientKey, clientSecret } = this.options;
-    const signature = hmacSHA1(str, clientSecret);
-    const encodedSignature = urlSafeBase64Encode(Base64.stringify(signature));
-    return `${clientKey}:${encodedSignature}`;
-  }
-
-  getSecuredUrl(url, signatureStr) {
-    const token = this.getToken(signatureStr);
-    const separator = /\?/.test(url) ? '&' : '?'
-    return `${url}${separator}token=${token}`;
-  }
-
-  getSecuredHeader(data) {
-    const str = sortedJSONStringify(data);
-    const token = this.getToken(str);
-    return `NDS ${token}`;
+    this.signer = new Signer(options);
   }
 
   getFullUrl(url) {
     const { secure, port } = this.options;
     const schema = secure ? 'https' : 'http';
+    if (!url) {
+      url = '';
+    }
     let portStr;
     if ((secure && port == 443) || (!secure && port == 80)) {
       portStr = '';
@@ -91,35 +80,21 @@ class Client {
     return `${schema}://${this.options.hostname}${portStr}${this.options.endPoint}${url}`;
   }
 
-  /**
-   * Build full URL of a NDS request
-   * @protected
-   * @ignore
-   * @param {string} url 
-   * @param {object} [options] 
-   * @param {object} [options.qs] - Query string parameters
-   * @param {object} [options.signature] - Secure params
-   * @returns {string}
-   */
-  buildUrl(url, options = {}) {
+  buildUrl(requestOptions) {
+    let { url } = requestOptions;
     if (/^https?/.test(url)) {
       return url;
     }
     let signatureUrl = url;
-    if (!_.isEmpty(options.qs)) {
-      url += '?' + qs.stringify(options.qs);
+    if (!_.isEmpty(requestOptions.qs)) {
+      url += '?' + qs.stringify(requestOptions.qs);
     }
-    url = this.getFullUrl(url);
-    if (options.signature) {
-      signatureUrl = this.getFullUrl(signatureUrl);
-      let query = { ...options.qs, ...options.signature };
-      query = sortObjectKey(query);
-      signatureUrl += '?' + qs.stringify(query);
-      console.log('url =', url);
-      console.log('signatureUrl =', signatureUrl);
-      url = this.getSecuredUrl(url, signatureUrl);
-    }
-    return url;
+    requestOptions.url = this.getFullUrl(url);
+  }
+
+  getUrl(requestOptions) {
+    this.buildUrl(requestOptions);
+    return this.signer.signUrl(requestOptions);
   }
 
   /**
@@ -128,10 +103,12 @@ class Client {
    * @param {object} options 
    */
   processHeader(options) {
-    if (options.signature) {
+    const { signature, expires } = options;
+    if (signature && options.expires) {
       options.headers = options.headers || {}
-      options.headers.Authorization = this.getSecuredHeader(options.signature),
+      options.headers.Authorization = this.getAuthorizationHeader(signature, expires),
       delete options.signature;
+      delete options.expires;
     }
   }
 
@@ -139,28 +116,20 @@ class Client {
    * Request NDS server and return a stream like object
    * @protected
    * @ignore
-   * @param {string} method 
-   * @param {string} url 
-   * @param {object} [options]
+   * @param {RequestOptions} requestOptions 
    * @returns {WritableStream}
    */
-  requestAsStream(method, url, options = {}) {
-    this.processHeader(options);
-    options = {
-      method,
-      url: this.buildUrl(url, options),
-      ...options,
-    };
-    return request(options);
+  requestAsStream(requestOptions) {
+    this.buildUrl(requestOptions);
+    this.signer.signRequest(requestOptions);
+    return request(requestOptions);
   }
 
   /**
    * Request NDS and return a Promise
    * @protected
    * @ignore
-   * @param {string} method 
-   * @param {string} url 
-   * @param {object} [options] 
+   * @param {RequestOptions} requestOptions 
    * @returns {Promise}
    * @fulfil {object} - NDS response object
    * @reject {object} - NDS error object
@@ -169,15 +138,12 @@ class Client {
    * - `error.error`: The error message
    * - `error.description`: The error description
    */
-  request(method, url, options) {
-    this.processHeader(options);
-    options = {
-      method,
-      url: this.buildUrl(url, options),
-      ...options,
-    };
+  request(requestOptions) {
+    this.buildUrl(requestOptions);
+    this.signer.signRequest(requestOptions);
+    console.log({requestOptions});
     return new Promise((resolve, reject) => {
-      request(options, (error, response, body) => {
+      request(requestOptions, (error, response, body) => {
         const contentType = response.headers['content-type'];
         if (!/^application\/json/i.test(contentType)) {
           reject('invalid response');

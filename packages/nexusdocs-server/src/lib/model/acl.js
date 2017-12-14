@@ -2,7 +2,7 @@ import BaseModel from '~/lib/base-model';
 
 export default class Acl extends BaseModel {
 
-  name = 'clients';
+  collectionName = 'clients';
   schema = {
     clients_id: { type: 'string' },
     target: { type: 'string' },

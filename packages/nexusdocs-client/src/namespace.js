@@ -38,7 +38,7 @@ class Namespace {
    * Get URL for upload
    * @param {object} [options] - Additional options
    * @param {boolean} [options.resumable] - If upload with resumbable.js
-   * @param {number|Date} [options.expires] - Seconds, timestamp or date, upload must done before this time
+   * @param {date} [options.expires] - Timestamp the Request will available before
    * @returns {string} URL for upload
    */
   getUploadUrl(options = {}) {
@@ -48,28 +48,25 @@ class Namespace {
     if (resumable) {
       query.resumable = 1;
     }
-    if (!expires) {
-      expires = this.client.options.defaultExpires;
-    }
-    query.e = getTimestamp(expires);
-    const urlOptions = {
+    const requestOptions = {
+      method: 'POST',
+      url,
       qs: query,
-      signature: {
-        method: 'POST',
-      },
+      expires,
     };
-    return this.client.buildUrl(url, urlOptions);
+    return this.client.getUrl(requestOptions);
   }
 
   /**
    * Get file URL for view or download
    * @param {string} fileId - File ID (uuid.v4)
    * @param {object} [options] - Additional options
-   * @param {number|date} [options.expires] - Seconds, timestamp or date, download must done before this time
+   * @param {date} [options.expires] - Timestamp the Request will available before
    * @param {boolean} [options.download=false] - Download with the original filename
-   * @param {string} [options.filename] - Download with new filename
-   * @param {string} [options.contentType] - Overwrite Content-Type in response header
-   * @param {string} [options.contentDisposition] - Overwrite Content-Disposition in response header
+   * @param {string} [options.filename] - Download with new filename, this will set contentType & contentDisposition
+   * @param {object} [options.response] - Overwrite response header
+   * @param {string} [options.response.contentType] - Overwrite Content-Type
+   * @param {string} [options.response.contentDisposition] - Overwrite Content-Disposition
    * @returns {string} file URL
    */
   getDownloadUrl(fileId, options = {}) {
@@ -77,12 +74,9 @@ class Namespace {
     let { expires } = options;
     const query = {};
     if (filename) {
+      response.contentType = mime.contentType(filename);
       response.contentDisposition = contentDisposition(filename);
     }
-    if (!expires) {
-      expires = this.client.options.defaultExpires;
-    }
-    query.e = getTimestamp(expires);
     if (download) {
       query.download = 1;
     }
@@ -90,14 +84,13 @@ class Namespace {
       key = 'response-' + decamelize(key, '-');
       query[key] = value;
     });
-    const url = `/namespaces/${this.name}/files/${fileId}`;
     const requestOptions = {
+      method: 'GET',
+      url: `/namespaces/${this.name}/files/${fileId}`,
       qs: query,
-      signature: {
-        method: 'GET',
-      },
+      expires,
     };
-    return this.client.buildUrl(url, requestOptions);
+    return this.client.getUrl(requestOptions);
   }
 
   /**
@@ -118,20 +111,16 @@ class Namespace {
     if (!contentType) {
       contentType = 'application/octet-stream';
     }
-    if (!expires) {
-      expires = this.client.options.defaultExpires;
-    }
-    expires = getTimestamp(expires);
-    const url = this.getUploadUrl();
     const requestOptions = {
+      method: 'POST',
+      url: `/namespaces/${this.name}/upload`,
       signature: {
-        namespace: this.name,
-        fileId,
-        expires,
+        body: {
+          fileId,
+        },
       },
       formData: {
         fileId,
-        expires,
         file: {
           value: stream,
           options: {
@@ -142,7 +131,7 @@ class Namespace {
         }
       },
     };
-    this.client.request('POST', url, requestOptions)
+    this.client.request(requestOptions)
     .then(result => {
       stream.emit('file', result);
     })
@@ -219,10 +208,11 @@ class Namespace {
    * @reject {any} When a error occur
    */
   delete(fileId) {
-    const url = `/namespaces/${this.name}/files/${fileId}`;
-    return this.client.request('DELETE', url, {
-      secure: true,
-    });
+    const requestOptions = {
+      method: 'DELETE',
+      url: `/namespaces/${this.name}/files/${fileId}`,
+    };
+    return this.client.request(requestOptions);
   }
 
   /**
@@ -230,8 +220,49 @@ class Namespace {
    * @returns {Promise}
    */
   truncate() {
-    const url = `/namespaces/${this.name}/truncate`;
-    return this.client.request('POST', url);
+    const requestOptions = {
+      method: 'POST',
+      url: `/namespaces/${this.name}/truncate`,
+    };
+    return this.client.request(requestOptions);
+  }
+
+  /**
+   * Create an archive
+   * @param {string[]} files - file id array
+   * @returns {Promise}
+   */
+  createArchive(files) {
+    const requestOptions = {
+      method: 'POST',
+      url: `/namespace/${this.name}/archives`,
+      body: {
+        files,
+      },
+      json: true,
+    };
+    return this.client.request(requestOptions);
+  }
+
+  /**
+   * 
+   * @param {string[]} files - file id array 
+   * @param {RequestOptions} options - RequestOptions
+   */
+  getArchiveUrl(files, options) {
+    const { expires } = options;
+    return this.createArchive(files)
+    .then(archive => {
+      const { _id: archive_id } = archive;
+      const requestOptions = {
+        method: 'GET',
+        url: `/namespace/${this.name}/archives/${archive_id}`,
+        signature: {
+          expires,
+        },
+      };
+      return this.client.buildUrl(requestOptions);
+    });
   }
 
 }

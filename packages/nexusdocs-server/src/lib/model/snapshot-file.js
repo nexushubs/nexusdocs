@@ -2,7 +2,7 @@ import BaseModel from '~/lib/base-model';
 
 export default class SnapshotFile extends BaseModel {
 
-  name = 'snapshots';
+  collectionName = 'snapshots';
   schema = {
     namespace: { type: 'string' },
   };

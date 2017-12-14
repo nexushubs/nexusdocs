@@ -1,14 +1,16 @@
 import _ from 'lodash';
 import { Writable } from 'stream';
+import archiver from 'archiver';
+import getNewFilename from 'new-filename';
 
 import BaseModel from '~/lib/base-model';
-import BaseBucket from '~/provider/base-bucket';
 import { bucketName, isObjectId } from '~/lib/schema';
 import { ValidationError, buildValidationError } from '~/lib/errors';
+import { ApiError } from '../../../lib/lib/errors';
 
 export default class Namespace extends BaseModel {
 
-  name = 'namespaces';
+  collectionName = 'namespaces';
   schema = {
     name: { type: 'string' },
     providers_id: { $isObjectId: 1 },
@@ -115,7 +117,7 @@ export default class Namespace extends BaseModel {
         md5: info.md5,
         size: info.size,
         status: 'ok',
-        metadata: {},
+        metadata: info.metadata,
       });
     }
     info.store_id = store.data('_id');
@@ -132,8 +134,8 @@ export default class Namespace extends BaseModel {
       contentType: info.contentType,
       md5: info.md5,
       size: info.size,
-      startDate: info.startDate,
-      uploadDate: info.uploadDate,
+      dateStarted: info.dateStarted,
+      dateUploaded: info.dateUploaded,
       path: info.path,
       aliases: [],
       isDelete: false,
@@ -181,16 +183,77 @@ export default class Namespace extends BaseModel {
   }
 
   async truncate() {
+    // TODO move deleting operation to task queue
     if (!this._active) {
       throw new Error('could not truncate on none instance');
     }
     const { File } = this.model();
-    // TODO move delete operation to task queue
     const files = await File.collection.find({
       namespace: this._data.name,
     }).toArray();
     const promises = files.map(file => this.deleteFile(file));
     return Promise.all(promises);
+  }
+
+  async createArchive(files, name) {
+    // TODO move acreating archive operation to task queue
+    const { Archive, File } = this.model();
+    const archive = await Archive.getByFiles(files);
+    if (archive) {
+      return archive;
+    }
+    if (!name) {
+      name = `archive-${(new Date).toISOString()}`;
+    }
+    const bucket = await this.bucket();
+    const filename = `${name}.zip`;
+    const storeStream = await bucket.openUploadStream({
+      filename,
+    });
+    const arvhive = new archiver('zip', {
+      zlib: { level: 6 },
+    });
+    const filenames = [];
+    return new Promise(async (resolve, reject) => {
+      storeStream.on('error', reject);
+      storeStream.on('upload', async info => {
+        info.files = files;
+        const data = await this.addArchive(info);
+        resolve(data);
+      });
+      arvhive.on('warning', reject);
+      arvhive.on('error', reject);
+      arvhive.pipe(storeStream);
+      await Promise.all(_.map(files, async fileId => {
+        console.log('next file:', fileId);
+        const file = await File.get(fileId);
+        if (!file) {
+          const err = new ApiError(404, `file not find: ${fileId}`);
+          arvhive.emit('error', err);
+        }
+        const fileStream = await bucket.openDownloadStream(file.store_id);
+        let filename = file.filename;
+        filename = getNewFilename(filenames, filename);
+        console.log('appending:', filename);
+        arvhive.append(fileStream, {
+          name: filename,
+          date: file.dateUploaded,
+        });
+      }));
+      console.log('arvhive.finalize()');
+      arvhive.finalize();
+    });
+  }
+
+  async addArchive(info) {
+    const { Archive } = this.model();
+    const { _id: store_id, filename, files, size } = info;
+    return Archive.create({
+      store_id,
+      filename,
+      files,
+      size,
+    });
   }
 
 }

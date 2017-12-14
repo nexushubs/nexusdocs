@@ -1,9 +1,9 @@
 import _ from 'lodash';
 
-import { loadClass, loadClasses } from '~/lib/util';
-import Base from '~/lib/base-service';
+import BaseService from '~/lib/base-service';
+import { loadClasses } from '~/lib/util';
 
-export default class Store extends Base {
+export default class Store extends BaseService {
   
   constructor(...params) {
     super(...params);
@@ -13,7 +13,7 @@ export default class Store extends Base {
 
   init() {
     super.init();
-    this.providerClasses = loadClasses('provider');
+    this.providerClasses = loadClasses('lib/service/store/providers');
   }
 
   _stop() {
@@ -57,7 +57,7 @@ export default class Store extends Base {
     }
     options = {
       ...options,
-      path: `provider/${type}`
+      path: `lib/service/store/providers/${type}`,
     };
     const instance = new ProviderClass(options);
     if (typeof instance.init === 'function') {

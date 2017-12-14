@@ -7,7 +7,7 @@ const randomBytes = util.promisify(crypto.randomBytes);
 
 export default class Client extends BaseModel {
 
-  name = 'clients';
+  collectionName = 'clients';
   schema = {
     clientKey: { type: 'string', optional: true },
     clientSecret: { type: 'string', optional: true },

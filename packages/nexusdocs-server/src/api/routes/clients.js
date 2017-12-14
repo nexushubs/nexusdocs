@@ -7,9 +7,9 @@ import { checkAuth } from '~/api/middleware';
 
 const api = express.Router();
 
-// api.use(checkAuth({
-//   role: 'admin',
-// }));
+api.use(checkAuth({
+  role: 'admin',
+}));
 
 api.param('clientId', wrap(async (req, res, next) => {
   const { Client } = req.model();

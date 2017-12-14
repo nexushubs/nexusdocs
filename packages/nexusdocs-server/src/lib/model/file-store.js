@@ -2,7 +2,7 @@ import BaseModel from '~/lib/base-model';
 
 export default class FileStore extends BaseModel {
 
-  name = 'files.store';
+  collectionName = 'files.store';
   schema = {
     namespace: { type: 'string' },
     files_id: { type: 'array', items: { type: 'string', optional: true } },

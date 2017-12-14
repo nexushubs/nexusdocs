@@ -3,7 +3,7 @@ import uuid from 'uuid';
 
 export default class File extends BaseModel {
 
-  name = 'files';
+  collectionName = 'files';
   schema = {
     namespace: { type: 'string' },
     filename: { type: 'string' },
@@ -13,10 +13,11 @@ export default class File extends BaseModel {
     path: { type: 'string', optional: true },
     contentType: { type: 'string' },
     aliases: { type: 'array', items: { type: 'string' } },
-    startDate: { type: 'date' },
-    uploadDate: { type: 'date' },
-    isDelete: { type: 'boolean' },
     metadata: { type: 'object' },
+    dateStarted: { type: 'date' },
+    dateUploaded: { type: 'date' },
+    dateDeleted: { type: 'date', optional: true },
+    isDelete: { type: 'boolean' },
   };
 
   async openDownloadStream(id) {

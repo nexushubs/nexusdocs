@@ -5,23 +5,25 @@ import promisify from 'es6-promisify';
 import isStream from 'is-stream';
 import EventEmitter from 'events';
 import camelCase from 'camelcase';
-import jsonStringify from 'json-stable-stringify';
+import JSONStringify from 'json-stable-stringify';
 
 import { basePath } from '~/init/application';
 
 export const uuidRegexPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export function loadClass(path) {
-  path = basePath() + '/' + path;
-  return require(path).default;
+export function loadClass(file) {
+  file = basePath() + '/' + file;
+  console.log('loadClass', file);
+  return require(file).default;
 }
 
-export function loadClasses(path) {
+export function loadClasses(dir) {
   const classes = {};
-  path = basePath() + '/' + path;
-  const files = fs.readdirSync(path).forEach(name => {
-    if (/\.map$/.test(name)) return;
-    const classPath = path + '/' + name;
+  dir = basePath() + '/' + dir;
+  const files = fs.readdirSync(dir).forEach(name => {
+    // only auto load js file and directory
+    if (!/^([a-z0-9\-]+$|\.js$)/.test(name)) return;
+    const classPath = dir + '/' + name;
     const Class = require(classPath).default;
     classes[name] = Class;
   });
@@ -75,7 +77,6 @@ export function parseQueryStringHeaders(req) {
       }
     }
   });
-  console.log(headers);
   return headers;
 }
 
@@ -86,6 +87,6 @@ export function urlSafeBase64Encode(str) {
     .replace(/=+$/, '');
 }
 
-export function sortedJSONStringify(obj) {
-  return JSONStringify(data, (a, b) => a.key < b.key ? 1 : -1);
+export function sortedJSONStringify(object) {
+  return JSONStringify(object, (a, b) => a.key < b.key ? 1 : -1);
 }

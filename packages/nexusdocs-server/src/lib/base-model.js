@@ -7,40 +7,52 @@ import { db } from '~/init/database';
 
 export default class BaseModel {
   
-  name = '';
-
-  
   defaultProjection = undefined;
   
-  constructor(data, isActive) {
+  constructor(data) {
     this.db = db;
-    this._active = !!isActive;
+    this._active = !!data;
     this._deleted = false;
-    if (data && _.isObject(data)) {
-      this._data = data;
-    } else {
-      data = {};
+    this._data = {};
+    this.validator = buildValidator(this.schema);
+    if (data && _.isPlainObject(data)) {
+      this.data(data);
     }
   }
 
   getInstance(data) {
-    const instance = new (this.constructor)(data, true);
+    const instance = new (this.constructor)(data);
     this.bindLoader(instance);
     instance.init();
     return instance;
   }
 
   init() {
-    const collection = this.db.collection(`docs.${this.name}`);
+    const collection = this.db.collection(`docs.${this.collectionName}`);
     this.collection = collection;
-    this.validator = buildValidator(this.schema);
+    this.bindDataProperties();
     const aliases = ['find', 'findOne'];
     aliases.forEach(method => {
-      this[method] = this.collection[method].bind(this.collection);
+      this[method] = collection[method].bind(this.collection);
     });
-    // if (this._data && !_.isEmpty(this._data)) {
-    //   this.prepareData(this._data);
-    // }
+  }
+
+  bindDataProperties() {
+    const keys = Object.keys(this.schema);
+    keys.unshift('_id');
+    keys.forEach(key => {
+      Object.defineProperty(this, key, {
+        configurable: false,
+        enumerable: true,
+        get: () => {
+          return this.data(key);
+        },
+        set: (value) => {
+          this.data(key, value);
+          return value;
+        },
+      });
+    });
   }
   
   validate(data, options) {
@@ -48,6 +60,15 @@ export default class BaseModel {
       ...options,
       custom: this.validators,
     });
+    if (!result.valid) {
+      throw new ValidationError(result.error);
+    }
+  }
+
+  validateOne(key, value) {
+    const result = this.validator.validate({
+      [key]: value,
+    }, key);
     if (!result.valid) {
       throw new ValidationError(result.error);
     }
@@ -87,13 +108,13 @@ export default class BaseModel {
   }
 
   async create(data, skipWrapMethod) {
+    if (!skipWrapMethod) {
+      await this.beforeCreate(data);
+    }
     try {
       this.validate(data);
     } catch(err) {
       return Promise.reject(err);
-    }
-    if (!skipWrapMethod) {
-      await this.beforeCreate(data);
     }
     data._id = data._id || this.generateId();
     await this.collection.insertOne(data);
@@ -115,8 +136,8 @@ export default class BaseModel {
         _id: this.prepareId(query),
       };
     }
-    data = this.prepareData(data);
     await this.beforeUpdate(query, data);
+    data = this.prepareData(data);
     await this.collection.update(query, { $set: data });
     return this;
   }
@@ -165,22 +186,25 @@ export default class BaseModel {
     }
   }
 
-  data(data, value) {
+  data(key, value) {
     if (!this._active) {
       throw new Error('cannot access data for a none active model');
     }
-    if (!data) {
+    if (_.isUndefined(key)) {
       return this._data;
-    } else if (_.isString(data)) {
-      return this._data[data];
-    } else if (!_.isUndefined(value)) {
-      this._data[data] = value;
-      this._data = data;
+    } else if (_.isString(key)) {
+      if (_.isUndefined(value)) {
+        return this._data[key];
+      } else {
+        this.validateOne(key, value);
+        this._data[key] = value
+      }
+    } else if (_.isPlainObject(key)) {
+      this.validate(key);
+      _.extend(this._data, key);
       return this;
     } else {
-      this.validate(data);
-      this._data = data;
-      return this;
+      throw new TypeError('invalid data key');
     }
   }
 

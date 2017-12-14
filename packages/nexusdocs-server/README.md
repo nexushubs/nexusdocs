@@ -4,13 +4,21 @@ NexusDocs server application
 
 [NexusDocs Documentation](https://github.com/nexushubs/nexusdocs/wiki)
 
-## Use
+## Install
 
 ```bash
 npm install nexushubs-server
 ```
 
-app.js
+## Quick Start
+
+### Standalone Service
+
+```bash
+npm start
+```
+
+### Start in Main Application
 
 ```javascript
 const createServer = require('nexusdocs-server');
@@ -28,9 +36,10 @@ server.start();
 
 | Env | Description |
 | --- | ----------- |
-| `NDS_HOSTNAME` | Server bind hostname |
-| `NDS_PORT` | Server bind port |
 | `NDS_DATABASE` | Mongodb database URL |
+| `NDS_RESTFUL_ENABLED` | Whether to start API Server |
+| `NDS_RESTFUL_HOSTNAME` | API Server bind hostname |
+| `NDS_RESTFUL_PORT` | API Server bind port |
 
 ## Command Line Tool
 
@@ -53,3 +62,7 @@ $ ./ndstool --help
     client [command]     client manage
     help [cmd]           display help for [cmd]
 ```
+
+## License
+
+> MIT

@@ -10,7 +10,7 @@ let app = null;
 
 export async function getApp() {
   if (!app) {
-    app = new Application(config.get('cli'));
+    app = new Application({ restful: { enabled: false }});
     app.on('error', err => console.error);
     app.on('start', err => console.log('# NexusDocs server tool started'));
     app.on('stop', err => console.log(`# NexusDocs server tool finished in ${app.time()}s`));

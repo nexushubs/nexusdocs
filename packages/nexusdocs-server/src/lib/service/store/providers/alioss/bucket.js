@@ -3,7 +3,7 @@ import path from 'path';
 import { PassThrough } from 'stream';
 import { Wrapper as oss} from 'ali-oss';
 
-import BaseBucket from '../base-bucket';
+import BaseBucket from '../../base-bucket';
 
 export default class AliOSSProviderBucket extends BaseBucket {
 

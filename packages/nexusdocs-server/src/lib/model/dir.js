@@ -2,7 +2,7 @@ import BaseModel from '~/lib/base-model';
 
 export default class Dir extends BaseModel {
 
-  name = 'files';
+  collectionName = 'files';
   schema = {
     namespace: { type: 'string' },
     path: { type: 'string' },

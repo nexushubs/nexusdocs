@@ -1,3 +1,4 @@
+import qs from 'qs';
 import Base64 from 'crypto-js/enc-base64';
 import JSONStringify from 'json-stable-stringify';
 
@@ -43,4 +44,9 @@ export function sortObjectKey(obj) {
     sorted[key] = obj[key];
   })
   return sorted;
+}
+
+export function addUrlParams(url, params) {
+  const separator = /\?/.test(url) ? '&' : '?';
+  return `${url}${separator}${qs.stringify(params)}`;  
 }

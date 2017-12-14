@@ -8,7 +8,6 @@ import { Writable } from 'stream';
 
 import { uuidRegexPattern, promisifyStream } from '~/lib/util';
 import UploadStream from './upload-stream';
-import { upload } from '~/api/middleware/upload';
 
 export default class BaseBucket extends EventEmitter {
 

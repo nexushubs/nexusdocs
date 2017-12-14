@@ -4,7 +4,7 @@ import inspector from 'schema-inspector';
 import camelCase from 'camelcase';
 import upperCamelCase from 'uppercamelcase';
 
-import Base from '~/lib/base-service';
+import BaseService from '~/lib/base-service';
 import BaseCache from './base-cache';
 import FSCache from './cache/fs';
 import { ValidationError, buildValidationError } from '~/lib/errors';
@@ -15,7 +15,7 @@ import { uuidRegexPattern, loadClasses, createErrorEvent } from '~/lib/util';
 /**
  * Resumable upload handler
  */
-export default class Resumable extends Base {
+export default class Resumable extends BaseService {
 
   paramSchema = {
     chunkNumber: { type: 'integer', gt: 0 },

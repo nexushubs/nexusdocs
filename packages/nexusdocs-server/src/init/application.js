@@ -3,7 +3,10 @@ import EventEmetter from 'events';
 import _ from 'lodash';
 import promisify from 'es6-promisify';
 import decamelize from 'decamelize';
+import upperCamelCase from 'uppercamelcase';
 import camelCase from 'camelcase';
+
+import config from 'config';
 
 import { connect, db } from '~/init/database';
 import { promisifyAll } from '~/lib/util';
@@ -16,15 +19,37 @@ export function basePath () {
 
 let instance = null;
 
+/**
+ * Get Application instance
+ * @returns {Application}
+ */
 export function app() {
   return instance;
 }
 
 export default class Application extends EventEmetter {
   
-  constructor(options) {
+  /**
+   * NDS application constructor
+   * @param {object} options - NDS Application options
+   * @param {string} options.database - Mongodb connection url
+   * @param {object} options.restful - RESTful API service options
+   * @param {string} options.restful.enabled - whether start API service (useful when using module in your application or in CLI mode)
+   * @param {string} options.restful.hostname - API listening hostname
+   * @param {string} options.restful.port - API listening port
+   */
+  constructor(options = {}) {
     super();
-    this.options = options;
+    const defaultOptions = {
+      database: 'mongodb://localhost:27017/nexusdocs',
+      restful: {
+        enabled: true,
+        hostname: '127.0.0.1',
+        port: 4000,
+      },
+    }
+    config.util.extendDeep(defaultOptions, options);
+    config.util.setModuleDefaults('Application', defaultOptions);
     this.db = null;
     this.api = null;
     this.startTime;
@@ -45,17 +70,17 @@ export default class Application extends EventEmetter {
 
   async _start() {
     try {
-      const { hostname, port, database, cli } = this.options;
+      const { database, restful: { hostname, port }, restfulEnabled } = config.get('Application');
       // connecting database;
       this.db = await connect(database);
       // autoload models and services
       await this.autoload();
-      if (!cli) {
+      if (!restfulEnabled) {
         // lazy loading api routes
         const api = require('~/api').default;
         this.api = api;
         promisifyAll(api, ['listen', 'close']);
-        await api.listen(port, hostname);
+        await api.listen(parseInt(port), hostname);
       }
       this.started = true;
       this.emit('start');
@@ -108,7 +133,8 @@ export default class Application extends EventEmetter {
     const initials = _.map(classes, (Class, name) => {
       const instance = new Class(name);
       this.bindLoader(instance);
-      holder[name] = instance;
+      holder[Class.name] = instance;
+      // console.log('init model:', Class.name);
       if (instance.init) {
         return instance.init();
       } else {
@@ -118,6 +144,10 @@ export default class Application extends EventEmetter {
     return Promise.all(initials);
   }
 
+  /**
+   * Bind model loader to any object
+   * @param {any} instance 
+   */
   bindLoader(instance) {
     instance.nds = this;
     instance.model = this.model;
@@ -125,7 +155,12 @@ export default class Application extends EventEmetter {
     instance.bindLoader = this.bindLoader;
   }
 
-  _instance(holder, name) {
+  /**
+   * Get model instance
+   * @param {Classes[]} holder 
+   * @param {string} name 
+   */
+  _getLoaderInstance(holder, name) {
     if (!name) {
       const instances = {};
       _.each(holder, (model, name) => {
@@ -135,17 +170,17 @@ export default class Application extends EventEmetter {
       });
       return instances;
     } else {
-      const alias = camelCase(name);
+      const alias = upperCamelCase(name);
       return holder[name] || holder[alias];
     }
   }
   
   model(name) {
-    return this._instance(this.models, name);
+    return this._getLoaderInstance(this.models, name);
   }
   
   service(name) {
-    return this._instance(this.services, name);
+    return this._getLoaderInstance(this.services, name);
   }
 
 }
