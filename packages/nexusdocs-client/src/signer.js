@@ -60,7 +60,6 @@ export default class Signer {
    */
   signUrl(requestOptions) {
     let { method, url, expires } = requestOptions;
-    // console.log('original url=', url);
     if (!expires) {
       expires = this.options.defaultUrlExpires;
     }
@@ -72,7 +71,8 @@ export default class Signer {
       url,
     };
     url = this.getSecuredUrl(url, signatureBody);
-    // console.log('signUrl() => ', url);
+    requestOptions.url = url;
+    // console.log('Signer.signUrl() => ', url);
     return url;
   }
 
@@ -95,13 +95,12 @@ export default class Signer {
     if (json) {
       signature.body = sortedJSONStringify(body);
     }
-    console.log('!!!!', {signature});
-    requestOptions = _.merge(requestOptions, {
+    _.merge(requestOptions, {
       headers: {
         Authorization: this.getAuthorizationHeader(signature, expires),
       },
     });
-    console.log('signRequest() => ', requestOptions);
+    // console.log('Signer.signRequest() => ', requestOptions);
     return requestOptions;
   }
 

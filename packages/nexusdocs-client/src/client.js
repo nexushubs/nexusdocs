@@ -80,27 +80,28 @@ class Client {
     return `${schema}://${this.options.hostname}${portStr}${this.options.endPoint}${url}`;
   }
 
-  buildUrl(requestOptions) {
-    let { url } = requestOptions;
+  buildUrl(options) {
+    let { url } = options;
     if (/^https?/.test(url)) {
       return url;
     }
     let signatureUrl = url;
-    if (!_.isEmpty(requestOptions.qs)) {
-      url += '?' + qs.stringify(requestOptions.qs);
+    if (!_.isEmpty(options.qs)) {
+      url += '?' + qs.stringify(options.qs);
     }
-    requestOptions.url = this.getFullUrl(url);
+    options.url = this.getFullUrl(url);
   }
 
-  getUrl(requestOptions) {
-    this.buildUrl(requestOptions);
-    return this.signer.signUrl(requestOptions);
+  getUrl(options) {
+    this.buildUrl(options);
+    this.signer.signUrl(options);
+    return options.url;
   }
 
   /**
    * @protected
    * @ignore
-   * @param {object} options 
+   * @param {RequestOptions} options 
    */
   processHeader(options) {
     const { signature, expires } = options;
@@ -116,20 +117,20 @@ class Client {
    * Request NDS server and return a stream like object
    * @protected
    * @ignore
-   * @param {RequestOptions} requestOptions 
+   * @param {RequestOptions} options 
    * @returns {WritableStream}
    */
-  requestAsStream(requestOptions) {
-    this.buildUrl(requestOptions);
-    this.signer.signRequest(requestOptions);
-    return request(requestOptions);
+  requestAsStream(options) {
+    this.buildUrl(options);
+    this.signer.signRequest(options);
+    return request(options);
   }
 
   /**
    * Request NDS and return a Promise
    * @protected
    * @ignore
-   * @param {RequestOptions} requestOptions 
+   * @param {RequestOptions} options 
    * @returns {Promise}
    * @fulfil {object} - NDS response object
    * @reject {object} - NDS error object
@@ -138,12 +139,11 @@ class Client {
    * - `error.error`: The error message
    * - `error.description`: The error description
    */
-  request(requestOptions) {
-    this.buildUrl(requestOptions);
-    this.signer.signRequest(requestOptions);
-    console.log({requestOptions});
+  request(options) {
+    this.buildUrl(options);
+    this.signer.signRequest(options);
     return new Promise((resolve, reject) => {
-      request(requestOptions, (error, response, body) => {
+      request(options, (error, response, body) => {
         const contentType = response.headers['content-type'];
         if (!/^application\/json/i.test(contentType)) {
           reject('invalid response');

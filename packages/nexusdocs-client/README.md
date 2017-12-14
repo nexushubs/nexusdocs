@@ -28,6 +28,26 @@ npm install nexusdocs-client
 </dd>
 </dl>
 
+## Functions
+
+<dl>
+<dt><a href="#signUrl">signUrl(requestOptions)</a></dt>
+<dd><p>Sign a URL for secured request</p>
+</dd>
+<dt><a href="#signRequest">signRequest(requestOptions)</a></dt>
+<dd><p>Sign a request with body</p>
+</dd>
+</dl>
+
+## Typedefs
+
+<dl>
+<dt><a href="#RequestOptions,">RequestOptions,</a> : <code>Object</code></dt>
+<dd><p>Request options for <a href="https://github.com/request/request#requestoptions-callback">request</a>,
+some properties are added for additional use, see specified method</p>
+</dd>
+</dl>
+
 <a name="module_nexusdocs-client"></a>
 
 ## nexusdocs-client
@@ -92,7 +112,7 @@ Creates an instance of NDS Client.
 | [options.endPoint] | <code>string</code> | <code>&quot;/api&quot;</code> | API endpoint |
 | options.clientKey | <code>string</code> |  | NDS API key |
 | options.clientSecret | <code>string</code> |  | NDS API secret |
-| options.defaultExpires | <code>number</code> |  | default expires time |
+| options.defaultUrlExpires | <code>number</code> |  | default expires time |
 
 **Example**  
 You can pass a URL sting instead of a config object:
@@ -129,6 +149,8 @@ Class presenting NexusDocs namespace instance
     * [.downloadToLocal(fileId, filePath, [options])](#Namespace+downloadToLocal) ⇒ <code>Promise</code>
     * [.delete(fileId)](#Namespace+delete) ⇒ <code>Promise</code>
     * [.truncate()](#Namespace+truncate) ⇒ <code>Promise</code>
+    * [.createArchive(files)](#Namespace+createArchive) ⇒ <code>Promise</code>
+    * [.getArchiveUrl(files, options)](#Namespace+getArchiveUrl)
 
 <a name="new_Namespace_new"></a>
 
@@ -160,7 +182,7 @@ Get URL for upload
 | --- | --- | --- |
 | [options] | <code>object</code> | Additional options |
 | [options.resumable] | <code>boolean</code> | If upload with resumbable.js |
-| [options.expires] | <code>number</code> \| <code>Date</code> | Seconds, timestamp or date, upload must done before this time |
+| [options.expires] | <code>date</code> | Timestamp the Request will available before |
 
 <a name="Namespace+getDownloadUrl"></a>
 
@@ -173,12 +195,12 @@ Get file URL for view or download
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | fileId | <code>string</code> |  | File ID (uuid.v4) |
-| [options] | <code>object</code> |  | Additional options |
-| [options.expires] | <code>number</code> \| <code>date</code> |  | Seconds, timestamp or date, download must done before this time |
+| [options] | <code>RequestOptions</code> |  | Additional options |
 | [options.download] | <code>boolean</code> | <code>false</code> | Download with the original filename |
-| [options.filename] | <code>string</code> |  | Download with new filename |
-| [options.contentType] | <code>string</code> |  | Overwrite Content-Type in response header |
-| [options.contentDisposition] | <code>string</code> |  | Overwrite Content-Disposition in response header |
+| [options.filename] | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
+| [options.response] | <code>object</code> |  | Overwrite response header |
+| [options.response.contentType] | <code>string</code> |  | Overwrite Content-Type |
+| [options.response.contentDisposition] | <code>string</code> |  | Overwrite Content-Disposition |
 
 <a name="Namespace+openUploadStream"></a>
 
@@ -190,9 +212,11 @@ Get upload stream
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [options] | <code>object</code> | Options |
+| [options] | <code>RequestOptions</code> | Options |
+| [options.stream] | <code>ReadableStream</code> | Provide readable stream directly |
 | [options.filename] | <code>string</code> | Provide filename |
 | [options.contentType] | <code>string</code> | Provide content-type for download |
+| [options.knownLength] | <code>number</code> | Provide stream total length if available |
 
 <a name="Namespace+uploadFromLocal"></a>
 
@@ -226,7 +250,7 @@ Get a readable stream for download
 | Param | Type | Description |
 | --- | --- | --- |
 | fileId | <code>string</code> | The file id which is needed for download |
-| [options] | <code>object</code> | Additional options |
+| [options] | <code>RequestOptions</code> | Additional options |
 
 <a name="Namespace+downloadToLocal"></a>
 
@@ -241,7 +265,7 @@ Download a file to local file-system
 | --- | --- | --- |
 | fileId | <code>string</code> | The file id |
 | filePath | <code>string</code> | The path of file will be saved |
-| [options] | <code>object</code> | Additional options |
+| [options] | <code>RequestOptions</code> | Request options |
 
 <a name="Namespace+delete"></a>
 
@@ -262,6 +286,67 @@ Delete a file on the server
 Delete all files in this namespace
 
 **Kind**: instance method of [<code>Namespace</code>](#Namespace)  
+<a name="Namespace+createArchive"></a>
+
+### namespace.createArchive(files) ⇒ <code>Promise</code>
+Create an archive
+
+**Kind**: instance method of [<code>Namespace</code>](#Namespace)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| files | <code>Array.&lt;string&gt;</code> | file id array |
+
+<a name="Namespace+getArchiveUrl"></a>
+
+### namespace.getArchiveUrl(files, options)
+**Kind**: instance method of [<code>Namespace</code>](#Namespace)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| files | <code>Array.&lt;string&gt;</code> | file id array |
+| options | <code>RequestOptions</code> | RequestOptions |
+
+<a name="signUrl"></a>
+
+## signUrl(requestOptions)
+Sign a URL for secured request
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| requestOptions | <code>RequestOptions</code> | 
+
+<a name="signRequest"></a>
+
+## signRequest(requestOptions)
+Sign a request with body
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| requestOptions | <code>ReqestOptions</code> | 
+
+<a name="RequestOptions,"></a>
+
+## RequestOptions, : <code>Object</code>
+Request options for [request](https://github.com/request/request#requestoptions-callback),
+some properties are added for additional use, see specified method
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| method | <code>string</code> | HTTP method of the request |
+| url | <code>string</code> | Path of the request, or full url |
+| body | <code>string</code> | Entire body for PATCH, PUT, POST or DELETE, `json` must be `true` and only plain object is allowed |
+| json | <code>boolean</code> | Set to `true` when providing `body` |
+| expires | <code>number</code> \| <code>date</code> | Expires time in second, timestamp or Date object, the request will be invalid after this timestamp |
+| signature | <code>object</code> | Additional signature data besides `method`, `url`, `expires` |
+
 
 * * *
 
