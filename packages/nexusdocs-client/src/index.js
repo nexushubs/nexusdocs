@@ -41,6 +41,48 @@ export { Client, Namespace };
  * @example Example file id: `e5ac71cf-a0f0-46b5-9070-268ae97bb769`
  */
 
+
+b = {
+  "_id": "78951d7e-e183-4a6b-8d29-4dbd2edecd13",
+  "namespace": "ns.gridfs",
+  "contentType": "image/jpeg",
+  "md5": "ea9dd455a97248a01529d02e0e1c088a",
+  "size": 48103,
+  "metadata": {
+      "height": 500,
+      "width": 900,
+      "type": "jpg"
+  }
+}
+
+/**
+ * Zip file entry
+ * @typedef {object} Namespace~ZipFileEntry holds file basic information in zip file
+ * @property {string} path - Relative path to zip archive
+ * @property {number} compressedSize - Stored size
+ * @property {number} uncompressedSize - Original size
+ * @property {date} lastModified - Last modified date
+ */
+
+/**
+ * Image file info
+ * @typedef {object} Namespace~ImageInfo holds file basic information of image file
+ * @property {number} width - Image width
+ * @property {number} height - Image height
+ */
+
+/**
+ * File information
+ * @typedef {object} Namespace~FileInfo - file information holder
+ * @property {string} namespace - Namespace file is stored in
+ * @property {string} md5 - MD5 hash string
+ * @property {string} contentType - File content type
+ * @property {number} size - File total length
+ * @property {object} metadata - Additional information
+ * @property {ImageInfo} [metadata.image] - Metadata for image files
+ * @property {ZipFileEntry[]} [metadata.entries] - Zip file entries
+ */
+
 /**
  * Create a NexusDocs client instance
  * @example Create a client

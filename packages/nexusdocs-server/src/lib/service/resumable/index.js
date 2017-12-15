@@ -97,15 +97,19 @@ export default class Resumable extends BaseService {
     return null;
   }
 
-  parseParams(params) {
-    params = _.mapKeys(params, (value, key) => {
-      if (key.indexOf(this.options.paramPrefix) === 0) {
-        return camelCase(key.slice(this.options.paramPrefix.length));
-      } else {
-        return key;
+  parseParams(inputParams) {
+    const { paramPrefix } = this.options;
+    const params = {};
+    _.each(inputParams, (value, key) => {
+      if (key.indexOf(paramPrefix) === 0) {
+        key = camelCase(key.slice(paramPrefix.length));
+      }
+      if (_.has(this.paramSchema, key)) {
+        params[key] = value;
       }
     });
     inspector.sanitize(this.getParamSchema('sanitize'), params);
+    console.log('params =!!!', params);
     const result = inspector.validate(this.getParamSchema('validate'), params);
     if (!result.valid) {
       throw new ValidationError(result.error);

@@ -136,6 +136,10 @@ class Client {
     this.signer.signRequest(options);
     return new Promise((resolve, reject) => {
       request(options, (error, response, body) => {
+        if (error) {
+          reject(error);
+          return;
+        }
         const contentType = response.headers['content-type'];
         if (!/^application\/json/i.test(contentType)) {
           reject('invalid response');

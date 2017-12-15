@@ -137,6 +137,7 @@ Class presenting NexusDocs namespace instance
         * [.uploadFromLocal(filePath)](#Namespace+uploadFromLocal) ⇒ <code>Promise</code>
         * [.openDownloadStream(fileId, [options])](#Namespace+openDownloadStream) ⇒ <code>ReadableStream</code>
         * [.downloadToLocal(fileId, filePath, [options])](#Namespace+downloadToLocal) ⇒ <code>Promise</code>
+        * [.getFileInfo(fileId)](#Namespace+getFileInfo) ⇒ <code>Promise</code>
         * [.delete(fileId)](#Namespace+delete) ⇒ <code>Promise</code>
         * [.truncate()](#Namespace+truncate) ⇒ <code>Promise</code>
         * [.createArchive(files)](#Namespace+createArchive) ⇒ <code>Promise</code>
@@ -144,6 +145,9 @@ Class presenting NexusDocs namespace instance
     * _inner_
         * [~RequestOptions](#Namespace..RequestOptions) : <code>object</code>
         * [~FileId](#Namespace..FileId) : <code>string</code>
+        * [~ZipFileEntry](#Namespace..ZipFileEntry) : <code>object</code>
+        * [~ImageInfo](#Namespace..ImageInfo) : <code>object</code>
+        * [~FileInfo](#Namespace..FileInfo) : <code>object</code>
 
 <a name="new_Namespace_new"></a>
 
@@ -253,13 +257,24 @@ Download a file to local file-system
 
 **Kind**: instance method of [<code>Namespace</code>](#Namespace)  
 **Fulfil**: <code>any</code> Download finished  
-**Reject**: <code>any</code> When a error occur  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | fileId | <code>FileId</code> | The file id, see [FileId](#Namespace..FileId) |
 | filePath | <code>string</code> | The path of file will be saved |
 | [options] | <code>RequestOptions</code> | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
+
+<a name="Namespace+getFileInfo"></a>
+
+### namespace.getFileInfo(fileId) ⇒ <code>Promise</code>
+Get file information
+
+**Kind**: instance method of [<code>Namespace</code>](#Namespace)  
+**Fulfil**: <code>FileInfo</code> file information  
+
+| Param | Type |
+| --- | --- |
+| fileId | <code>FileId</code> | 
 
 <a name="Namespace+delete"></a>
 
@@ -294,6 +309,8 @@ Create an archive
 <a name="Namespace+getArchiveUrl"></a>
 
 ### namespace.getArchiveUrl(files, options)
+Archive files then return download URL
+
 **Kind**: instance method of [<code>Namespace</code>](#Namespace)  
 
 | Param | Type | Description |
@@ -329,6 +346,52 @@ File identifier
 ```js
 Example file id: `e5ac71cf-a0f0-46b5-9070-268ae97bb769`
 ```
+<a name="Namespace..ZipFileEntry"></a>
+
+### Namespace~ZipFileEntry : <code>object</code>
+Zip file entry
+
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | Relative path to zip archive |
+| compressedSize | <code>number</code> | Stored size |
+| uncompressedSize | <code>number</code> | Original size |
+| lastModified | <code>date</code> | Last modified date |
+
+<a name="Namespace..ImageInfo"></a>
+
+### Namespace~ImageInfo : <code>object</code>
+Image file info
+
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| width | <code>number</code> | Image width |
+| height | <code>number</code> | Image height |
+
+<a name="Namespace..FileInfo"></a>
+
+### Namespace~FileInfo : <code>object</code>
+File information
+
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| namespace | <code>string</code> | Namespace file is stored in |
+| md5 | <code>string</code> | MD5 hash string |
+| contentType | <code>string</code> | File content type |
+| size | <code>number</code> | File total length |
+| metadata | <code>object</code> | Additional information |
+| metadata.image | <code>ImageInfo</code> | Metadata for image files |
+| metadata.entries | <code>Array.&lt;ZipFileEntry&gt;</code> | Zip file entries |
+
 
 * * *
 

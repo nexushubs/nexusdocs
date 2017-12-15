@@ -33,4 +33,9 @@ export default class File extends BaseModel {
     return uuid.v4();
   }
 
+  getStore() {
+    const { FileStore } = this.model();
+    return FileStore.get(this.store_id);
+  }
+
 }

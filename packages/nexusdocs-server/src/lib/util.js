@@ -13,7 +13,6 @@ export const uuidRegexPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab
 
 export function loadClass(file) {
   file = basePath() + '/' + file;
-  console.log('loadClass', file);
   return require(file).default;
 }
 
@@ -39,6 +38,18 @@ export function promisifyAll(object, methods) {
     newObject[method] = promisify(object[method], object);
   });
   return newObject;
+}
+
+export function promisifyEvent(emitter, event) {
+  if (_.isArray(event)) {
+    return Promise.all(event.map(name => {
+      return promisifyEvent(emitter, name);
+    }))
+  }
+  return new Promise((resolve, reject) => {
+    emitter.once(event, resolve);
+    emitter.once('error', reject);
+  });
 }
 
 export function promisifyStream(stream) {

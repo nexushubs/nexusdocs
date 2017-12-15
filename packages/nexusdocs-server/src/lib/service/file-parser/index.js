@@ -23,7 +23,7 @@ export default class FileParser extends BaseService {
   }
 
   getParserByFilename(filename) {
-    const ext = path.extname(filename);
+    const ext = path.extname(filename).slice(1);
     return this.parsers[ext] || [];
   }
 
@@ -35,9 +35,11 @@ export default class FileParser extends BaseService {
     });
     Promise.all(promises)
     .then(metadataList => {
+      console.log(metadataList);
       const metadata = _.assign({}, ...metadataList);
       console.log('metadata =', metadata);
       stream.emit('metadata', metadata);
+      return metadata;
     });
   }
 

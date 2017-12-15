@@ -201,13 +201,26 @@ class Namespace {
    * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @returns {Promise}
    * @fulfil {any} Download finished
-   * @reject {any} When a error occur
    */
   downloadToLocal(fileId, filePath, options = {}) {
     const fileStream = fs.createWriteStream(filePath);
     const stream = this.openDownloadStream(fileId, options);
     stream.pipe(fileStream);
     return promisifyStream(fileStream);
+  }
+
+  /**
+   * Get file information
+   * @param {FileId} fileId
+   * @returns {Promise}
+   * @fulfil {FileInfo} file information
+   */
+  getFileInfo(fileId) {
+    const options = {
+      method: 'GET',
+      url: `/namespaces/${this.name}/files/${fileId}/info`,
+    };
+    return this.client.request(options);
   }
   
   /**
@@ -255,7 +268,7 @@ class Namespace {
   }
 
   /**
-   * 
+   * Archive files then return download URL
    * @param {FileId[]} files - file id array, see [FileId](#Namespace..FileId)
    * @param {RequestOptions} options - RequestOptions, see [RequestOptions](#Namespace..RequestOptions)
    */

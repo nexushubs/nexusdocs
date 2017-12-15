@@ -83,6 +83,7 @@ api.post('/:namespace/upload', checkAuth({ from: 'url' }), upload(), wrap(async 
     'size',
     'status',
     'dateUploaded',
+    'metadata',
   ]);
   res.send({
     _id: file.files_id,
@@ -117,6 +118,20 @@ api.delete('/:namespace/files/:files_id', checkAuth(), wrap(async (req, res, nex
   const { files_id } = req.params;
   await namespace.deleteFile(file);
   res.send({});
+}));
+
+api.get('/:namespace/files/:files_id/info', checkAuth(), wrap(async (req, res, next) => {
+  const { file } = req.data;
+  const store = await file.getStore();
+  const data = {
+    _id: file._id,
+    ..._.omit(store.data(), [
+      '_id',
+      'files_id',
+      'status',
+    ]),
+  };
+  res.send(data);
 }));
 
 api.post('/:namespace/archives', checkAuth(), wrap(async (req, res, next) => {

@@ -3,6 +3,7 @@ import mime from 'mime-types';
 import { Transform } from 'stream';
 
 import { app } from '~/init/application';
+import { promisifyEvent } from '~/lib/util';
 
 export default class UploadStream extends Transform {
 
@@ -36,13 +37,17 @@ export default class UploadStream extends Transform {
   }
 
   initStream() {
-    this.uploadStream.on('finish', () => {
-      this.finish();
-    });
+    const { FileParser } = this.service();
+    FileParser.parse(this.filename, this);
     this.uploadStream.on('error', (err) => {
       this.emit('error', err);
     });
     this.pipe(this.uploadStream);
+    promisifyEvent(this, ['metadata', 'finish'])
+    .then(([metadata]) => {
+      this.metadata = metadata;
+      this.finish();
+    });
     setImmediate(() => {
       this.start();
     });
@@ -114,6 +119,7 @@ export default class UploadStream extends Transform {
       dateUploaded: this.dateUploaded,
       metadata: this.metadata,
     };
+    console.log('UploadStream.upload(), info =', info);
     this.emit('upload', info);
   }
 }
