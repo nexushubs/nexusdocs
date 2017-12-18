@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import path from 'path';
+import config from 'config';
 import getStream from 'get-stream';
 
 import BaseService from '~/lib/base-service';
@@ -16,6 +17,10 @@ export default class FileParser extends BaseService {
   initParsers() {
     this.parsers = {};
     _.each(parserClasses, Parser => {
+      const options = this.getParserOptions(Parser.name);
+      if (options.disabled) {
+        return;
+      }
       _.each(Parser.extensions, ext => {
         if (!this.parsers[ext]) {
           this.parsers[ext] = [];
@@ -30,6 +35,17 @@ export default class FileParser extends BaseService {
     return this.parsers[ext] || [];
   }
 
+  getParserOptions(name) {
+    const key = `services.FileParser.parsers.${name}`;
+    let options;
+    try {
+      options = config.get(key);
+    } catch(error) {
+      options = {};
+    }
+    return options;
+  }
+
   parse(filename, stream) {
     const parsers = this.getParserByFilename(filename);
     let bufferPromise = null;
@@ -42,7 +58,11 @@ export default class FileParser extends BaseService {
         p = bufferPromise;
       }
       return p.then(buffer => {
-        const parser = new Parser(filename, stream, buffer);
+        const options = this.getParserOptions(Parser.name);
+        const parser = new Parser(filename, stream, buffer, options);
+        if (parser.init) {
+          parser.init(options);
+        }
         return parser.parse();
       });
     });

@@ -1,10 +1,9 @@
+import _ from 'lodash';
 import gm from 'gm';
 import dataurl from 'dataurl';
 import BaseParser from '../base-parser';
 
-const THUMB_SIZE = 24;
-
-export default class ImageThumb extends BaseParser {
+export default class ImageThumbParser extends BaseParser {
 
   static key = 'image';
   static extensions = [
@@ -15,11 +14,18 @@ export default class ImageThumb extends BaseParser {
   ];
   static needBuffer = false;
 
+  init(options) {
+    this.options = _.defaults(options, {
+      thumbSize: 48,
+    });
+  }
+
   parse() {
     const { stream, filename } = this;
     return new Promise((resolve, reject) => {
+      const { thumbSize } = this.options;
       gm(stream, filename)
-      .resize(THUMB_SIZE, THUMB_SIZE)
+      .resize(thumbSize, thumbSize)
       .toBuffer('JPEG', (err, buffer) => {
         if (err) {
           console.log(err.stack);

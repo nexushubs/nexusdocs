@@ -120,7 +120,7 @@ export default class UploadStream extends Transform {
       dateUploaded: this.dateUploaded,
       metadata: this.metadata,
     };
-    console.log('UploadStream.upload(), info =', info);
+    // console.log('UploadStream.upload(), info =', info);
     this.emit('upload', info);
   }
 }

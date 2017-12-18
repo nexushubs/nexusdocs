@@ -7,4 +7,13 @@ module.exports = {
       port: 4000,
     },
   },
+  services: {
+    FileParser: {
+      parsers: {
+        ImageThumbParser: {
+          thumbSize: 48,
+        },
+      },
+    },
+  },
 };
