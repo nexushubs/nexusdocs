@@ -145,8 +145,9 @@ Class presenting NexusDocs namespace instance
     * _inner_
         * [~RequestOptions](#Namespace..RequestOptions) : <code>object</code>
         * [~FileId](#Namespace..FileId) : <code>string</code>
-        * [~ZipFileEntry](#Namespace..ZipFileEntry) : <code>object</code>
         * [~ImageInfo](#Namespace..ImageInfo) : <code>object</code>
+        * [~ZipFileEntry](#Namespace..ZipFileEntry) : <code>object</code>
+        * [~ZipInfo](#Namespace..ZipInfo) : <code>object</code>
         * [~FileInfo](#Namespace..FileInfo) : <code>object</code>
 
 <a name="new_Namespace_new"></a>
@@ -346,6 +347,21 @@ File identifier
 ```js
 Example file id: `e5ac71cf-a0f0-46b5-9070-268ae97bb769`
 ```
+<a name="Namespace..ImageInfo"></a>
+
+### Namespace~ImageInfo : <code>object</code>
+Image file info
+
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| width | <code>number</code> | Image width |
+| height | <code>number</code> | Image height |
+| type | <code>number</code> | Image type, e.g. jpeg, png, gif |
+| thumbnailUrl | <code>string</code> | Image thumbnail data-url |
+
 <a name="Namespace..ZipFileEntry"></a>
 
 ### Namespace~ZipFileEntry : <code>object</code>
@@ -361,18 +377,17 @@ Zip file entry
 | uncompressedSize | <code>number</code> | Original size |
 | lastModified | <code>date</code> | Last modified date |
 
-<a name="Namespace..ImageInfo"></a>
+<a name="Namespace..ZipInfo"></a>
 
-### Namespace~ImageInfo : <code>object</code>
-Image file info
+### Namespace~ZipInfo : <code>object</code>
+Zip file info
 
 **Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
 **Properties**
 
 | Name | Type | Description |
 | --- | --- | --- |
-| width | <code>number</code> | Image width |
-| height | <code>number</code> | Image height |
+| entries | <code>Array.&lt;ZipFileEntry&gt;</code> | files |
 
 <a name="Namespace..FileInfo"></a>
 
@@ -390,7 +405,7 @@ File information
 | size | <code>number</code> | File total length |
 | metadata | <code>object</code> | Additional information |
 | metadata.image | <code>ImageInfo</code> | Metadata for image files |
-| metadata.entries | <code>Array.&lt;ZipFileEntry&gt;</code> | Zip file entries |
+| metadata.zip | <code>ZipInfo</code> | Zip file entries |
 
 
 * * *

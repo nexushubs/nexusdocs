@@ -109,7 +109,6 @@ export default class Resumable extends BaseService {
       }
     });
     inspector.sanitize(this.getParamSchema('sanitize'), params);
-    console.log('params =!!!', params);
     const result = inspector.validate(this.getParamSchema('validate'), params);
     if (!result.valid) {
       throw new ValidationError(result.error);

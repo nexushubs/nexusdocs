@@ -1,8 +1,11 @@
 import _ from 'lodash';
 import path from 'path';
+import getStream from 'get-stream';
 
 import BaseService from '~/lib/base-service';
 import * as parserClasses from './parsers';
+
+const NEED_BUFFER_PROP = 'needBuffer';
 
 export default class FileParser extends BaseService {
 
@@ -29,14 +32,31 @@ export default class FileParser extends BaseService {
 
   parse(filename, stream) {
     const parsers = this.getParserByFilename(filename);
+    let bufferPromise = null;
+    if (_.some(parsers, NEED_BUFFER_PROP)) {
+      bufferPromise = getStream.buffer(stream);
+    };
     const promises = _.map(parsers, Parser => {
-      const parser = new Parser(filename, stream);
-      return parser.parse();
+      let p = Promise.resolve();
+      if (Parser[NEED_BUFFER_PROP]) {
+        p = bufferPromise;
+      }
+      return p.then(buffer => {
+        const parser = new Parser(filename, stream, buffer);
+        return parser.parse();
+      });
     });
-    Promise.all(promises)
-    .then(metadataList => {
-      console.log(metadataList);
-      const metadata = _.assign({}, ...metadataList);
+    return Promise.all(promises)
+    .then(dataList => {
+      console.log(dataList);
+      const metadata = {};
+      _.each(dataList, (data, index) => {
+        const { key } = parsers[index];
+        metadata[key] = {
+          ...metadata[key],
+          ...data,
+        };
+      });
       console.log('metadata =', metadata);
       stream.emit('metadata', metadata);
       return metadata;

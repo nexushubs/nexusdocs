@@ -1,8 +1,9 @@
 export default class BaseParser {
 
-  constructor(filename, stream) {
+  constructor(filename, stream, buffer) {
     this.filename = filename;
     this.stream = stream;
+    this.buffer = buffer;
   }
 
   parse() {

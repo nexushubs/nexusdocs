@@ -38,9 +38,10 @@ export default class UploadStream extends Transform {
 
   initStream() {
     const { FileParser } = this.service();
-    FileParser.parse(this.filename, this);
-    this.uploadStream.on('error', (err) => {
-      this.emit('error', err);
+    FileParser.parse(this.filename, this)
+    .catch(error => this.emit('error', error));
+    this.uploadStream.on('error', (error) => {
+      this.emit('error', error);
     });
     this.pipe(this.uploadStream);
     promisifyEvent(this, ['metadata', 'finish'])

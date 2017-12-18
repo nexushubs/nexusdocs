@@ -3,7 +3,11 @@ import BaseParser from '../base-parser';
 
 export default class ZipParser extends BaseParser {
 
-  static extensions = ['zip'];
+  static key = 'zip';
+  static extensions = [
+    'zip',
+  ];
+  static needBuffer = false;
 
   parse() {
     const { stream } = this;
@@ -14,9 +18,7 @@ export default class ZipParser extends BaseParser {
           entry.autodrain();
         })
         .on('cd.entries', entries => {
-          resolve({
-            entries,
-          });
+          resolve({ entries });
         })
         .on('error', reject);
     });
