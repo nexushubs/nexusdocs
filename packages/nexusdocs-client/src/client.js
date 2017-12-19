@@ -7,9 +7,7 @@ import parse from 'url-parse';
 import {
   urlSafeBase64Encode,
   sortedJSONStringify,
-  sortObjectKey,
-  promisifyStream,
-  getTimestamp,
+  JSONParse,
 } from './util';
 import Signer from './signer';
 
@@ -151,7 +149,7 @@ class Client {
         }
         let result;
         try {
-          result = JSON.parse(body);
+          result = JSONParse(body);
         } catch (error) {
           reject(new TypeError('invalid json format'));
         }

@@ -18,9 +18,19 @@ export default class ZipParser extends BaseParser {
           entry.autodrain();
         })
         .on('cd.entries', entries => {
+          entries = entries.map(entry => ({
+            type: entry.type,
+            path: entry.path,
+            size: entry.uncompressedSize,
+            lastModified: entry.lastModified,
+          }));
           resolve({ entries });
         })
-        .on('error', reject);
+        .on('error', error => {
+          console.error('ZipParser error:', error);
+          // resolve({});
+        });
+        // .on('error', reject);
     });
   }
   

@@ -50,3 +50,16 @@ export function addUrlParams(url, params) {
   const separator = /\?/.test(url) ? '&' : '?';
   return `${url}${separator}${qs.stringify(params)}`;  
 }
+
+const regISODate = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
+
+const dateParser = (key, value) => {
+  if (typeof value === 'string' && regISODate.test(value)) {
+    return new Date(value);
+  }
+  return value;
+};
+
+export function JSONParse(str) {
+  return JSON.parse(str, dateParser);
+}

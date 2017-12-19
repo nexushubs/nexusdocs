@@ -68,7 +68,6 @@ export default class FileParser extends BaseService {
     });
     return Promise.all(promises)
     .then(dataList => {
-      console.log(dataList);
       const metadata = {};
       _.each(dataList, (data, index) => {
         const { key } = parsers[index];
@@ -77,7 +76,6 @@ export default class FileParser extends BaseService {
           ...data,
         };
       });
-      console.log('metadata =', metadata);
       stream.emit('metadata', metadata);
       return metadata;
     });
