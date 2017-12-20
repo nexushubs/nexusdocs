@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { Writable } from 'stream';
 import archiver from 'archiver';
 import getNewFilename from 'new-filename';
+import { PassThrough } from 'stream';
 
 import BaseModel from '~/lib/base-model';
 import { bucketName, isObjectId } from '~/lib/schema';
@@ -254,6 +255,19 @@ export default class Namespace extends BaseModel {
       files,
       size,
     });
+  }
+
+  async convert(file, commands) {
+    const { File, FileStore } = this.model();
+    const { FileConverter } = this.service();
+    if (!(file instanceof File.constructor)) {
+      file = await File.get(file);
+    }
+    const fileStream = await this.openDownloadStream(file.store_id);
+    console.log('fileStream');
+    const outputStream = FileConverter.convert(fileStream, file.filename, commands);
+    console.log('outputStream');
+    return outputStream;
   }
 
 }

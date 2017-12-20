@@ -101,3 +101,7 @@ export function urlSafeBase64Encode(str) {
 export function sortedJSONStringify(object) {
   return JSONStringify(object, (a, b) => a.key < b.key ? 1 : -1);
 }
+
+export function getExtension(filename) {
+  return path.extname(filename).slice(1);
+}

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import 'source-map-support/register';
 import config from 'config';
 import Application from '~/init/application';

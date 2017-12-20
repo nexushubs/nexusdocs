@@ -134,6 +134,22 @@ api.get('/:namespace/files/:files_id/info', checkAuth(), wrap(async (req, res, n
   res.send(data);
 }));
 
+api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth(), wrap(async (req, res, next) => {
+  const { namespace, file } = req.data;
+  const { commands } = req.params;
+  const { download } = req.query;
+  const stream = await namespace.convert(file, commands);
+  stream.on('start', ({filename, format}) => {
+    filename = file.filename.replace(/\.\w+$/, `.${format}`);
+    res.set('Content-Type', mime.contentType(filename));
+    if (download) {
+      res.set('Content-Disposition', contentDisposition(filename));
+    }
+    stream.pipe(res);
+  });
+  stream.on('error', next);
+}));
+
 api.post('/:namespace/archives', checkAuth(), wrap(async (req, res, next) => {
   const { files, filename } = req.body;
   const { namespace } = req.data;
