@@ -15,5 +15,12 @@ module.exports = {
         },
       },
     },
+    FileConverter: {
+      converters: {
+        ImageGMConverter: {
+          disabled: true,
+        }
+      }
+    }
   },
 };

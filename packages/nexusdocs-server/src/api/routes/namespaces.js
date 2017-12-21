@@ -7,7 +7,6 @@ import mime from 'mime-types';
 import { ApiError } from '~/lib/errors';
 import { upload, checkAuth } from '~/api/middleware';
 import { parseQueryStringHeaders } from '~/lib/util';
-import { downloadFile } from './files';
 
 const api = express.Router();
 
@@ -22,6 +21,12 @@ api.param('namespace', wrap(async (req, res, next) => {
   next();
 }));
 
+// disable auth for GET APIs if namespace is public
+const needAuth = auth => {
+  const { namespace } = auth.req.data;
+  return !namespace.isPublic;
+};
+
 api.get('/', checkAuth({ role: 'admin' }), wrap(async (req, res, next) => {
   const { Namespace } = req.model();
   const list = await Namespace.getAll();
@@ -35,7 +40,7 @@ api.post('/', checkAuth({ role: 'admin' }), wrap(async (req, res, next) => {
   res.send({});
 }));
 
-api.get('/:namespace', checkAuth({ role: 'admin' }), wrap(async (req, res, next) => {
+api.get('/:namespace', checkAuth({ needAuth }), wrap(async (req, res, next) => {
   const { namespace } = req.data;
   res.send(namespace.data());
 }));
@@ -91,7 +96,7 @@ api.post('/:namespace/upload', checkAuth({ from: 'url' }), upload(), wrap(async 
   });
 }));
 
-api.get('/:namespace/files', checkAuth(), wrap(async (req, res, next) => {
+api.get('/:namespace/files', checkAuth({ role: 'admin' }), wrap(async (req, res, next) => {
   const { File } = req.model();
   const { namespace } = req.params;
   const list = await File.getAll({namespace: namespace});
@@ -111,7 +116,22 @@ api.param('files_id', wrap(async (req, res, next) => {
 api.get([
   '/:namespace/files/:files_id',
   '/:namespace/files/:files_id/download',
-], checkAuth(), downloadFile);
+], checkAuth({ needAuth }),
+wrap(async (req, res, next) => {
+  const { namespace, file } = req.data;
+  const { files_id } = req.params;
+  const { contentType, filename, size, store_id } = file.data();
+  console.log(namespace.bucket);
+  res.set('Content-Type', contentType);
+  if (/download$/.test(req.path) || req.query.download) {
+    res.set('Content-Disposition', contentDisposition(filename));
+  }
+  res.set('Content-Length', size);
+  const headers = parseQueryStringHeaders(req);
+  res.set(headers);
+  const fileStream = await namespace.openDownloadStream(store_id);
+  fileStream.pipe(res);
+}));
 
 api.delete('/:namespace/files/:files_id', checkAuth(), wrap(async (req, res, next) => {
   const { namespace, file } = req.data;
@@ -120,7 +140,7 @@ api.delete('/:namespace/files/:files_id', checkAuth(), wrap(async (req, res, nex
   res.send({});
 }));
 
-api.get('/:namespace/files/:files_id/info', checkAuth(), wrap(async (req, res, next) => {
+api.get('/:namespace/files/:files_id/info', checkAuth({ needAuth }), wrap(async (req, res, next) => {
   const { file } = req.data;
   const store = await file.getStore();
   const data = {
@@ -134,7 +154,7 @@ api.get('/:namespace/files/:files_id/info', checkAuth(), wrap(async (req, res, n
   res.send(data);
 }));
 
-api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth(), wrap(async (req, res, next) => {
+api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth }), wrap(async (req, res, next) => {
   const { namespace, file } = req.data;
   const { commands } = req.params;
   const { download } = req.query;
@@ -168,7 +188,7 @@ api.param('archive_id', wrap(async (req, res, next, archiveId) => {
   next();
 }))
 
-api.get('/:namespace/archives/:archive_id', checkAuth(), wrap(async (req, res, next) => {
+api.get('/:namespace/archives/:archive_id', checkAuth({ needAuth }), wrap(async (req, res, next) => {
   const { namespace, archive } = req.data;
   const { filename, store_id, size } = archive;
   const bucket = await namespace.bucket();

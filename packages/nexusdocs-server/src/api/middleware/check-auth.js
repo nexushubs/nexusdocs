@@ -10,6 +10,11 @@ class Authorization {
 
   constructor(req, options = {}) {
     this.req = req;
+    if (_.isFunction(options)) {
+      options = {
+        needAuth: options,
+      };
+    }
     if (!options.from) {
       options.from = this.getDefaultFrom(req.method);
     }
@@ -17,6 +22,7 @@ class Authorization {
       from: 'url',
       signature: {},
       role: 'user',
+      needAuth: () => true,
     }, options);
     
   }
@@ -26,6 +32,10 @@ class Authorization {
   }
 
   async authorize() {
+    const { req, opt: { needAuth } } = this;
+    if (_.isFunction(needAuth) && !needAuth(this)) {
+      return true;
+    }
     const error = await this._authorize();
     if (error) {
       throw new ApiError(401, null, error);

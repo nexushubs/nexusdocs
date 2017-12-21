@@ -13,7 +13,7 @@ api.use((req, res, next) => {
   app().bindLoader(req);
   res.set('X-Powered-By', 'nexusdocs-server');
   req.data = {};
-  console.log(`\n${req.method} ${req.url}`);
+  console.log(`${req.method} ${req.url}`);
   next();
 });
 

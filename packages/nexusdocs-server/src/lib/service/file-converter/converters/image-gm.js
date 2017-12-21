@@ -8,7 +8,7 @@ import BaseConverter from '../base-converter';
 // format: <width>x<height>{%}{@}{!}{^}{<}{>}
 const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/
 
-export default class ImageConverter extends BaseConverter {
+export default class ImageGMConverter extends BaseConverter {
 
   static extensions = [
     'bmp',
@@ -59,7 +59,7 @@ export default class ImageConverter extends BaseConverter {
 
   _quality(q) {
     q = parseInt(q);
-    if (!_.isNaN(q) || q <= 0 || q > 100) {
+    if (_.isNaN(q) || q <= 0 || q > 100) {
       throw new ApiError(400, null, 'ImageConverter.quality: invalid command option');
     }
     return ['quality', q];

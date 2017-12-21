@@ -15,6 +15,8 @@ export default class Namespace extends BaseModel {
   schema = {
     name: { type: 'string' },
     providers_id: { $isObjectId: 1 },
+    bucket: { type: 'string' },
+    isPublic: { type: 'boolean' },
     description: { type: 'string', optional: true },
   };
   validators = {
@@ -49,7 +51,7 @@ export default class Namespace extends BaseModel {
     return this.ensureUnique({name: data.name});
   }
 
-  async bucket(id) {
+  async getBucket(id) {
     id = this.prepareId(id);
     const { Store } = this.service();
     let instance = this._active ? this : await this.get(id);
@@ -62,7 +64,7 @@ export default class Namespace extends BaseModel {
       throw new Error('could not open upload stream on none instance');
     }
     const { filename, fileId, md5 } = options;
-    const bucket = await this.bucket();
+    const bucket = await this.getBucket();
     let uploadStream = null;
     if (md5 && /[0-9a-f]{32}/i.test(md5)) {
       // if file md5 is provided and match, skip upload to provider
@@ -148,7 +150,7 @@ export default class Namespace extends BaseModel {
     if (!this._active) {
       throw new Error('could not open upload stream on none instance');
     }
-    const bucket = await this.bucket();
+    const bucket = await this.getBucket();
     const downloadStream = await bucket.openDownloadStream(storeId);
     return downloadStream;
   }
@@ -174,7 +176,7 @@ export default class Namespace extends BaseModel {
       file.delete(),
     ];
     if (count === 0) {
-      const bucket = await this.bucket();
+      const bucket = await this.getBucket();
       promises = [ ...promises,
         bucket.delete(info.store_id),
         FileStore.delete(info.store_id),
@@ -206,7 +208,7 @@ export default class Namespace extends BaseModel {
     if (!name) {
       name = `archive-${(new Date).toISOString()}`;
     }
-    const bucket = await this.bucket();
+    const bucket = await this.getBucket();
     const filename = `${name}.zip`;
     const storeStream = await bucket.openUploadStream({
       filename,
@@ -264,9 +266,7 @@ export default class Namespace extends BaseModel {
       file = await File.get(file);
     }
     const fileStream = await this.openDownloadStream(file.store_id);
-    console.log('fileStream');
     const outputStream = FileConverter.convert(fileStream, file.filename, commands);
-    console.log('outputStream');
     return outputStream;
   }
 

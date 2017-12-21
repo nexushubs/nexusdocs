@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import filenamify from 'filenamify';
+import config from 'config';
 import { PassThrough } from 'stream';
 
 import BaseService from '~/lib/base-service';
@@ -32,9 +33,11 @@ export default class FileConverter extends BaseService {
 
   getConverterOptions(name) {
     const key = `services.FileConverter.converters.${name}`;
+    console.log(key);
     let options;
     try {
       options = config.get(key);
+      console.log(options);
     } catch(error) {
       options = {};
     }

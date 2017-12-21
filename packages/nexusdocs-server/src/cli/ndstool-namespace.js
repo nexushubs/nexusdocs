@@ -7,6 +7,7 @@ program
   .command('add <name>')
   .option('-p, --provider <name>', 'namespace')
   .option('-b, --bucket <bucket>', 'bucket name')
+  .option('-p, --public', 'namespace is public')
   .option('-d, --dest <text>', 'description text')
   .action((env, options) => {
     const name = program.args[0];
@@ -15,6 +16,7 @@ program
       provider: options.provider,
       bucket: options.bucket,
       description: options.dest,
+      isPublic: !!options.public,
     };
     run(async app => {
       const { Namespace } = app.model();
