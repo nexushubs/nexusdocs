@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import gm from 'gm';
 
 import { ApiError } from '~/lib/errors';
@@ -42,7 +43,7 @@ export default class ImageGMConverter extends BaseConverter {
   prepare(command, options) {
     const method = `_${command}`;
     if (!this[method]) {
-      throw ApiError(400, null, 'ImageConverter: invalid command');
+      throw new ApiError(400, null, 'ImageConverter: invalid command');
     }
     const params = this[method](options);
     this.commands.push(params);

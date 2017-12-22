@@ -8,6 +8,7 @@ export default class GridFSProviderBucket extends BaseBucket {
     super(provider, bucketName);
     this.db = this.provider.db;
     bucketName = `fs.${this.formatName(provider.name)}.${this.formatName(this.name)}`;
+    this.bucketName = bucketName;
     this.bucket = new GridFSBucket(this.db, { bucketName });
   }
 
@@ -31,6 +32,14 @@ export default class GridFSProviderBucket extends BaseBucket {
 
   find(id) {
     return this.bucket.find(id);
+  }
+
+  truncate() {
+    const { bucketName } = this;
+    return Promise.all([
+      this.db.collection(`${bucketName}.files`).remove(),
+      this.db.collection(`${bucketName}.chunks`).remove(),
+    ]);
   }
 
   drop() {

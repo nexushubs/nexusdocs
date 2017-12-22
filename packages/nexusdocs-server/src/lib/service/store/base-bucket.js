@@ -102,6 +102,10 @@ export default class BaseBucket extends EventEmitter {
   rename() {
     throw new Error('method rename() is not implemented');
   }
+
+  truncate() {
+    throw new Error('method truncate() is not implemented');
+  }
   
   destroy() {
     throw new Error('method destroy() is not implemented');

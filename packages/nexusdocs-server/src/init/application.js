@@ -124,14 +124,20 @@ export default class Application extends EventEmetter {
   }
 
   async autoload() {
-    await this.load(this.models, models);
+    await this.load('models', models);
     this.emit('starting service');
-    await this.load(this.services, services);
+    await this.load('services', services);
   }
 
-  load(holder, classes) {
+  load(holderName, classes) {
+    const holder = this[holderName];
     const initials = _.map(classes, (Class, name) => {
-      const instance = new Class(name);
+      let options = undefined;
+      const key = `${holderName}.${Class.name}`;
+      if (config.has(key)) {
+        options = config.get(key);
+      }
+      const instance = new Class(options);
       this.bindLoader(instance);
       holder[Class.name] = instance;
       // console.log('init model:', Class.name);

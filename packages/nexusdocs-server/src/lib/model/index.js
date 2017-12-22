@@ -1,5 +1,6 @@
 export { default as Acl } from './acl';
 export { default as Archive } from './Archive';
+export { default as Cache } from './cache';
 export { default as Client } from './client';
 export { default as Dir } from './dir';
 export { default as File } from './file';

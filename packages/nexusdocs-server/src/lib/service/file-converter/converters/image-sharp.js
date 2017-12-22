@@ -7,7 +7,7 @@ import BaseConverter from '../base-converter';
 // Resize command pattern
 // http://www.graphicsmagick.org/GraphicsMagick.html#details-resize
 // format: <width>x<height>{%}{@}{!}{^}{<}{>}
-const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/
+const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/;
 
 export default class ImageSharpConverter extends BaseConverter {
 
@@ -81,7 +81,6 @@ export default class ImageSharpConverter extends BaseConverter {
   _quality(quality) {
     const { commands } = this;
     quality = parseInt(quality);
-    console.log({quality});
     if (_.isNaN(quality) || quality <= 0 || quality > 100) {
       throw new ApiError(400, null, 'ImageConverter.quality: invalid command option');
     }
@@ -96,9 +95,21 @@ export default class ImageSharpConverter extends BaseConverter {
     return ['toFormat', format];
   }
 
+  _rotate(angle) {
+    const { commands } = this;
+    if (angle === 'auto') {
+      angle = undefined;
+    } else {
+      angle = parseInt(angle);
+      if (!_.isNaN(angle) || angle % 90 !== 0) {
+        throw new ApiError(400, null, 'ImageConverter: invalide rotate angle');
+      }
+    }
+    commands.push(['rotate', angle]);
+  }
+
   runCommands(handler) {
     const { commands } = this;
-    console.log(commands)
     return commands.reduce((result, command) => {
       if (_.isString(command)) {
         return result[command]();
@@ -124,6 +135,10 @@ export default class ImageSharpConverter extends BaseConverter {
         quality: this.quality,
       }
       formatCommand.push(options);
+    }
+    let enlargeCommand = _.find(commands, c => c[0] === 'withoutEnlargement');
+    if (!enlargeCommand) {
+      commands.push('withoutEnlargement');
     }
   }
 

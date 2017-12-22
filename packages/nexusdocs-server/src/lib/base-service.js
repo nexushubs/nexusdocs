@@ -6,9 +6,9 @@ import { buildValidator } from '~/lib/validator';
 
 export default class BaseService extends EventEmitter {
   
-  constructor(name) {
+  constructor(options) {
     super();
-    this.name = name;
+    this.options = options || {};
   }
 
   init() {

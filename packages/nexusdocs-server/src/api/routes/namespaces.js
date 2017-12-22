@@ -121,7 +121,6 @@ wrap(async (req, res, next) => {
   const { namespace, file } = req.data;
   const { files_id } = req.params;
   const { contentType, filename, size, store_id } = file.data();
-  console.log(namespace.bucket);
   res.set('Content-Type', contentType);
   if (/download$/.test(req.path) || req.query.download) {
     res.set('Content-Disposition', contentDisposition(filename));
@@ -155,19 +154,21 @@ api.get('/:namespace/files/:files_id/info', checkAuth({ needAuth }), wrap(async 
 }));
 
 api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth }), wrap(async (req, res, next) => {
+  const { FileCache } = req.service();
   const { namespace, file } = req.data;
   const { commands } = req.params;
   const { download } = req.query;
-  const stream = await namespace.convert(file, commands);
-  stream.on('start', ({filename, format}) => {
-    filename = file.filename.replace(/\.\w+$/, `.${format}`);
-    res.set('Content-Type', mime.contentType(filename));
+  const streamBuilder = () => namespace.convert(file, commands);
+  const key = `/namespaces${req.path}`;
+  FileCache.get(key, streamBuilder)
+  .then(({ contentType, stream }) => {
+    res.set('Content-Type', contentType);
     if (download) {
       res.set('Content-Disposition', contentDisposition(filename));
     }
     stream.pipe(res);
-  });
-  stream.on('error', next);
+  })
+  .catch(next);
 }));
 
 api.post('/:namespace/archives', checkAuth(), wrap(async (req, res, next) => {

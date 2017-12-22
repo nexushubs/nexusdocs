@@ -1,6 +1,7 @@
 import _ from 'lodash';
-import filenamify from 'filenamify';
 import config from 'config';
+import filenamify from 'filenamify';
+import mime from 'mime-types';
 import { PassThrough } from 'stream';
 
 import BaseService from '~/lib/base-service';
@@ -33,11 +34,9 @@ export default class FileConverter extends BaseService {
 
   getConverterOptions(name) {
     const key = `services.FileConverter.converters.${name}`;
-    console.log(key);
     let options;
     try {
       options = config.get(key);
-      console.log(options);
     } catch(error) {
       options = {};
     }
@@ -48,33 +47,26 @@ export default class FileConverter extends BaseService {
    * Convert file format
    * @param {stream.Readable} inputStream 
    * @param {object} options 
-   * @returns {stream.Readable} - The converted file format
+   * @returns {Promise} - The converted file stream and content type
    */
-  convert(stream, filename, commands) {
-    const ext = getExtension(filename);
-    const ConverterClass = this.getConverterOptionsByExt(ext);
-    const output = new PassThrough();
-    try {
+  convert(inputStream, filename, commands) {
+    return new Promise((resolve, reject) => {
+      const ext = getExtension(filename);
+      const ConverterClass = this.getConverterOptionsByExt(ext);
       if (!ConverterClass) {
         throw new ApiError(400, null, 'FileConverter: invalid converter');
       }
-      const converter = new ConverterClass(stream, filename);
+      const converter = new ConverterClass(inputStream, filename);
       commands = _.chunk(commands.split('/'), 2);
       _.each(commands, ([command, options]) => {
         converter.prepare(command, options);
       });
       const format = converter.getFormat();
-      const resultStream = converter.exec();
-      setImmediate(() => {
-        output.emit('start', {
-          filename: filenamify(`${filename}-${commands}.${format}`),
-          format,
-        });
+      const outputSteam = converter.exec();
+      resolve({
+        contentType: mime.contentType(format),
+        stream: outputSteam,
       });
-      resultStream.pipe(output);
-    } catch(error) {
-      output.emit('error', error);
-    }
-    return output;
+    });
   }
 }

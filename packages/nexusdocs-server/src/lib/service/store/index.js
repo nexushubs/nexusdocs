@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { ObjectId } from 'mongodb';
 
 import BaseService from '~/lib/base-service';
 import { loadClasses } from '~/lib/util';
@@ -21,18 +22,22 @@ export default class Store extends BaseService {
   }
 
   async provider(id, forceReload) {
-    const strId = id.toString();
-    if (!this.providers[strId] || forceReload) {
+    let strId;
+    if (id instanceof ObjectId) {
+      strId = id.toString();
+    }
+    if (!strId || !this.providers[strId] || forceReload) {
       const Provider = this.model('provider');
       const provider = await Provider.get(id);
       const data = provider.data();
+      strId = data._id.toString();
       this.providers[strId] = await this.loadProvider(data);
     }
     return this.providers[strId];
   }
 
-  async bucket(providerId, bucketName) {
-    const provider = await this.provider(providerId);
+  async bucket(providerQuery, bucketName) {
+    const provider = await this.provider(providerQuery);
     return provider.bucket(bucketName);
   }
 

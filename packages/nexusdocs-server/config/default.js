@@ -8,6 +8,9 @@ module.exports = {
     },
   },
   services: {
+    FileCache: {
+      clearOnStartUp: true,
+    },
     FileParser: {
       parsers: {
         ImageThumbParser: {

@@ -9,6 +9,7 @@ export default class Provider extends BaseModel {
     name: { type: 'string', pattern: 'alphaNumeric' },
     description: { type: 'string', optional: true },
     params: { type: 'object' },
+    isSystem: { type: 'boolean', optional: true },
     buckets: { type: 'array', items: {
       type: 'string', $bucketName: 1 },
     },

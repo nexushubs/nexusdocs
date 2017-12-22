@@ -1,3 +1,4 @@
+export { default as FileCache } from './file-cache';
 export { default as FileConverter } from './file-converter';
 export { default as FileParser } from './file-parser';
 export { default as Queue } from './queue';

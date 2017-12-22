@@ -16,7 +16,8 @@ export default class Namespace extends BaseModel {
     name: { type: 'string' },
     providers_id: { $isObjectId: 1 },
     bucket: { type: 'string' },
-    isPublic: { type: 'boolean' },
+    isPublic: { type: 'boolean', optional: true },
+    isSystem: { type: 'boolean', optional: true },
     description: { type: 'string', optional: true },
   };
   validators = {
@@ -266,8 +267,7 @@ export default class Namespace extends BaseModel {
       file = await File.get(file);
     }
     const fileStream = await this.openDownloadStream(file.store_id);
-    const outputStream = FileConverter.convert(fileStream, file.filename, commands);
-    return outputStream;
+    return FileConverter.convert(fileStream, file.filename, commands);
   }
 
 }
