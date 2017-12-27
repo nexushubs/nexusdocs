@@ -1,9 +1,19 @@
 import _ from 'lodash';
 import filenamify from 'filenamify';
+import fs from 'fs';
+import mime from 'mime-types';
+import _mkdirp from 'mkdirp';
+import os from 'os';
+import path from 'path';
+import util from 'util';
+import uuid from 'uuid';
 import { PassThrough } from 'stream';
 
 import BaseService from '~/lib/base-service';
 import { ApiError } from '~/lib/errors';
+import { promisifyStream } from '~/lib/util';
+
+const mkdirp = util.promisify(_mkdirp);
 
 // The namespace FileCache uses
 const CACHE_NAMESPACE = 'nexusdocs.cache';
@@ -19,25 +29,32 @@ export default class FileCache extends BaseService {
 
   async init() {
     const { Namespace } = this.model();
-    const { clearOnStartUp } = this.options;
+    const { clearOnStartup } = this.options;
     const namespace = await Namespace.get({ name: CACHE_NAMESPACE });
     if (!namespace) {
       throw new Error(`FileCache: namespace '${CACHE_NAMESPACE}' is not found!`);
     }
     this.namespace = namespace;
-    if (clearOnStartUp) {
+    if (clearOnStartup) {
       this.clear();
     }
     return this.initCache();
   }
 
-  initCache() {
+  async initCache() {
+    await this.initFSCache();
     this.memCacheTimer = setInterval(() => {
       this.updateCache();
     }, UPDATE_CACHE_INTERVAL * 1000);
     return this.updateCache();
   }
 
+  initFSCache() {
+    const tempDir = `${os.tmpdir()}/nexusdocs/file-cache`;
+    this.tempDir = tempDir;
+    return mkdirp(tempDir);
+  }
+  
   updateCache() {
     const { memCaches } = this;
     const expired = (new Date).valueOf() - MEM_CACHE_EXPIRES * 1000;
@@ -67,6 +84,17 @@ export default class FileCache extends BaseService {
     ]).then(() => {
       console.log(`# FileCache: ${expiredCaches.length} removed`);
     });
+  }
+
+  writeStreamToFile(inputStream, contentType) {
+    console.log('writeStreamToFile - 1');
+    const filePath = path.normalize(`${this.tempDir}/${uuid.v4()}.${mime.extension(contentType)}`);
+    const fileStream = fs.createWriteStream(filePath);
+    console.log('writeStreamToFile - 2');
+    inputStream.pipe(fileStream);
+    console.log('writeStreamToFile - 3');
+    return promisifyStream(fileStream)
+    .then(() => filePath);
   }
 
   async clear() {
@@ -109,7 +137,7 @@ export default class FileCache extends BaseService {
     return false;
   }
 
-  async get(key, buildCache, options) {
+  async get(key, cacheBuilder, options) {
     const { namespace, memCaches } = this;
     const { Cache, File } = this.model();
     const { Store } = this.service();
@@ -127,18 +155,19 @@ export default class FileCache extends BaseService {
         stream: downloadStream,
       };
     }
-    if (!_.isFunction(buildCache)) {
+    if (!_.isFunction(cacheBuilder)) {
       return null;
     }
-    const cachePromise = buildCache();
+    const cachePromise = cacheBuilder();
     memCaches.set(key, {
       dateCreated: new Date,
       promise: cachePromise,
     });
-    const cacheObject = await cachePromise;
-    memCaches.delete(key);
-    this.set(key, cacheObject, options);
-    return cacheObject;
+    return cachePromise.then(cacheObject => {
+      memCaches.delete(key);
+      this.set(key, cacheObject, options);
+      return cacheObject;
+    });
   }
 
   async unset(key) {

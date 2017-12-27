@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import config from 'config';
 import filenamify from 'filenamify';
-import mime from 'mime-types';
+import fs from 'fs';
+import getStream from 'get-stream';
+import mime, { contentType } from 'mime-types';
 import { PassThrough } from 'stream';
 
 import BaseService from '~/lib/base-service';
@@ -43,30 +45,43 @@ export default class FileConverter extends BaseService {
     return options;
   }
 
+  saveTempfile(stream) {
+    const filepath = `os.tempdir()/`
+  }
+
   /**
    * Convert file format
    * @param {stream.Readable} inputStream 
    * @param {object} options 
    * @returns {Promise} - The converted file stream and content type
    */
-  convert(inputStream, filename, commands) {
-    return new Promise((resolve, reject) => {
-      const ext = getExtension(filename);
+  async convert(inputStream, filename, commands) {
+    const { FileCache } = this.service();
+    const ext = getExtension(filename);
+    try {
       const ConverterClass = this.getConverterOptionsByExt(ext);
       if (!ConverterClass) {
         throw new ApiError(400, null, 'FileConverter: invalid converter');
       }
-      const converter = new ConverterClass(inputStream, filename);
+      const options = this.getConverterOptions(ConverterClass.name);
+      let buffer = null;
+      if (ConverterClass.needBuffer) {
+        buffer = await getStream.buffer(inputStream);
+      }
+      const converter = new ConverterClass(inputStream, filename, buffer, options);
       commands = _.chunk(commands.split('/'), 2);
       _.each(commands, ([command, options]) => {
         converter.prepare(command, options);
       });
       const format = converter.getFormat();
-      const outputSteam = converter.exec();
-      resolve({
+      const outputSteam = await converter.exec();
+      return {
         contentType: mime.contentType(format),
         stream: outputSteam,
-      });
-    });
+      };
+    } catch (error) {
+      throw error;
+    }
   }
+  
 }

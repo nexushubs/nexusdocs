@@ -9,7 +9,7 @@ module.exports = {
   },
   services: {
     FileCache: {
-      clearOnStartUp: true,
+      clearOnStartup: true,
     },
     FileParser: {
       parsers: {
@@ -22,7 +22,10 @@ module.exports = {
       converters: {
         ImageGMConverter: {
           disabled: true,
-        }
+        },
+        DocumentConverter: {
+          uniconvServerURL: 'http://127.0.0.1:5000',
+        },
       }
     }
   },

@@ -158,10 +158,14 @@ api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth
   const { namespace, file } = req.data;
   const { commands } = req.params;
   const { download } = req.query;
-  const streamBuilder = () => namespace.convert(file, commands);
+  const cacheBuilder = () => namespace.convert(file, commands);
   const key = `/namespaces${req.path}`;
-  FileCache.get(key, streamBuilder)
-  .then(({ contentType, stream }) => {
+  FileCache.get(key, cacheBuilder)
+  .then((cacheObject) => {
+    if (!cacheObject) {
+      throw new ApiError(500, null, 'Converting failed');
+    }
+    const { contentType, stream } = cacheObject;
     res.set('Content-Type', contentType);
     if (download) {
       res.set('Content-Disposition', contentDisposition(filename));
