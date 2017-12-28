@@ -133,6 +133,7 @@ Class presenting NexusDocs namespace instance
     * _instance_
         * [.getUploadUrl([options])](#Namespace+getUploadUrl) ⇒ <code>string</code>
         * [.getDownloadUrl(fileId, [options])](#Namespace+getDownloadUrl) ⇒ <code>string</code>
+        * [.getConvertedUrl(fileId, converting, [options])](#Namespace+getConvertedUrl) ⇒ <code>string</code>
         * [.openUploadStream([options])](#Namespace+openUploadStream) ⇒ <code>WritableStream</code>
         * [.uploadFromLocal(filePath)](#Namespace+uploadFromLocal) ⇒ <code>Promise</code>
         * [.openDownloadStream(fileId, [options])](#Namespace+openDownloadStream) ⇒ <code>ReadableStream</code>
@@ -149,6 +150,7 @@ Class presenting NexusDocs namespace instance
         * [~ZipFileEntry](#Namespace..ZipFileEntry) : <code>object</code>
         * [~ZipInfo](#Namespace..ZipInfo) : <code>object</code>
         * [~FileInfo](#Namespace..FileInfo) : <code>object</code>
+        * [~ConvertingOptions](#Namespace..ConvertingOptions) : <code>object</code>
 
 <a name="new_Namespace_new"></a>
 
@@ -193,6 +195,25 @@ Get file URL for view or download
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | fileId | <code>FileId</code> |  | File identifier, see [FileId](#Namespace..FileId) |
+| [options] | <code>RequestOptions</code> |  | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
+| [options.download] | <code>boolean</code> | <code>false</code> | Download with the original filename |
+| [options.filename] | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
+| [options.response] | <code>object</code> |  | Overwrite response header |
+| [options.response.contentType] | <code>string</code> |  | Overwrite Content-Type |
+| [options.response.contentDisposition] | <code>string</code> |  | Overwrite Content-Disposition |
+
+<a name="Namespace+getConvertedUrl"></a>
+
+### namespace.getConvertedUrl(fileId, converting, [options]) ⇒ <code>string</code>
+Get the converted file URL for view or download
+
+**Kind**: instance method of [<code>Namespace</code>](#Namespace)  
+**Returns**: <code>string</code> - The converted file URL  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| fileId | <code>FileId</code> |  | File identifier, see [FileId](#Namespace..FileId) |
+| converting | <code>ConvertingOptions</code> |  | Converting options, see [ConvertingOptions](#Namespace..ConvertingOptions) |
 | [options] | <code>RequestOptions</code> |  | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
 | [options.download] | <code>boolean</code> | <code>false</code> | Download with the original filename |
 | [options.filename] | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
@@ -373,8 +394,7 @@ Zip file entry
 | Name | Type | Description |
 | --- | --- | --- |
 | path | <code>string</code> | Relative path to zip archive |
-| compressedSize | <code>number</code> | Stored size |
-| uncompressedSize | <code>number</code> | Original size |
+| size | <code>number</code> | Stored size |
 | lastModified | <code>date</code> | Last modified date |
 
 <a name="Namespace..ZipInfo"></a>
@@ -407,6 +427,37 @@ File information
 | metadata.image | <code>ImageInfo</code> | Metadata for image files |
 | metadata.zip | <code>ZipInfo</code> | Zip file entries |
 
+<a name="Namespace..ConvertingOptions"></a>
+
+### Namespace~ConvertingOptions : <code>object</code>
+File converting options
+
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| format | <code>string</code> | The output format, `documents`: `pdf`, `image`: `gif`, `jpeg`, `png`, `webp`, `tiff` |
+| resize | <code>string</code> | For `image`, resize the image `<width>x<height>{%}{@}{!}{<}{>}`    please check [gm docs](http://www.graphicsmagick.org/GraphicsMagick.html#details-resize).    notice: only `{!}{>}{^}` are available when server is using ImageSharpConverter |
+| rotate | <code>string</code> \| <code>number</code> | For `image`, rotate the image `auto|90|180|270`,    if `auto` is set, it will auto detect by gravity from EXIF |
+| quality | <code>number</code> | For`image`, set the output image quality 0 - 100, available for format `jpeg`, `tiff`, `webp` |
+
+**Example**  
+Get a thumbnail of size 32px
+```javascript
+{
+  format: 'jpeg',
+  resize: '32x32',
+  rotate: 'auto'
+}
+```
+**Example**  
+Get a pdf version of a document
+```javascript
+{
+  format: 'pdf',
+}
+```
 
 * * *
 

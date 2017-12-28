@@ -95,6 +95,26 @@ class Namespace {
   }
 
   /**
+   * Get the converted file URL for view or download
+   * @param {FileId} fileId - File identifier, see [FileId](#Namespace..FileId)
+   * @param {ConvertingOptions} converting - Converting options, see [ConvertingOptions](#Namespace..ConvertingOptions)
+   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
+   * @param {boolean} [options.download=false] - Download with the original filename
+   * @param {string} [options.filename] - Download with new filename, this will set contentType & contentDisposition
+   * @param {object} [options.response] - Overwrite response header
+   * @param {string} [options.response.contentType] - Overwrite Content-Type
+   * @param {string} [options.response.contentDisposition] - Overwrite Content-Disposition
+   * @returns {string} The converted file URL
+   */
+  getConvertedUrl(fileId, converting = {}, options = {}) {
+    const str = '${fileId}/convert';
+    _.each(converting, (value, key) => {
+      str += `/${key}/${encodeURIComponent(value)}`;
+    });
+    return this.getDownloadUrl(str, options);
+  }
+
+  /**
    * Get upload stream
    * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @param {ReadableStream} [options.stream] - Provide readable stream directly

@@ -54,8 +54,7 @@ export { Client, Namespace };
  * Zip file entry
  * @typedef {object} Namespace~ZipFileEntry holds file basic information in zip file
  * @property {string} path - Relative path to zip archive
- * @property {number} compressedSize - Stored size
- * @property {number} uncompressedSize - Original size
+ * @property {number} size - Stored size
  * @property {date} lastModified - Last modified date
  */
 
@@ -75,6 +74,32 @@ export { Client, Namespace };
  * @property {object} metadata - Additional information
  * @property {ImageInfo} [metadata.image] - Metadata for image files
  * @property {ZipInfo} [metadata.zip] - Zip file entries
+ */
+
+/**
+ * File converting options
+ * @typedef {object} Namespace~ConvertingOptions - file information holder
+ * @property {string} format - The output format, `documents`: `pdf`, `image`: `gif`, `jpeg`, `png`, `webp`, `tiff`
+ * @property {string} [resize] - For `image`, resize the image `<width>x<height>{%}{@}{!}{<}{>}`
+ *    please check [gm docs](http://www.graphicsmagick.org/GraphicsMagick.html#details-resize).
+ *    notice: only `{!}{>}{^}` are available when server is using ImageSharpConverter
+ * @property {string|number} [rotate] - For `image`, rotate the image `auto|90|180|270`,
+ *    if `auto` is set, it will auto detect by gravity from EXIF
+ * @property {number} [quality] - For`image`, set the output image quality 0 - 100, available for format `jpeg`, `tiff`, `webp`
+ * @example Get a thumbnail of size 32px
+ * ```javascript
+ * {
+ *   format: 'jpeg',
+ *   resize: '32x32',
+ *   rotate: 'auto'
+ * }
+ * ```
+ * @example Get a pdf version of a document
+ * ```javascript
+ * {
+ *   format: 'pdf',
+ * }
+ * ```
  */
 
 /**
