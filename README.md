@@ -21,4 +21,4 @@ NexusDocs is designed for applications to use multiple cloud storage engine in s
 ----
 ## License
 
-[MIT](./LICENSE.md)
+[MIT](./LICENSE)
