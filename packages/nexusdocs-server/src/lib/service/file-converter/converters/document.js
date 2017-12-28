@@ -2,6 +2,7 @@ import _ from 'lodash';
 import mime from 'mime-types';
 import fs from 'fs';
 import request from 'request';
+import contentDisposition from 'content-disposition';
 import { PassThrough } from 'stream';
 
 import { ApiError } from '~/lib/errors';
@@ -24,8 +25,6 @@ export default class DocumentConverter extends BaseConverter {
 
   static formatMap = {
   };
-
-  static needBuffer = true;
 
   commands = [];
   
@@ -58,15 +57,11 @@ export default class DocumentConverter extends BaseConverter {
     const r = request({
       method: 'POST',
       url: url,
-      formData: {
-        file: {
-          value: this.buffer,
-          options: {
-            filename,
-            contentType: mime.contentType(this.filename),
-          },
-        },
+      headers: {
+        'Content-Type': mime.contentType(this.filename),
+        'Content-Disposition': contentDisposition(filename),
       },
+      body: stream,
     });
     return r;
   }
@@ -74,7 +69,10 @@ export default class DocumentConverter extends BaseConverter {
   async exec() {
     const { stream } = this;
     await this.preExec();
-    const output = this.runCommands();
+    const r = this.runCommands();
+    // pipe to skip original HTTP header
+    const output = new PassThrough;
+    r.pipe(output);
     return output;
   }
   

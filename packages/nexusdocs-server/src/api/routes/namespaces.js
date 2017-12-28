@@ -3,10 +3,11 @@ import express from 'express';
 import wrap from 'express-wrap-async';
 import contentDisposition from 'content-disposition';
 import mime from 'mime-types';
+import boolean from 'boolean';
 
 import { ApiError } from '~/lib/errors';
 import { upload, checkAuth } from '~/api/middleware';
-import { parseQueryStringHeaders } from '~/lib/util';
+import { parseQueryStringHeaders, getBasename } from '~/lib/util';
 
 const api = express.Router();
 
@@ -120,9 +121,10 @@ api.get([
 wrap(async (req, res, next) => {
   const { namespace, file } = req.data;
   const { files_id } = req.params;
+  const { download } = req.query;
   const { contentType, filename, size, store_id } = file.data();
   res.set('Content-Type', contentType);
-  if (/download$/.test(req.path) || req.query.download) {
+  if (/download$/.test(req.path) || boolean(download)) {
     res.set('Content-Disposition', contentDisposition(filename));
   }
   res.set('Content-Length', size);
@@ -167,9 +169,12 @@ api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth
     }
     const { contentType, stream } = cacheObject;
     res.set('Content-Type', contentType);
-    if (download) {
-      res.set('Content-Disposition', contentDisposition(filename));
+    const headers = parseQueryStringHeaders(req);
+    if (boolean(download)) {
+      const filename = `${getBasename(file.filename)}.${mime.extension(contentType)}`;
+      headers['Content-Disposition'] = contentDisposition(filename);
     }
+    res.set(headers);
     stream.pipe(res);
   })
   .catch(next);

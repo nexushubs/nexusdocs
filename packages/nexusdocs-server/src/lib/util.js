@@ -105,3 +105,7 @@ export function sortedJSONStringify(object) {
 export function getExtension(filename) {
   return path.extname(filename).slice(1);
 }
+
+export function getBasename(filename) {
+  return path.parse(filename).name;
+}
