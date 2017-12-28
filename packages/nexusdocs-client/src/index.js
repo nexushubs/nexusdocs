@@ -81,10 +81,10 @@ export { Client, Namespace };
  * @typedef {object} Namespace~ConvertingOptions - file information holder
  * @property {string} format - The output format, `documents`: `pdf`, `image`: `gif`, `jpeg`, `png`, `webp`, `tiff`
  * @property {string} [resize] - For `image`, resize the image `<width>x<height>{%}{@}{!}{<}{>}`
- *    please check [gm docs](http://www.graphicsmagick.org/GraphicsMagick.html#details-resize).
- *    notice: only `{!}{>}{^}` are available when server is using ImageSharpConverter
- * @property {string|number} [rotate] - For `image`, rotate the image `auto|90|180|270`,
- *    if `auto` is set, it will auto detect by gravity from EXIF
+ *    please check [GraphicsMagick](http://www.graphicsmagick.org/GraphicsMagick.html#details-resize).
+ *    notice: only `{!}{>}{^}` are available when the server is using `ImageSharpConverter`
+ * @property {string|number} [rotate] - For `image`, rotate the image by angle `{auto}{90}{180}{270}`,
+ *    if `auto` is set, the angle will be detected by gravity from EXIF
  * @property {number} [quality] - For`image`, set the output image quality 0 - 100, available for format `jpeg`, `tiff`, `webp`
  * @example Get a thumbnail of size 32px
  * ```javascript

@@ -438,8 +438,8 @@ File converting options
 | Name | Type | Description |
 | --- | --- | --- |
 | format | <code>string</code> | The output format, `documents`: `pdf`, `image`: `gif`, `jpeg`, `png`, `webp`, `tiff` |
-| resize | <code>string</code> | For `image`, resize the image `<width>x<height>{%}{@}{!}{<}{>}`    please check [gm docs](http://www.graphicsmagick.org/GraphicsMagick.html#details-resize).    notice: only `{!}{>}{^}` are available when server is using ImageSharpConverter |
-| rotate | <code>string</code> \| <code>number</code> | For `image`, rotate the image `auto|90|180|270`,    if `auto` is set, it will auto detect by gravity from EXIF |
+| resize | <code>string</code> | For `image`, resize the image `<width>x<height>{%}{@}{!}{<}{>}`    please check [GraphicsMagick](http://www.graphicsmagick.org/GraphicsMagick.html#details-resize).    notice: only `{!}{>}{^}` are available when the server is using `ImageSharpConverter` |
+| rotate | <code>string</code> \| <code>number</code> | For `image`, rotate the image by angle `{auto}{90}{180}{270}`,    if `auto` is set, the angle will be detected by gravity from EXIF |
 | quality | <code>number</code> | For`image`, set the output image quality 0 - 100, available for format `jpeg`, `tiff`, `webp` |
 
 **Example**  
