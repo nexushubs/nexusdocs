@@ -1,7 +1,13 @@
 import _ from 'lodash';
 import program from 'commander';
+import boolean from 'boolean';
 
-import { makeObject, makeArray, handleError, getApp, listToTable, run } from './util';
+import {
+  ApiError,
+  run,
+  printList,
+  printDoc,
+} from './util';
 
 program
   .command('add <name>')
@@ -27,7 +33,32 @@ program
   });
 
 program
-  .command('ls [name]')
+  .command('update <name>')
+  .option('-p, --provider [name]', 'namespace')
+  .option('-b, --bucket [bucket]', 'bucket name')
+  .option('-p, --public [bool]', 'namespace is public')
+  .option('-d, --dest [text]', 'description text')
+  .action((env, options) => {
+    const name = program.args[0];
+    const update = {
+      provider: options.provider,
+      bucket: options.bucket,
+      public: _.isUndefined(options.public) ? undefined : boolean(options.public),
+      description: options.desc,
+    };
+    run(async app => {
+      const { Namespace } = app.model();
+      const namespace = await Namespace.get({ name });
+      if (!namespace) {
+        throw new ApiError(404, 'namespace not found');
+      }
+      await namespace.update(update);
+      printDoc(namespace.data());
+    });
+  });
+
+program
+  .command('ls [options]')
   .option('-t, --type <type>', 'namespace type')
   .option('-l, --detail', 'show detail')
   .action((env, options) => {
@@ -35,12 +66,25 @@ program
       const { Namespace } = app.model();
       const list = await Namespace.getAll();
       if (options.detail) {
-        const table = listToTable(list);
-        console.log(table);
+        printList(list)
       } else {
         console.log(_.map(list, 'name').join('\n'));
       }
       console.log(`${list.length} items listed.`);
+    });
+  });
+
+program
+  .command('info <name>')
+  .action((env, options) => {
+    const name = program.args[0];
+    run(async app => {
+      const { Namespace } = app.model();
+      const namespace = await Namespace.get({ name });
+      if (!namespace) {
+        throw new ApiError(400, 'namespace not found');
+      }
+      printDoc(namespace.data());
     });
   });
 

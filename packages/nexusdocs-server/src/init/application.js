@@ -1,7 +1,6 @@
 import path from 'path';
 import EventEmetter from 'events';
 import _ from 'lodash';
-import promisify from 'es6-promisify';
 import decamelize from 'decamelize';
 import upperCamelCase from 'uppercamelcase';
 import camelCase from 'camelcase';

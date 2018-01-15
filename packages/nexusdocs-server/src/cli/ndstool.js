@@ -6,6 +6,7 @@ program
   .version(packageConfig.version);
 
 program
+  .command('install', 'install default data')
   .command('provider [command]', 'manage provider')
   .command('namespace [command]', 'namespace provider')
   .command('client [command]', 'client manage');

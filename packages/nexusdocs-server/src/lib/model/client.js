@@ -9,19 +9,42 @@ export default class Client extends BaseModel {
 
   collectionName = 'clients';
   schema = {
+    name: { type: 'string' },
+    role: { type: 'string', pattern: /^user|admin$/ },
+    description: { type: 'string', optional: true },
     clientKey: { type: 'string', optional: true },
     clientSecret: { type: 'string', optional: true },
-    name: { type: 'string' },
-    description: { type: 'string', optional: true },
-    role: { type: 'string', pattern: /^user|admin$/ },
   };
   defaultProjection = {
     clientSecret: 0,
   }
+
+  async generateClientKey() {
+    return base32Encode(await randomBytes(18), 'Crockford');
+  }
+
+  async generateClientSecret() {
+    return (await randomBytes(36)).toString('base64');
+  }
   
   async beforeCreate(data) {
-    data.clientKey = base32Encode(await randomBytes(18), 'Crockford');
-    data.clientSecret = (await randomBytes(36)).toString('base64');
+    data.clientKey = await this.generateClientKey();
+    data.clientSecret = await this.generateClientSecret();
     return this.ensureUnique({ name: data.name })
   }
+  
+  async updateSecret() {
+    console.log('updating secret');
+    return this.update({
+      clientSecret: await this.generateClientSecret(),
+    });
+  }
+
+  async updateAuth() {
+    return this.update({
+      clientKey: await this.generateClientKey(),
+      clientSecret: await this.generateClientSecret(),
+    });
+  }
+
 }

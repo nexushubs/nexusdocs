@@ -127,7 +127,9 @@ export default class BaseModel {
   }
     
   async update(query, data) {
+    let useInstance = false;
     if (_.isUndefined(data) && this._active) {
+      useInstance = true;
       data = query;
       query = this.data('_id');
     }
@@ -137,22 +139,26 @@ export default class BaseModel {
       };
     }
     await this.beforeUpdate(query, data);
-    data = this.prepareData(data);
-    await this.collection.update(query, { $set: data });
+    if (useInstance) {
+      this.data(data);
+    } else {
+      this.prepareData(data);
+    }
+    await this.collection.update(query, { $set: this.data() });
     return this;
   }
  
-  getAll(query) {
-    return this.collection.find(query, this.defaultProjection).toArray();
+  getAll(query, projection) {
+    return this.collection.find(query, projection || this.defaultProjection).toArray();
   }
 
-  async get(query) {
+  async get(query, projection) {
     if (!_.isPlainObject(query)) {
       query = {
         _id: this.prepareId(query),
       };
     }
-    const data = await this.collection.findOne(query, this.defaultProjection);
+    const data = await this.collection.findOne(query, projection || this.defaultProjection);
     if (!data) return null;
     const instance = this.getInstance(data);
     return instance;
@@ -200,8 +206,9 @@ export default class BaseModel {
         this._data[key] = value
       }
     } else if (_.isPlainObject(key)) {
-      this.validate(key);
-      _.extend(this._data, key);
+      const values = _.omitBy(key, _.isUndefined);
+      this.validate(values);
+      _.extend(this._data, values);
       return this;
     } else {
       throw new TypeError('invalid data key');

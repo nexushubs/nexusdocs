@@ -1,10 +1,14 @@
+import 'source-map-support/register';
 import config from 'config';
 import _ from 'lodash';
 import Table from 'cli-table';
 import { ObjectId } from 'mongodb';
 
 import Application from '~/init/application';
-import { ValidationError } from '~/lib/errors';
+import { ApiError, ValidationError } from '~/lib/errors';
+export { ApiError } from '~/lib/errors';
+
+const MAX_CELL_WIDTH = 128;
 
 let app = null;
 
@@ -26,7 +30,7 @@ export async function run(fn) {
   } catch(e) {
     handleError(e);
   } finally {
-    console.log('done!');
+    console.log('# done!');
     app.stop(true);
   }
 }
@@ -45,7 +49,10 @@ export function makeArray(val) {
 }
 
 export function handleError(err) {
-  if (err instanceof ValidationError) {
+  if (err instanceof ApiError) {
+    console.error('Error:', err.message);
+    return;
+  } else if (err instanceof ValidationError) {
     console.error('Invalid Input:');
     _.each(err.errors, e => {
       delete e.code;
@@ -60,27 +67,66 @@ export function listToTable(list) {
   if (!_.isArray(list) || !list.length) {
     return 'no record';
   }
-  const table = new Table({ head: _.keys(list[0])});
+  const head = _.keys(list[0]);
+  const table = new Table({ head });
   list.map(doc => {
-    const values = _.values(doc).map(value => {
-      if (/^[0-9a-f]{24}/.test(value)) {
-        return value.toString();
-      } else if (_.isArray(value)) {
-        return value;
+    const values = [];
+    _.each(head, key => {
+      let value = doc[key];
+      if (/^[0-9a-f]{24}$/i.test(value)) {
+        value = mongoJSONStringify(value);
+        // value = value.toString();
       } else if (_.isObject(value)) {
-        return _.keys(value).length ? '{...}' : '{}';
+        const v = mongoJSONStringify(value);
+        if (v.length > MAX_CELL_WIDTH) {
+          value = `${v.slice(0, MAX_CELL_WIDTH - 5)} ...${v.slice(-1)}`;
+        } else {
+          value = v;
+        }
       } else if (_.isUndefined(value)) {
-        return '';
+        value = '';
       } else if (_.isNull(value)) {
-        return 'null';
+        value = 'null';
       }
-      return value;
+      values.push(value);
     });
     table.push(values);
   })
   return table.toString();
 }
 
-export function docToTable(doc) {
-  return listToTable([doc]);
+export function printList(list) {
+  const table = listToTable(list);
+  console.log(table);
+}
+
+export function mongoJSONReplacer(key, value) {
+  if (value instanceof ObjectId || /^[0-9a-f]{24}$/i.test(value)) {
+    return `ObjectId('${value.valueOf()}')`;
+  } else if (value instanceof Date) {
+    return `ISODate('${value.toISOString()}')`;
+  }
+  return value;
+}
+
+export function mongoJSONStringify(doc, replacer, space = 2) {
+  if (!replacer) {
+    replacer = mongoJSONReplacer;
+  }
+  return JSON.stringify(doc, replacer, space)
+    .replace(/"ObjectId\('([^)]+)'\)"/g, 'ObjectId("$1")')
+    .replace(/"ISODate\('([^)]+)'\)"/g, 'ISODate("$1")');
+}
+
+export function printDoc(doc) {
+  // const json = mongoJSONStringify(doc);
+  // console.log(json);
+  printList([doc]);
+}
+
+export async function printCollection(db, name) {
+  const list = await db.collection(name).find({}).toArray();
+  const table = listToTable(list);
+  console.log(`collection '${name}' (${list.length} docs):`);
+  console.log(table);
 }
