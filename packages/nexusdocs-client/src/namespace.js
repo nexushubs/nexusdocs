@@ -107,7 +107,7 @@ class Namespace {
    * @returns {string} The converted file URL
    */
   getConvertedUrl(fileId, converting = {}, options = {}) {
-    const str = '${fileId}/convert';
+    let str = `${fileId}/convert`;
     _.each(converting, (value, key) => {
       str += `/${key}/${encodeURIComponent(value)}`;
     });

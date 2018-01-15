@@ -463,4 +463,4 @@ Get a pdf version of a document
 
 ## License
 
-MIT © NexusDocs
+MIT
