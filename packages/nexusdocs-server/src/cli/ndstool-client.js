@@ -73,18 +73,19 @@ program
   });
 
 program
-  .command('ls')
-  .option('-l, --detail', 'show detail')
+  .command('list')
+  .alias('ls')
+  .option('-q, --quiet', 'only display names')
   .action((options) => {
     run(async app => {
       const { Client } = app.model();
       const list = await Client.getAll({}, {});
-      if (options.detail) {
+      if (!options.quiet) {
         printList(list)
+        console.log(`${list.length} items listed.`);
       } else {
         console.log(_.map(list, 'name').join('\n'));
       }
-      console.log(`${list.length} items listed.`);
     });
   });
 

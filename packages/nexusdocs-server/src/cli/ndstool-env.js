@@ -110,7 +110,8 @@ program
   .action(() => {
     let config = readConfig();
     _.each(config, item => {
-      console.log(`${item.key}=${item.value}`);
+      const value = _.isUndefined(item.value) ? '' : item.value;
+      console.log(`${item.key}=${value}`);
     });
   });
 

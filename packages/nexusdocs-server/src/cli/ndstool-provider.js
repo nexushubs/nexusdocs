@@ -52,9 +52,10 @@ program
   });
 
 program
-  .command('ls')
+  .command('list')
+  .alias('ls')
   .option('-t, --type <type>', 'provider type')
-  .option('-l, --detail', 'show detail')
+  .option('-q, --quiet', 'only display names')
   .action((options) => {
     let query = {};
     if (options.type) {
@@ -63,12 +64,12 @@ program
     run(async app => {
       const { Provider } = app.model();
       const list = await Provider.getAll(query);
-      if (options.detail) {
+      if (!options.quiet) {
         printList(list)
+        console.log(`${list.length} items listed.`);
       } else {
         console.log(_.map(list, 'name').join('\n'));
       }
-      console.log(`${list.length} items listed.`);
     });
   });
 

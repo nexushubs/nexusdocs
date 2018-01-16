@@ -47,8 +47,8 @@ export default class Application extends EventEmetter {
         port: 4000,
       },
     }
-    config.util.extendDeep(defaultOptions, options);
-    config.util.setModuleDefaults('Application', defaultOptions);
+    const configOptions = config.get('Application');
+    this.options = _.merge({}, defaultOptions, configOptions, options);
     this.db = null;
     this.api = null;
     this.startTime;
@@ -69,12 +69,12 @@ export default class Application extends EventEmetter {
 
   async _start() {
     try {
-      const { database, restful: { hostname, port }, restfulEnabled } = config.get('Application');
+      const { database, restful: { enabled, hostname, port } } = this.options;
       // connecting database;
       this.db = await connect(database);
       // autoload models and services
       await this.autoload();
-      if (!restfulEnabled) {
+      if (!enabled) {
         // lazy loading api routes
         const api = require('~/api').default;
         this.api = api;
