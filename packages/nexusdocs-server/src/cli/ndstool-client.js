@@ -11,8 +11,7 @@ program
   .command('add <name>')
   .option('-d, --desc [text]', 'description text')
   .option('-r, --role <role>', 'client role [user|admin]', 'user')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name, options) => {
     const doc = {
       name,
       role: options.role,
@@ -29,8 +28,7 @@ program
   .command('update <name>')
   .option('-d, --desc [text]', 'description text')
   .option('-r, --role <role>', 'client role [user|admin]', 'user')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name, options) => {
     const update = {
       role: options.role,
       description: options.desc,
@@ -48,8 +46,7 @@ program
 
 program
   .command('update-secret <name>')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name) => {
     run(async app => {
       const { Client } = app.model();
       const client = await Client.get({ name });
@@ -63,8 +60,7 @@ program
 
 program
   .command('update-auth <name>')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name) => {
     run(async app => {
       const { Client } = app.model();
       const client = await Client.get({ name });
@@ -77,9 +73,9 @@ program
   });
 
 program
-  .command('ls [options]')
+  .command('ls')
   .option('-l, --detail', 'show detail')
-  .action((env, options) => {
+  .action((options) => {
     run(async app => {
       const { Client } = app.model();
       const list = await Client.getAll({}, {});
@@ -94,8 +90,7 @@ program
 
 program
   .command('info <name>')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name, options) => {
     run(async app => {
       const { Client } = app.model();
       const client = await Client.get({ name }, {});
@@ -108,9 +103,7 @@ program
 
 program
   .command('remove <name>')
-  .action((env, options) => {
-    const { args } = program;
-    const name = args[0];
+  .action((name, options) => {
     run(async app => {
       const { Client } = app.model();
       const { result } = await Client.collection.remove({ name });

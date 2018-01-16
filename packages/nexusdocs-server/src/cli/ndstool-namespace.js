@@ -15,8 +15,7 @@ program
   .option('-b, --bucket <bucket>', 'bucket name')
   .option('-p, --public', 'namespace is public')
   .option('-d, --dest <text>', 'description text')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name, options) => {
     let doc = {
       name,
       provider: options.provider,
@@ -38,8 +37,7 @@ program
   .option('-b, --bucket [bucket]', 'bucket name')
   .option('-p, --public [bool]', 'namespace is public')
   .option('-d, --dest [text]', 'description text')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name, options) => {
     const update = {
       provider: options.provider,
       bucket: options.bucket,
@@ -58,10 +56,10 @@ program
   });
 
 program
-  .command('ls [options]')
+  .command('ls')
   .option('-t, --type <type>', 'namespace type')
   .option('-l, --detail', 'show detail')
-  .action((env, options) => {
+  .action((options) => {
     run(async app => {
       const { Namespace } = app.model();
       const list = await Namespace.getAll();
@@ -76,8 +74,7 @@ program
 
 program
   .command('info <name>')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name) => {
     run(async app => {
       const { Namespace } = app.model();
       const namespace = await Namespace.get({ name });
@@ -90,12 +87,10 @@ program
 
 program
   .command('remove <name>')
-  .action((env, options) => {
-    const { args } = program;
-    const name = args[0];
+  .action((name) => {
     run(async app => {
       const { Namespace } = app.model();
-      const { result } = await Namespace.collection.remove({name: name});
+      const { result } = await Namespace.collection.remove({ name });
       console.log(`${result.n} items removed.`);
     });
   });

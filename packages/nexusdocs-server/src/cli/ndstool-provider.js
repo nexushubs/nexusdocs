@@ -14,8 +14,7 @@ program
   .option('-p, --params [params]', 'server parameters, foo=1,bar=2', makeObject, {})
   .option('-b, --buckets <buckets>', 'file bucket list, a,b', makeArray, [])
   .option('-d, --desc [text]', 'description text')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name, options) => {
     const doc = {
       name,
       type: options.type,
@@ -35,8 +34,7 @@ program
   .option('-p, --params [params]', 'server parameters, param1=value1,param2=value2', makeObject, {})
   .option('-b, --buckets [buckets]', 'file bucket list, a,b', makeArray, [])
   .option('-d, --desc [text]', 'description text')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name, options) => {
     const update = {
       params: _.isEmpty(options.params) ? undefined : options.params,
       buckets: _.isEmpty(options.buckets) ? undefined : options.buckets,
@@ -54,11 +52,10 @@ program
   });
 
 program
-  .command('ls [options]')
+  .command('ls')
   .option('-t, --type <type>', 'provider type')
   .option('-l, --detail', 'show detail')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((options) => {
     let query = {};
     if (options.type) {
       query.type = options.type;
@@ -77,8 +74,7 @@ program
 
 program
   .command('info <name>')
-  .action((env, options) => {
-    const name = program.args[0];
+  .action((name, options) => {
     run(async app => {
       const { Provider } = app.model();
       const provider = await Provider.get({ name });
@@ -91,12 +87,10 @@ program
 
 program
   .command('remove <name>')
-  .action((env, options) => {
-    const { args } = program;
-    const name = args[0];
+  .action((name) => {
     run(async app => {
       const { Provider } = app.model();
-      const { result } = await Provider.collection.remove({name: name});
+      const { result } = await Provider.collection.remove({ name });
       console.log(`${result.n} items removed.`);
     });
   });
