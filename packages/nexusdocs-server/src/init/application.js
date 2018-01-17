@@ -74,7 +74,7 @@ export default class Application extends EventEmetter {
       this.db = await connect(database);
       // autoload models and services
       await this.autoload();
-      if (!enabled) {
+      if (enabled) {
         // lazy loading api routes
         const api = require('~/api').default;
         this.api = api;

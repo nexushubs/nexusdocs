@@ -1,0 +1,28 @@
+# Docker compose definition to run NexusDocs in production mode, so no mounted
+# code, no dev containers etc. Only this single file is required.
+
+version: '2.0'
+
+services:
+
+  mongo:
+    image: mongo:3.6
+    restart: on-failure:5
+    volumes:
+      - ./database:/data/db:rw
+
+  nds:
+    image: nexushubs/nexusdocs
+    restart: on-failure:5
+    environment:
+      NDS_DATABASE: mongodb://mongo/nexusdocs
+      UNOCONV_SERVER_URL: http://unoconv:4000
+    ports:
+      - '5000:4000'
+    depends_on:
+      - mongo
+      - unoconv
+
+  unoconv:
+    image: alphakevin/unoconv-server
+    restart: on-failure:5

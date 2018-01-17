@@ -16,6 +16,7 @@ node_modules
 
 # application
 /lib
+database
 yarn.lock
 .vscode
 .env
