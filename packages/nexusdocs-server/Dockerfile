@@ -1,20 +1,14 @@
-FROM node:carbon-alpine
+FROM node:carbon
 
 WORKDIR /usr/src/app
 COPY . .
+
 ENV NDS_RESTFUL_HOSTNAME 0.0.0.0
 ENV NDS_RESTFUL_PORT 4000
-EXPOSE 4000
-RUN apk add --no-cache --virtual vips --repository https://dl-3.alpinelinux.org/alpine/edge/testing/ \
-        vips-dev \
-        fftw-dev \
-    && apk add --no-cache --virtual gyp \
-        python \
-        make \
-        g++ \
-    && npm install \
+
+RUN npm install \
     && rm -rf lib/* \
     && npm run build \
-    && ln -s -f /usr/src/app/ndstool /usr/bin/ndstool \
-    && apk del gyp vips
+    && ln -s -f /usr/src/app/ndstool /usr/bin/ndstool
+
 CMD npm start

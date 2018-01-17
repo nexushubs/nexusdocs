@@ -18,7 +18,7 @@ services:
       NDS_DATABASE: mongodb://mongo/nexusdocs
       UNOCONV_SERVER_URL: http://unoconv:4000
     ports:
-      - '5000:4000'
+      - '4000:4000'
     depends_on:
       - mongo
       - unoconv
