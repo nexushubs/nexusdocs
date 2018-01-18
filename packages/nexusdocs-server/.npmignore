@@ -16,5 +16,6 @@ node_modules
 
 # application
 database
+docker
 .vscode
 .env
