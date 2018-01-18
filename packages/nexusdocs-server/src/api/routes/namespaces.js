@@ -76,7 +76,7 @@ api.get('/:namespace/upload', checkAuth(), wrap(async (req, res, next) => {
   }
 }));
 
-api.post('/:namespace/upload', checkAuth({ from: 'url' }), upload(), wrap(async (req, res, next) => {
+api.post('/:namespace/upload', checkAuth({ from: 'auto' }), upload(), wrap(async (req, res, next) => {
   const { file } = req;
   if (!file) {
     throw new ApiError(400, 'Missing file data');

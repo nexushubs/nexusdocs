@@ -14,6 +14,7 @@ module.exports = {
     FileParser: {
       parsers: {
         ImageThumbParser: {
+          disabled: true,
           thumbSize: 48,
         },
       },

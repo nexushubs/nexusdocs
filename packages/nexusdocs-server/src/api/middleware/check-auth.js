@@ -15,16 +15,13 @@ class Authorization {
         needAuth: options,
       };
     }
-    if (!options.from) {
-      options.from = this.getDefaultFrom(req.method);
-    }
     this.opt = _.merge({
-      from: 'url',
+      from: this.getDefaultFrom(req.method),
       signature: {},
+      fields: {},
       role: 'user',
       needAuth: () => true,
     }, options);
-    
   }
 
   getDefaultFrom(method) {
@@ -44,7 +41,11 @@ class Authorization {
   }
 
   async _authorize() {
-    let { expires, token } = this.parseClientToken();
+    let parsed = this.parseClientToken();
+    if (!parsed) {
+      return 'token not found';
+    }
+    let { expires, token } = parsed;
     if (!token) {
       return 'token not found';
     }
@@ -76,6 +77,9 @@ class Authorization {
 
   parseClientToken() {
     const { from } = this.opt;
+    if (from === 'auto') {
+      return this.parseFromUrl() || this.parseFromHeader();
+    }
     if (from === 'header') {
       return this.parseFromHeader();
     } else {
@@ -84,7 +88,7 @@ class Authorization {
   }
 
   getServerToken(expires) {
-    let { req, opt: { from, signature } } = this;
+    let { req, opt: { from, signature, fields } } = this;
     let url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
     url = url.replace(/&token=.+$/, '');
     const jsonType = 'application/json';
@@ -95,6 +99,12 @@ class Authorization {
     };
     if (from === 'header') {
       signature.expires = expires;
+      if (fields) {
+        signature = {
+          ...signature,
+          ..._.pick(req.body, fields),
+        };
+      }
     }
     if (req.is(jsonType) === jsonType) {
       signature.body = sortedJSONStringify(req.body);
@@ -123,8 +133,9 @@ class Authorization {
     const pattern = /^NDS expires="([^"]+)",token="([^"]+)"$/;
     const result = pattern.exec(tokenHeader);
     if (!result) {
-      return {};
+      return null;
     }
+    this.opt.from = 'header';
     return {
       expires: result[1],
       token: result[2],
@@ -133,6 +144,10 @@ class Authorization {
 
   parseFromUrl() {
     const { query } = this.req;
+    if (!query.e && !query.token) {
+      return null;
+    }
+    this.opt.from = 'url';
     return {
       expires: query.e,
       token: query.token,

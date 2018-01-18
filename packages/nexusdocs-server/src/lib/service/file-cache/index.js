@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import boolean from 'boolean';
 import filenamify from 'filenamify';
 import fs from 'fs';
 import mime from 'mime-types';
@@ -35,7 +36,7 @@ export default class FileCache extends BaseService {
       throw new Error(`FileCache: namespace '${CACHE_NAMESPACE}' is not found!`);
     }
     this.namespace = namespace;
-    if (clearOnStartup) {
+    if (boolean(clearOnStartup)) {
       this.clear();
     }
     return this.initCache();

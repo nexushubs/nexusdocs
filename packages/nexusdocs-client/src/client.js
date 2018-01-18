@@ -46,7 +46,7 @@ class Client {
       options.port = port ? parseInt(port) : 80;
       options.endPoint = pathname
       options.clientKey = username;
-      options.clientSecret = password;
+      options.clientSecret = decodeURIComponent(password);
       if (query.defaultUrlExpires) {
         options.defaultUrlExpires = query.defaultUrlExpires
       }

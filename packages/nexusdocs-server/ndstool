@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
-cd $(dirname $(realpath $0))
+cd "$(dirname "$(readlink -n $0)")"
 node ./lib/cli/ndstool.js "$@"

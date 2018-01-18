@@ -8,6 +8,8 @@ services:
   mongo:
     image: mongo:3.6
     restart: on-failure:5
+    ports:
+      - '127.0.0.1:27018:27017'
     volumes:
       - ./database:/data/db:rw
 
@@ -17,6 +19,7 @@ services:
     environment:
       NDS_DATABASE: mongodb://mongo/nexusdocs
       UNOCONV_SERVER_URL: http://unoconv:4000
+      FILE_CACHE_CLEAR_ON_STARTUP: 0
     ports:
       - '4000:4000'
     depends_on:

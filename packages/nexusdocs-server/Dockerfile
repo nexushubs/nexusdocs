@@ -9,6 +9,7 @@ ENV NDS_RESTFUL_PORT 4000
 RUN npm install \
     && rm -rf lib/* \
     && npm run build \
-    && ln -s -f /usr/src/app/ndstool /usr/bin/ndstool
+    && ln -s -f /usr/src/app/ndstool /usr/bin/ndstool \
+    && npm cache clean --force
 
 CMD npm start

@@ -98,6 +98,7 @@ export default class Signer {
       url,
       expires,
     };
+    // console.log('\nsignature:', signature);
     if (json) {
       signature.body = sortedJSONStringify(body);
     }

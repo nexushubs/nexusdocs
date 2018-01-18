@@ -120,14 +120,24 @@ class Namespace {
    * @param {ReadableStream} [options.stream] - Provide readable stream directly
    * @param {FileId} [options.fileId] - Specify fileId, see [FileId](#Namespace..FileId)
    * @param {string} [options.filename] - Provide filename
+   * @param {string} [options.md5] - MD5 hash of the file if available
    * @param {string} [options.contentType] - Provide content-type for download
    * @param {number} [options.knownLength] - Provide stream total length if available
    * @returns {WritableStream} Writable stream for upload
    */
   openUploadStream(options) {
-    let { fileId, filename, contentType, stream, knownLength, expires } = options;
+    let {
+      fileId,
+      filename,
+      md5,
+      contentType,
+      stream,
+      knownLength,
+      expires,
+    } = options;
     delete options.fileId;
     delete options.filename;
+    delete options.md5;
     delete options.contentType;
     delete options.stream;
     delete options.knownLength;
@@ -140,17 +150,19 @@ class Namespace {
     if (!contentType) {
       contentType = 'application/octet-stream';
     }
+    const fields = _.omitBy({
+      fileId,
+      filename,
+      md5,
+    }, _.isUndefined);
     _.merge(options, {
       method: 'POST',
       url: `/namespaces/${this.name}/upload`,
       signature: {
-        fileId,
-        filename,
-        contentType,
-        knownLength,
+        // ...fields
       },
       formData: {
-        fileId,
+        ...fields,
         file: {
           value: stream,
           options: {
