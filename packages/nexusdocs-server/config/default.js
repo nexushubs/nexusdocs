@@ -17,6 +17,9 @@ module.exports = {
           disabled: true,
           thumbSize: 48,
         },
+        ZipParser: {
+          disabled: true,
+        },
       },
     },
     FileConverter: {

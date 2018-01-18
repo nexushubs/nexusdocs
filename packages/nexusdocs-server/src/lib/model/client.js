@@ -2,6 +2,7 @@ import BaseModel from '~/lib/base-model';
 import util from 'util';
 import crypto from 'crypto';
 import base32Encode from 'base32-encode';
+import config from 'config';
 
 const randomBytes = util.promisify(crypto.randomBytes);
 
@@ -47,4 +48,23 @@ export default class Client extends BaseModel {
     });
   }
 
+  createUrl(options = {}) {
+    if (!this._active) {
+      throw new Error('could not create url from non-active instance');
+    }
+    const { clientKey, clientSecret } = this;
+    const { hostname: _hostname, port: _port } = this.nds.options.restful;
+    const {
+      hostname = _hostname,
+      port = _port,
+      schema = 'http',
+      entry = '/api',
+    } = options;
+    let portStr = `:${port}`;
+    if ((schema === 'http' && port == 80) || (schema === 'https' && port == 443)) {
+      portStr = '';
+    }
+    const entryStr = entry.replace(/^\//, '');
+    return `${schema}://${clientKey}:${encodeURIComponent(clientSecret)}@${hostname}${portStr}/${entryStr}`;
+  }
 }

@@ -103,6 +103,29 @@ program
   });
 
 program
+  .command('create-url <name>')
+  .option('-h, --hostname [hostname]', 'server bound hostname')
+  .option('-p, --port [port]', 'server bound port')
+  .option('-s, --schema [schema]', 'server schema', 'http')
+  .option('-e, --entry [entry]', 'server entry', '/api')
+  .action((name, options) => {
+    run(async app => {
+      const { Client } = app.model();
+      const client = await Client.get({ name }, {});
+      if (!client) {
+        throw new ApiError(404, 'client not found');
+      }
+      const url = client.createUrl({
+        hostname: options.hostname,
+        port: options.port,
+        schema: options.schema,
+        entry: options.entry,
+      });
+      console.log(url);
+    });
+  });
+
+program
   .command('remove <name>')
   .action((name, options) => {
     run(async app => {

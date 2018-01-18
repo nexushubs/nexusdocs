@@ -14,9 +14,6 @@ coverage
 # nodejs
 node_modules
 
-# build
-/lib
-
 # application
 database
 .vscode
