@@ -235,6 +235,7 @@ Get upload stream
 | [options.stream] | <code>ReadableStream</code> | Provide readable stream directly |
 | [options.fileId] | <code>FileId</code> | Specify fileId, see [FileId](#Namespace..FileId) |
 | [options.filename] | <code>string</code> | Provide filename |
+| [options.md5] | <code>string</code> | MD5 hash of the file if available |
 | [options.contentType] | <code>string</code> | Provide content-type for download |
 | [options.knownLength] | <code>number</code> | Provide stream total length if available |
 
