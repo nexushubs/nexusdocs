@@ -6,13 +6,13 @@ NexusDocs server application
 
 ## Install
 
-Install as npm package:
+### Install as npm package:
 
 ```bash
 npm install nexushubs-server
 ```
 
-Install from source code:
+### Install from source code:
 
 ```bash
 git clone https://github.com/nexushubs/nexusdocs.git
@@ -20,13 +20,13 @@ cd packages/nexusdocs-server
 npm install
 ```
 
-Install default data:
+### Install default data:
 
 ```bash
 ./ndstool install
 ```
 
-Creating connection URI for client
+### Creating connection URI for client
 
 ```bash
 ./ndstool client create-url user
@@ -89,7 +89,7 @@ $ ./ndstool --help
 
 # Playing with Docker
 
-The build-in [docker-compose.yml](./docker-compose.yml) starts 3 container:
+The build-in [docker-compose.yml](./docker-compose.yml) starts 3 containers:
 
 * `unoconv` for converting office document
 * `mongo` build-in mongodb server, you can replace to your own
