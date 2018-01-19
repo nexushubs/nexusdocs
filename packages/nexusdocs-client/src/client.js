@@ -143,8 +143,8 @@ class Client {
           reject('invalid response');
           return;
         }
-        if (error) {
-          reject(error);
+        if (_.isObject(body)) {
+          resolve(body);
           return;
         }
         let result;

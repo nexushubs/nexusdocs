@@ -290,7 +290,7 @@ class Namespace {
   createArchive(files) {
     const options = {
       method: 'POST',
-      url: `/namespace/${this.name}/archives`,
+      url: `/namespaces/${this.name}/archives`,
       body: {
         files,
       },
@@ -310,9 +310,9 @@ class Namespace {
       const { _id: archive_id } = archive;
       _.merge(options, {
         method: 'GET',
-        url: `/namespace/${this.name}/archives/${archive_id}`,
+        url: `/namespaces/${this.name}/archives/${archive_id}`,
       });
-      return this.client.buildUrl(options);
+      return this.client.getUrl(options);
     });
   }
 

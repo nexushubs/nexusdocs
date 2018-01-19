@@ -201,7 +201,7 @@ api.param('archive_id', wrap(async (req, res, next, archiveId) => {
 api.get('/:namespace/archives/:archive_id', checkAuth({ needAuth }), wrap(async (req, res, next) => {
   const { namespace, archive } = req.data;
   const { filename, store_id, size } = archive;
-  const bucket = await namespace.bucket();
+  const bucket = await namespace.getBucket();
   const downloadStream = bucket.openDownloadStream(store_id);
   const contentType = mime.lookup(filename);
   res.set('Content-Type', contentType);
