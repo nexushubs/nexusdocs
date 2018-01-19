@@ -16,6 +16,7 @@ RUN apk add --no-cache --repository https://dl-3.alpinelinux.org/alpine/edge/tes
     && npm install \
     && rm -rf lib/* \
     && npm run build \
+    && npm cache clean --force \
     && ln -s -f /usr/src/app/ndstool /usr/bin/ndstool \
     && apk del .gyp
 

@@ -42,7 +42,7 @@ class Client {
       options = {};
       const { hostname, protocol, port, pathname, username, password, query } = parsed;
       options.hostname = hostname,
-      options.secure = protocol === 'https';
+      options.secure = protocol === 'https:';
       options.port = port ? parseInt(port) : 80;
       options.endPoint = pathname
       options.clientKey = username;
