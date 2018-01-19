@@ -107,7 +107,7 @@ Creating nexusdocsserver_nds_1     ... done
 ## Install the Default Data
 
 ```
-$ docker-compose exec nds
+$ docker-compose exec nds /bin/sh
 /usr/src/app # ndstool install
 ```
 
