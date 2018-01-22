@@ -30,7 +30,7 @@ class Client {
     this.defaultOptions = {
       hostname: '127.0.0.1',
       secure: false,
-      port: '4000',
+      port: 4000,
       endPoint: '/api',
       clientKey: '',
       clientSecret: '',
@@ -43,7 +43,7 @@ class Client {
       const { hostname, protocol, port, pathname, username, password, query } = parsed;
       options.hostname = hostname,
       options.secure = protocol === 'https:';
-      options.port = port ? parseInt(port) : 80;
+      options.port = port ? parseInt(port) : (options.secure ? 443 : 80);
       options.endPoint = pathname
       options.clientKey = username;
       options.clientSecret = decodeURIComponent(password);

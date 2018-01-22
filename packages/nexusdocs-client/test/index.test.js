@@ -3,10 +3,15 @@ const path = require('path');
 const { expect } = require('chai');
 const nock = require('nock');
 const uuid = require('uuid');
+const mime = require('mime-types');
 const contentDisposition = require('content-disposition');
 
 const { encodeRFC5987ValueChars } = require('./util');
 const createClient = require('../lib');
+
+function normalizeUrl(url) {
+  return url.replace(/(&|\?)(e=\d+|token=[\.\w\-_]+)/g, '');
+}
 
 describe('File uploading and downloading', () => {
 
@@ -25,11 +30,47 @@ describe('File uploading and downloading', () => {
       // .delay(500)
       .reply(200, { files_id: fileId });
     
-    api.get(`/api/namespaces/${ns}/files/${fileId}`)
+    api.get(new RegExp(`\/api\/namespaces\/${ns}\/files\/${fileId}.+`))
       // .delay(500)
       .reply(200, (uri, requestBody) => {
         return fs.createReadStream(testFile);
       });
+  });
+
+  describe('Init Options', () => {
+    
+    it('parse http string option', () => {
+      const url = 'http://key:secret@192.168.1.100:8080/custom/api';
+      const client = createClient(url);
+      const expectedUrl = `${apiUrl}/namespaces/${ns}/upload`;
+      expect(client.options).to.deep.equal({
+        hostname: '192.168.1.100',
+        secure: false,
+        port: 8080,
+        endPoint: '/custom/api',
+        clientKey: 'key',
+        clientSecret: 'secret',
+        defaultUrlExpires: 3600,
+        defaultRequestExpires: 60,
+      });
+    });
+    
+    it('parse https string option', () => {
+      const url = 'https://key:secret@192.168.1.100:443/custom/api';
+      const client = createClient(url);
+      const expectedUrl = `${apiUrl}/namespaces/${ns}/upload`;
+      expect(client.options).to.deep.equal({
+        hostname: '192.168.1.100',
+        secure: true,
+        port: 443,
+        endPoint: '/custom/api',
+        clientKey: 'key',
+        clientSecret: 'secret',
+        defaultUrlExpires: 3600,
+        defaultRequestExpires: 60,
+      });
+    });
+
   });
 
   describe('Uploading', () => {
@@ -37,7 +78,7 @@ describe('File uploading and downloading', () => {
     it('get upload url', () => {
       const url = namespace.getUploadUrl();
       const expectedUrl = `${apiUrl}/namespaces/${ns}/upload`;
-      expect(url).to.equal(expectedUrl);
+      expect(normalizeUrl(url)).to.equal(expectedUrl);
     });
 
     it('upload file as stream', done => {
@@ -70,14 +111,14 @@ describe('File uploading and downloading', () => {
     it('get download url', () => {
       const url = namespace.getDownloadUrl(fileId);
       const expectedUrl = `${apiUrl}/namespaces/${ns}/files/${fileId}`;
-      expect(url).to.equal(expectedUrl);
+      expect(normalizeUrl(url)).to.equal(expectedUrl);
     });
     
     it('get download url with filename', () => {
       const filename = '测试文件.docx';
       const url = namespace.getDownloadUrl(fileId, { filename });
-      const expectedUrl = `${apiUrl}/namespaces/${ns}/files/${fileId}?response-content-disposition=${encodeRFC5987ValueChars(contentDisposition(filename))}`;
-      expect(url).to.equal(expectedUrl);
+      const expectedUrl = `${apiUrl}/namespaces/${ns}/files/${fileId}?response-content-type=${encodeURIComponent(mime.contentType(filename))}&response-content-disposition=${encodeRFC5987ValueChars(contentDisposition(filename))}`;
+      expect(normalizeUrl(url)).to.equal(expectedUrl);
     });
 
     it('download file as stream', done => {
