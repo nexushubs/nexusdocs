@@ -54,6 +54,25 @@ const server = createServer({
 server.start();
 ```
 
+## Behind nginx
+
+```conf
+server {
+  listen 80;
+  server_name storage.example.com;
+  #...
+  location /api/nexusdocs {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Scheme $scheme;
+    proxy_set_header X-Original-URI $request_uri;
+    proxy_pass http://127.0.0.1:4000/api;
+    proxy_http_version 1.1;
+  }
+  #...
+}
+```
+
 ## Config by Environment Variables
 
 | Env | Description |
