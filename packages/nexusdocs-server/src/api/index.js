@@ -8,6 +8,8 @@ import { errorHandler } from './middleware';
 
 const api = express();
 
+api.set('trust proxy', app().options.restful.trustedProxy);
+
 // bind app handlers
 api.use((req, res, next) => {
   app().bindLoader(req);
@@ -17,7 +19,13 @@ api.use((req, res, next) => {
   if (originalUrl) {
     req.originalUrl = originalUrl;
   }
-  console.log(`${req.method} ${req.originalUrl}`);
+  const protocol = req.get('X-Original-Proto');
+  if (protocol) {
+    req.protocol = protocol;
+  }
+  if (app().options.debug.request) {
+    console.log(`${req.method} ${req.url}`);
+  }
   next();
 });
 

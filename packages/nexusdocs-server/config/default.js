@@ -5,7 +5,11 @@ module.exports = {
       enabled: true,
       hostname: '127.0.0.1',
       port: 4000,
+      trustedProxy: '127.0.0.1',
     },
+    debug: {
+      request: true,
+    }
   },
   services: {
     FileCache: {

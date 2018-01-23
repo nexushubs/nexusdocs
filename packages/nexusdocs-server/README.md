@@ -63,6 +63,7 @@ server {
   #...
   location /api/nexusdocs {
     proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Scheme $scheme;
     proxy_set_header X-Original-URI $request_uri;
@@ -81,6 +82,8 @@ server {
 | `NDS_RESTFUL_ENABLED` | Whether to start API Server |
 | `NDS_RESTFUL_HOSTNAME` | API Server bind hostname |
 | `NDS_RESTFUL_PORT` | API Server bind port |
+| `NDS_RESTFUL_TRUSTED_PROXY` | Trusted Proxy, see http://expressjs.com/en/4x/api.html#trust.proxy.options.table |
+| `NDS_DEBUG_REQUEST` | Switch whether to debug HTTP requests |
 
 ## Command Line Tool
 

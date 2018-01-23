@@ -5,7 +5,11 @@ module.exports = {
       enabled: 'NDS_RESTFUL_ENABLED',
       hostname: 'NDS_RESTFUL_HOSTNAME',
       port: 'NDS_RESTFUL_PORT',
+      trustedProxy: 'NDS_RESTFUL_TRUSTED_PROXY',
     },
+    debug: {
+      request: 'NDS_DEBUG_REQUEST',
+    }
   },
   services: {
     FileCache: {
