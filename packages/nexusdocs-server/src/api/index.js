@@ -13,7 +13,11 @@ api.use((req, res, next) => {
   app().bindLoader(req);
   res.set('X-Powered-By', 'nexusdocs-server');
   req.data = {};
-  console.log(`${req.method} ${req.url}`);
+  const originalUrl = req.get('X-Original-URI') || req.get('X-Original-URL');
+  if (originalUrl) {
+    req.originalUrl = originalUrl;
+  }
+  console.log(`${req.method} ${req.originalUrl}`);
   next();
 });
 
