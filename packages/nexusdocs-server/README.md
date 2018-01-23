@@ -56,7 +56,7 @@ server.start();
 
 ## Behind nginx
 
-```conf
+```nginx
 server {
   listen 80;
   server_name storage.example.com;
