@@ -19,10 +19,11 @@ api.use((req, res, next) => {
   if (originalUrl) {
     req.originalUrl = originalUrl;
   }
-  const protocol = req.get('X-Original-Proto');
+  const protocol = req.get('X-Forwarded-Proto');
   if (protocol) {
-    req.protocol = protocol;
+    req._protocol = protocol;
   }
+  req.fullUrl = `${req._protocol || req.protocol}://${req.get('host')}${req.originalUrl}`;
   if (app().options.debug.request) {
     console.log(`${req.method} ${req.url}`);
   }

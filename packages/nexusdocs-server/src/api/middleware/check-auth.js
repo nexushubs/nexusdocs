@@ -89,8 +89,7 @@ class Authorization {
 
   getServerToken(expires) {
     let { req, opt: { from, signature, fields } } = this;
-    let url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
-    url = url.replace(/&token=.+$/, '');
+    const url = req.fullUrl.replace(/&token=.+$/, '');
     const jsonType = 'application/json';
     signature = {
       ...signature,
