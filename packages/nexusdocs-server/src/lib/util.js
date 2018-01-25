@@ -109,3 +109,12 @@ export function getExtension(filename) {
 export function getBasename(filename) {
   return path.parse(filename).name;
 }
+
+export function currentTimestamp() {
+  return Math.floor((new Date).valueOf() / 1000);
+}
+
+export function diffTimestampFromNow(t) {
+  const now = currentTimestamp();
+  return t - now;
+}

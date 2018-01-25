@@ -197,6 +197,7 @@ Get file URL for view or download
 | fileId | <code>FileId</code> |  | File identifier, see [FileId](#Namespace..FileId) |
 | [options] | <code>RequestOptions</code> |  | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
 | [options.download] | <code>boolean</code> | <code>false</code> | Download with the original filename |
+| [options.origin] | <code>boolean</code> | <code>false</code> | Download from origin provider |
 | [options.filename] | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
 | [options.response] | <code>object</code> |  | Overwrite response header |
 | [options.response.contentType] | <code>string</code> |  | Overwrite Content-Type |

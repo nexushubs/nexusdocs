@@ -7,7 +7,7 @@ import boolean from 'boolean';
 
 import { ApiError } from '~/lib/errors';
 import { upload, checkAuth } from '~/api/middleware';
-import { parseQueryStringHeaders, getBasename } from '~/lib/util';
+import { parseQueryStringHeaders, getBasename, diffTimestampFromNow } from '~/lib/util';
 
 const api = express.Router();
 
@@ -57,6 +57,33 @@ api.delete('/:namespace', checkAuth({ role: 'admin' }), wrap(async (req, res, ne
   const { namespace } = req.data;
   await namespace.delete();
   res.send({});
+}));
+
+api.post('/:namespace/urls', checkAuth(), wrap(async (req, res, next) => {
+  const { File } = req.model();
+  const { namespace } = req.data;
+  const { e } = req.query;
+  const { download, origin, expires: _expires, files: _files } = req.body;
+  const fileIds = _.uniq(_files);
+  const files = await File.getAll({_id: {$in: fileIds}});
+  const expires = diffTimestampFromNow(expires || e);
+  const data = await Promise.map(fileList, async file => {
+    const { _id, contentType, filename, store_id } = file;
+    const options = {
+      contentType,
+      expires,
+      serverUrl: req.serverUrl,
+    };
+    if (download) {
+      options.filename = filename;
+    }
+    const originalUrl = await namespace.getOriginalUrl(store_id, options);
+    return {
+      id: _id,
+      url: originalUrl,
+    };
+  });
+  res.send(data);
 }));
 
 api.post('/:namespace/truncate', checkAuth(), wrap(async (req, res, next) => {
@@ -120,18 +147,48 @@ api.get([
 ], checkAuth({ needAuth }),
 wrap(async (req, res, next) => {
   const { namespace, file } = req.data;
-  const { files_id } = req.params;
-  const { download } = req.query;
-  const { contentType, filename, size, store_id } = file.data();
+  const { download: _download, origin: _origin, e } = req.query;
+  const { contentType, filename, size, store_id } = file;
+  const download = (/download$/.test(req.path) || boolean(_download));
+  const origin = boolean(_origin);
+  if (origin) {
+    const options = {
+      download,
+      expires: diffTimestampFromNow(e),
+    };
+    const originalUrl = await namespace.getOriginalUrl(file, options);
+    if (originalUrl) {
+      res.redirect(301, originalUrl);
+      return;
+    }
+  }
   res.set('Content-Type', contentType);
-  if (/download$/.test(req.path) || boolean(download)) {
+  res.set('Content-Length', size);
+  if (download) {
     res.set('Content-Disposition', contentDisposition(filename));
   }
-  res.set('Content-Length', size);
   const headers = parseQueryStringHeaders(req);
   res.set(headers);
   const fileStream = await namespace.openDownloadStream(store_id);
   fileStream.pipe(res);
+}));
+
+api.get('/:namespace/files/:files_id/original-url', checkAuth({ needAuth }), wrap(async (req, res, next) => {
+  const { namespace, file } = req.data;
+  const { download: _download } = req.query;
+  const { contentType, filename, size } = file;
+  const download = boolean(_download);
+  const options = {
+    download,
+    expires: diffTimestampFromNow(e),
+    serverUrl: req.serverUrl,
+    processNative: true,
+  };
+  const originalUrl = await namespace.getOriginalUrl(file, options);
+  const data = {
+    url: originalUrl,
+  };
+  res.send(data);
 }));
 
 api.delete('/:namespace/files/:files_id', checkAuth(), wrap(async (req, res, next) => {

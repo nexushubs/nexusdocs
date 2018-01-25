@@ -22,10 +22,11 @@ if (require.main === module && argv.pop() === 'start') {
     console.log('# starting NexusDocs server...');
   })
   app.on('start', () => {
-    const { restful: { hostname, port } } = config.get('Application');
+    const { restful: { hostname, port, serverUrl } } = config.get('Application');
     const seconds = app.time();
     console.log(`# server started successfully in ${seconds}s`);
     console.log(`# api binds to http://${hostname}:${port}/api/`);
+    console.log(`# server url is ${serverUrl || 'auto-detect'}`);
   })
   app.on('starting service', () => {
     console.log('# starting sub services ...');

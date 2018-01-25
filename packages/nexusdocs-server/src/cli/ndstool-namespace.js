@@ -26,8 +26,7 @@ program
     run(async app => {
       const { Namespace } = app.model();
       const instance = await Namespace.createByProviderName(doc);
-      const table = listToTable([instance.data()]);
-      console.log(table);
+      printDoc(instance.data());
     });
   });
 

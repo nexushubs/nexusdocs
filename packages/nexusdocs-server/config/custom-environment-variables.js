@@ -6,6 +6,7 @@ module.exports = {
       hostname: 'NDS_RESTFUL_HOSTNAME',
       port: 'NDS_RESTFUL_PORT',
       trustedProxy: 'NDS_RESTFUL_TRUSTED_PROXY',
+      serverUrl: 'NDS_RESTFUL_SERVER_URL',
     },
     debug: {
       request: 'NDS_DEBUG_REQUEST',

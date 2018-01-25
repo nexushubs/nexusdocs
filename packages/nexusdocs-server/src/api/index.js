@@ -15,15 +15,11 @@ api.use((req, res, next) => {
   app().bindLoader(req);
   res.set('X-Powered-By', 'nexusdocs-server');
   req.data = {};
-  const originalUrl = req.get('X-Original-URI') || req.get('X-Original-URL');
-  if (originalUrl) {
-    req.originalUrl = originalUrl;
-  }
-  const protocol = req.get('X-Forwarded-Proto');
-  if (protocol) {
-    req._protocol = protocol;
-  }
-  req.fullUrl = `${req._protocol || req.protocol}://${req.get('host')}${req.originalUrl}`;
+  const originalUrl = req.get('X-Original-URI') || req.get('X-Original-URL') || req.originalUrl;
+  const protocol = req.get('X-Forwarded-Proto') || req.protocol;
+  req.fullUrl = `${protocol}://${req.get('host')}${originalUrl}`;
+  req.serverUrl = req.fullUrl.replace(req.url.replace(/^\/api/, ''), '');
+  console.log('req.serverUrl', req.serverUrl);
   if (app().options.debug.request) {
     console.log(`${req.method} ${req.url}`);
   }

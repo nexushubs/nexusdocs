@@ -3,6 +3,7 @@ import { Writable } from 'stream';
 import archiver from 'archiver';
 import getNewFilename from 'new-filename';
 import { PassThrough } from 'stream';
+import qs from 'qs';
 
 import BaseModel from '~/lib/base-model';
 import { bucketName, isObjectId } from '~/lib/schema';
@@ -270,4 +271,36 @@ export default class Namespace extends BaseModel {
     return FileConverter.convert(fileStream, file.filename, commands);
   }
 
+  async getOriginalUrl(file, options = {}) {
+    const bucket = await this.getBucket();
+    const { type } = bucket.provider.options;
+    const { download, expires, processNative } = options;
+    let { serverUrl } = options;
+    if (type === 'gridfs') {
+      if (processNative) {
+        serverUrl = serverUrl || this.nds.options.restful.serverUrl;
+        if (!serverUrl) {
+          throw new Error('serverUrl is not set');
+        }
+        const query = {
+          download: download ? 1 : undefined,
+        };
+        const url = `${serverUrl}/namespaces/${this.name}/files/{file._id}?` + qs.stringify(query);
+        return url;
+      } else {
+        return null;
+      }
+    }
+    const downloadOptions = {
+      serverUrl,
+      expires,
+      download,
+      contentType: file.contentType,
+    };
+    if (download) {
+      options.filename = file.filename;
+    }
+    const url = await bucket.getUrl(file.store_id, options);
+    return url;
+  }
 }

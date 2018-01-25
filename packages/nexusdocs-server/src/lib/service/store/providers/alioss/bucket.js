@@ -9,12 +9,10 @@ export default class AliOSSProviderBucket extends BaseBucket {
 
   constructor(provider, bucketName) {
     super(provider, bucketName);
-    const { accessKeyId, accessKeySecret, region } = this.provider.options.params;
+    const { params } = this.provider.options;
     this.bucket = oss({
-      accessKeyId: accessKeyId,
-      accessKeySecret: accessKeySecret,
+      ...params,
       bucket: bucketName,
-      region: region,
     });
   }
 
@@ -56,7 +54,7 @@ export default class AliOSSProviderBucket extends BaseBucket {
     if (options.contentType) {
       urlOptions.response['content-type'] = options.contentType;
     }
-    this.bucket.signatureUrl(id, urlOptions);
+    return this.bucket.signatureUrl(id, urlOptions);
   }
 
   delete(id) {

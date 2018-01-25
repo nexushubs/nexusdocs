@@ -62,6 +62,7 @@ class Namespace {
    * @param {FileId} fileId - File identifier, see [FileId](#Namespace..FileId)
    * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @param {boolean} [options.download=false] - Download with the original filename
+   * @param {boolean} [options.origin=false] - Download from origin provider
    * @param {string} [options.filename] - Download with new filename, this will set contentType & contentDisposition
    * @param {object} [options.response] - Overwrite response header
    * @param {string} [options.response.contentType] - Overwrite Content-Type
@@ -69,7 +70,7 @@ class Namespace {
    * @returns {string} file URL
    */
   getDownloadUrl(fileId, options = {}) {
-    const { filename, download, response = {} } = options;
+    const { filename, download, origin, response = {}, } = options;
     delete options.filename;
     delete options.download;
     delete options.response;
@@ -80,6 +81,9 @@ class Namespace {
     }
     if (download) {
       query.download = 1;
+    }
+    if (origin) {
+      query.origin = 1;
     }
     _.each(response, (value, key) => {
       key = 'response-' + decamelize(key, '-');

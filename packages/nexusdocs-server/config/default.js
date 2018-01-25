@@ -6,6 +6,7 @@ module.exports = {
       hostname: '127.0.0.1',
       port: 4000,
       trustedProxy: '127.0.0.1',
+      serverUrl: '',
     },
     debug: {
       request: true,
