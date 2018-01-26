@@ -4,8 +4,27 @@ import { PassThrough } from 'stream';
 import { Wrapper as oss} from 'ali-oss';
 
 import BaseBucket from '../../base-bucket';
+import { convert } from './converter';
 
 export default class AliOSSProviderBucket extends BaseBucket {
+
+  static supportedInputTypes = [
+    'bmp',
+    'gif',
+    'jpg',
+    'png',
+    'tiff',
+    'webp',
+  ];
+
+  static supportedOutputTypes = [
+    'bmp',
+    'gif',
+    'jpg',
+    'png',
+    'tiff',
+    'webp',
+  ];
 
   constructor(provider, bucketName) {
     super(provider, bucketName);
@@ -27,7 +46,6 @@ export default class AliOSSProviderBucket extends BaseBucket {
       const filename = `${id}${path.extname(options.filename)}`;
       putOptions.headers['content-disposition'] = contentDisposition(filename);
     }
-    console.log('AliOSSProviderBucket._openUploadStream()', id, 'stream', putOptions);
     this.bucket.putStream(id, stream, putOptions)
     .then(console.log)
     .catch(console.err);
@@ -45,7 +63,7 @@ export default class AliOSSProviderBucket extends BaseBucket {
 
   getUrl(id, options = {}) {
     const urlOptions = {
-      expires: options.expires || 3600,
+      expires: options.expires || 1800,
       response: {},
     }
     if (options.filename) {
@@ -53,6 +71,17 @@ export default class AliOSSProviderBucket extends BaseBucket {
     }
     if (options.contentType) {
       urlOptions.response['content-type'] = options.contentType;
+    }
+    return this.bucket.signatureUrl(id, urlOptions);
+  }
+
+  getConvertedUrl(id, options = {}) {
+    const { inputType, expires = 1800, commands } = options;
+    const { supportedOutputTypes } = this.constructor;
+    const process = convert(inputType, commands, { supportedOutputTypes });
+    const urlOptions = {
+      expires,
+      process,
     }
     return this.bucket.signatureUrl(id, urlOptions);
   }

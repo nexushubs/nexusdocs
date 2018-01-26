@@ -103,6 +103,7 @@ class Namespace {
    * @param {FileId} fileId - File identifier, see [FileId](#Namespace..FileId)
    * @param {ConvertingOptions} converting - Converting options, see [ConvertingOptions](#Namespace..ConvertingOptions)
    * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
+   * @param {boolean} [options.origin=false] - Download from the origin provider
    * @param {boolean} [options.download=false] - Download with the original filename
    * @param {string} [options.filename] - Download with new filename, this will set contentType & contentDisposition
    * @param {object} [options.response] - Overwrite response header

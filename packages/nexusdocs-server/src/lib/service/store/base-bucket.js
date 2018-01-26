@@ -5,6 +5,7 @@ import path from 'path';
 import uuid from 'uuid';
 import mimeTypes from 'mime-types';
 import { Writable } from 'stream';
+import _ from 'lodash';
 
 import { uuidRegexPattern, promisifyStream } from '~/lib/util';
 import UploadStream from './upload-stream';
@@ -15,6 +16,21 @@ export default class BaseBucket extends EventEmitter {
     super();
     this.provider = provider;
     this.name = bucketName;
+  }
+
+  support(type, commands) {
+    const { supportedInputTypes } = this.constructor;
+    if (type === 'jpeg') {
+      type = 'jpg';
+    }
+    if (!_.isArray(supportedInputTypes) || !supportedInputTypes.includes(type)) {
+      return false;
+    }
+    return true;
+  }
+
+  isNative() {
+    return this.name === 'gridfs';
   }
 
   openUploadStream(options = {}) {
@@ -85,6 +101,10 @@ export default class BaseBucket extends EventEmitter {
 
   getDownloadUrl(fileId, filename) {
     return this.getUrl(fileId, { filename });
+  }
+
+  getConvertedUrl(fileId, commands) {
+    throw new Error('method getConvertedUrl() is not implemented');
   }
 
   delete() {

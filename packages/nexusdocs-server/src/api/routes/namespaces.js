@@ -7,7 +7,7 @@ import boolean from 'boolean';
 
 import { ApiError } from '~/lib/errors';
 import { upload, checkAuth } from '~/api/middleware';
-import { parseQueryStringHeaders, getBasename, diffTimestampFromNow } from '~/lib/util';
+import { getExtension, parseQueryStringHeaders, getBasename, diffTimestampFromNow } from '~/lib/util';
 
 const api = express.Router();
 
@@ -158,7 +158,7 @@ wrap(async (req, res, next) => {
     };
     const originalUrl = await namespace.getOriginalUrl(file, options);
     if (originalUrl) {
-      res.redirect(301, originalUrl);
+      res.redirect(originalUrl);
       return;
     }
   }
@@ -216,25 +216,35 @@ api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth
   const { FileCache } = req.service();
   const { namespace, file } = req.data;
   const { commands } = req.params;
-  const { download } = req.query;
-  const cacheBuilder = () => namespace.convert(file, commands);
-  const key = `/namespaces${req.path}`;
-  FileCache.get(key, cacheBuilder)
-  .then((cacheObject) => {
-    if (!cacheObject) {
-      throw new ApiError(500, null, 'Converting failed');
-    }
-    const { contentType, stream } = cacheObject;
-    res.set('Content-Type', contentType);
-    const headers = parseQueryStringHeaders(req);
-    if (boolean(download)) {
-      const filename = `${getBasename(file.filename)}.${mime.extension(contentType)}`;
-      headers['Content-Disposition'] = contentDisposition(filename);
-    }
-    res.set(headers);
-    stream.pipe(res);
-  })
-  .catch(next);
+  const download = boolean(req.query.download);
+  const origin = boolean(req.query.origin);
+  const bucket = await namespace.getBucket();
+  const ext = getExtension(file.filename);
+  console.log(origin, !bucket.isNative(), bucket.support(ext))
+  if (origin && !bucket.isNative() && bucket.support(ext)) {
+    const url = await bucket.getConvertedUrl(file.store_id, { inputType: ext, commands });
+    console.log(url);
+    res.redirect(url);
+  } else {
+    const cacheBuilder = () => namespace.convert(file, commands);
+    const key = `/namespaces${req.path}`;
+    FileCache.get(key, cacheBuilder)
+    .then((cacheObject) => {
+      if (!cacheObject) {
+        throw new ApiError(500, null, 'Converting failed');
+      }
+      const { contentType, stream } = cacheObject;
+      res.set('Content-Type', contentType);
+      const headers = parseQueryStringHeaders(req);
+      if (download) {
+        const filename = `${getBasename(file.filename)}.${mime.extension(contentType)}`;
+        headers['Content-Disposition'] = contentDisposition(filename);
+      }
+      res.set(headers);
+      stream.pipe(res);
+    })
+    .catch(next);
+  }
 }));
 
 api.post('/:namespace/archives', checkAuth(), wrap(async (req, res, next) => {
