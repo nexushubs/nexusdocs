@@ -112,14 +112,14 @@ Server options
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| options.clientKey | <code>string</code> |  | NDS API key |
-| options.clientSecret | <code>string</code> |  | NDS API secret |
-| options.hostname | <code>string</code> | <code>&quot;127.0.0.1&quot;</code> | hostname |
-| options.secure | <code>boolean</code> | <code>false</code> | Whether to use HTTPS |
-| options.port | <code>number</code> | <code>4000</code> | Server Port |
-| options.endPoint | <code>string</code> | <code>&quot;/api&quot;</code> | API endpoint |
-| options.defaultUrlExpires | <code>number</code> |  | Default expires seconds |
-| options.defaultRequestExpires | <code>number</code> |  | Default expires seconds |
+| clientKey | <code>string</code> |  | NDS API key |
+| clientSecret | <code>string</code> |  | NDS API secret |
+| hostname | <code>string</code> | <code>&quot;127.0.0.1&quot;</code> | hostname |
+| secure | <code>boolean</code> | <code>false</code> | Whether to use HTTPS |
+| port | <code>number</code> | <code>4000</code> | Server Port |
+| endPoint | <code>string</code> | <code>&quot;/api&quot;</code> | API endpoint |
+| defaultUrlExpires | <code>number</code> |  | Default expires seconds |
+| defaultRequestExpires | <code>number</code> |  | Default expires seconds |
 
 <a name="Namespace"></a>
 
@@ -134,8 +134,9 @@ Class presenting NexusDocs namespace instance
         * [.getUploadUrl([options])](#Namespace+getUploadUrl) ⇒ <code>string</code>
         * [.getDownloadUrl(fileId, [options])](#Namespace+getDownloadUrl) ⇒ <code>string</code>
         * [.getConvertedUrl(fileId, converting, [options])](#Namespace+getConvertedUrl) ⇒ <code>string</code>
+        * [.upload(Buffer|ReadableStream, [options])](#Namespace+upload) ⇒ <code>Promise</code>
         * [.openUploadStream([options])](#Namespace+openUploadStream) ⇒ <code>WritableStream</code>
-        * [.uploadFromLocal(filePath)](#Namespace+uploadFromLocal) ⇒ <code>Promise</code>
+        * [.uploadFromLocal(filePath, options)](#Namespace+uploadFromLocal) ⇒ <code>Promise</code>
         * [.openDownloadStream(fileId, [options])](#Namespace+openDownloadStream) ⇒ <code>ReadableStream</code>
         * [.downloadToLocal(fileId, filePath, [options])](#Namespace+downloadToLocal) ⇒ <code>Promise</code>
         * [.getFileInfo(fileId)](#Namespace+getFileInfo) ⇒ <code>Promise</code>
@@ -145,6 +146,8 @@ Class presenting NexusDocs namespace instance
         * [.getArchiveUrl(files, options)](#Namespace+getArchiveUrl)
     * _inner_
         * [~RequestOptions](#Namespace..RequestOptions) : <code>object</code>
+        * [~UploadOptions](#Namespace..UploadOptions) : <code>object</code>
+        * [~DownloadOptions](#Namespace..DownloadOptions) : <code>object</code>
         * [~FileId](#Namespace..FileId) : <code>string</code>
         * [~ImageInfo](#Namespace..ImageInfo) : <code>object</code>
         * [~ZipFileEntry](#Namespace..ZipFileEntry) : <code>object</code>
@@ -180,7 +183,7 @@ Get URL for upload
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [options] | <code>object</code> | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
+| [options] | <code>RequestOptions</code> | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
 | [options.resumable] | <code>boolean</code> | If upload with resumbable.js |
 | [options.expires] | <code>date</code> | Timestamp the Request will available before |
 
@@ -192,16 +195,10 @@ Get file URL for view or download
 **Kind**: instance method of [<code>Namespace</code>](#Namespace)  
 **Returns**: <code>string</code> - file URL  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| fileId | <code>FileId</code> |  | File identifier, see [FileId](#Namespace..FileId) |
-| [options] | <code>RequestOptions</code> |  | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
-| [options.download] | <code>boolean</code> | <code>false</code> | Download with the original filename |
-| [options.origin] | <code>boolean</code> | <code>false</code> | Download from origin provider |
-| [options.filename] | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
-| [options.response] | <code>object</code> |  | Overwrite response header |
-| [options.response.contentType] | <code>string</code> |  | Overwrite Content-Type |
-| [options.response.contentDisposition] | <code>string</code> |  | Overwrite Content-Disposition |
+| Param | Type | Description |
+| --- | --- | --- |
+| fileId | <code>FileId</code> | File identifier, see [FileId](#Namespace..FileId) |
+| [options] | <code>DownloadOptions</code> | Additional options, see [DownloadOptions](#Namespace..DownloadOptions) |
 
 <a name="Namespace+getConvertedUrl"></a>
 
@@ -211,16 +208,25 @@ Get the converted file URL for view or download
 **Kind**: instance method of [<code>Namespace</code>](#Namespace)  
 **Returns**: <code>string</code> - The converted file URL  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| fileId | <code>FileId</code> |  | File identifier, see [FileId](#Namespace..FileId) |
-| converting | <code>ConvertingOptions</code> |  | Converting options, see [ConvertingOptions](#Namespace..ConvertingOptions) |
-| [options] | <code>RequestOptions</code> |  | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
-| [options.download] | <code>boolean</code> | <code>false</code> | Download with the original filename |
-| [options.filename] | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
-| [options.response] | <code>object</code> |  | Overwrite response header |
-| [options.response.contentType] | <code>string</code> |  | Overwrite Content-Type |
-| [options.response.contentDisposition] | <code>string</code> |  | Overwrite Content-Disposition |
+| Param | Type | Description |
+| --- | --- | --- |
+| fileId | <code>FileId</code> | File identifier, see [FileId](#Namespace..FileId) |
+| converting | <code>ConvertingOptions</code> | Converting options, see [ConvertingOptions](#Namespace..ConvertingOptions) |
+| [options] | <code>DownloadOptions</code> | Additional options, see [DownloadOptions](#Namespace..DownloadOptions) |
+
+<a name="Namespace+upload"></a>
+
+### namespace.upload(Buffer|ReadableStream, [options]) ⇒ <code>Promise</code>
+Upload file from Buffer, ReadableStream
+
+**Kind**: instance method of [<code>Namespace</code>](#Namespace)  
+**Fulfil**: <code>object</code> File info when uploading is finished  
+**Reject**: <code>any</code> Request error  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| Buffer|ReadableStream | <code>data</code> | File data |
+| [options] | <code>UploadOptions</code> | Additional options, see [UploadOptions](#Namespace..UploadOptions) |
 
 <a name="Namespace+openUploadStream"></a>
 
@@ -232,34 +238,22 @@ Get upload stream
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [options] | <code>RequestOptions</code> | Additional options, see [RequestOptions](#Namespace..RequestOptions) |
+| [options] | <code>UploadOptions</code> | Additional options, see [UploadOptions](#Namespace..UploadOptions) |
 | [options.stream] | <code>ReadableStream</code> | Provide readable stream directly |
-| [options.fileId] | <code>FileId</code> | Specify fileId, see [FileId](#Namespace..FileId) |
-| [options.filename] | <code>string</code> | Provide filename |
-| [options.md5] | <code>string</code> | MD5 hash of the file if available |
-| [options.contentType] | <code>string</code> | Provide content-type for download |
-| [options.knownLength] | <code>number</code> | Provide stream total length if available |
 
 <a name="Namespace+uploadFromLocal"></a>
 
-### namespace.uploadFromLocal(filePath) ⇒ <code>Promise</code>
+### namespace.uploadFromLocal(filePath, options) ⇒ <code>Promise</code>
 Upload a file from local file-system
 
 **Kind**: instance method of [<code>Namespace</code>](#Namespace)  
-**Fulfil**: <code>object</code> File info when uploading is finished
-
-```javascript
-{
-  id: string   // Uploaded file id
-  md5: string  // The MD5 hash of the file
-  size: number // The total size of the file
-}
-```  
+**Fulfil**: <code>FileInfo</code> File info when uploading is finished  
 **Reject**: <code>any</code> Request error  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | filePath | <code>string</code> | The path of file will be uploaded |
+| options | <code>UploadOptions</code> | Upload options |
 
 <a name="Namespace+openDownloadStream"></a>
 
@@ -359,6 +353,41 @@ some properties are added for additional use, see specified method
 | json | <code>boolean</code> | Set to `true` when providing `body` |
 | expires | <code>number</code> \| <code>date</code> | Expires time in second, timestamp or Date object, the request will be invalid after this timestamp |
 | signature | <code>object</code> | Additional signature data besides `method`, `url`, `expires` |
+
+<a name="Namespace..UploadOptions"></a>
+
+### Namespace~UploadOptions : <code>object</code>
+Upload request options
+
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
+**Extends**: <code>RequestOptions</code>  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| fileId | <code>FileId</code> | Specify fileId, see [FileId](#Namespace..FileId) |
+| filename | <code>string</code> | Provide filename |
+| md5 | <code>string</code> | MD5 hash of the file if available |
+| contentType | <code>string</code> | Provide content-type for download |
+| knownLength | <code>number</code> | Provide stream total length if available |
+
+<a name="Namespace..DownloadOptions"></a>
+
+### Namespace~DownloadOptions : <code>object</code>
+Download options
+
+**Kind**: inner typedef of [<code>Namespace</code>](#Namespace)  
+**Extends**: <code>RequestOptions</code>  
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| origin | <code>boolean</code> | <code>false</code> | Download from the origin provider |
+| download | <code>boolean</code> | <code>false</code> | Download with the original filename |
+| filename | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
+| response | <code>object</code> |  | Overwrite response header |
+| response.contentType | <code>string</code> |  | Overwrite Content-Type |
+| response.contentDisposition | <code>string</code> |  | Overwrite Content-Disposition |
 
 <a name="Namespace..FileId"></a>
 

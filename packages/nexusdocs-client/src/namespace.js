@@ -36,7 +36,7 @@ class Namespace {
 
   /**
    * Get URL for upload
-   * @param {object} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
+   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
    * @param {boolean} [options.resumable] - If upload with resumbable.js
    * @param {date} [options.expires] - Timestamp the Request will available before
    * @returns {string} URL for upload
@@ -60,13 +60,7 @@ class Namespace {
   /**
    * Get file URL for view or download
    * @param {FileId} fileId - File identifier, see [FileId](#Namespace..FileId)
-   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
-   * @param {boolean} [options.download=false] - Download with the original filename
-   * @param {boolean} [options.origin=false] - Download from origin provider
-   * @param {string} [options.filename] - Download with new filename, this will set contentType & contentDisposition
-   * @param {object} [options.response] - Overwrite response header
-   * @param {string} [options.response.contentType] - Overwrite Content-Type
-   * @param {string} [options.response.contentDisposition] - Overwrite Content-Disposition
+   * @param {DownloadOptions} [options] - Additional options, see [DownloadOptions](#Namespace..DownloadOptions)
    * @returns {string} file URL
    */
   getDownloadUrl(fileId, options = {}) {
@@ -102,13 +96,7 @@ class Namespace {
    * Get the converted file URL for view or download
    * @param {FileId} fileId - File identifier, see [FileId](#Namespace..FileId)
    * @param {ConvertingOptions} converting - Converting options, see [ConvertingOptions](#Namespace..ConvertingOptions)
-   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
-   * @param {boolean} [options.origin=false] - Download from the origin provider
-   * @param {boolean} [options.download=false] - Download with the original filename
-   * @param {string} [options.filename] - Download with new filename, this will set contentType & contentDisposition
-   * @param {object} [options.response] - Overwrite response header
-   * @param {string} [options.response.contentType] - Overwrite Content-Type
-   * @param {string} [options.response.contentDisposition] - Overwrite Content-Disposition
+   * @param {DownloadOptions} [options] - Additional options, see [DownloadOptions](#Namespace..DownloadOptions)
    * @returns {string} The converted file URL
    */
   getConvertedUrl(fileId, converting = {}, options = {}) {
@@ -120,23 +108,19 @@ class Namespace {
   }
 
   /**
-   * Get upload stream
-   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
-   * @param {ReadableStream} [options.stream] - Provide readable stream directly
-   * @param {FileId} [options.fileId] - Specify fileId, see [FileId](#Namespace..FileId)
-   * @param {string} [options.filename] - Provide filename
-   * @param {string} [options.md5] - MD5 hash of the file if available
-   * @param {string} [options.contentType] - Provide content-type for download
-   * @param {number} [options.knownLength] - Provide stream total length if available
-   * @returns {WritableStream} Writable stream for upload
+   * Upload file from Buffer, ReadableStream
+   * @param {data} Buffer|ReadableStream - File data
+   * @param {UploadOptions} [options] - Additional options, see [UploadOptions](#Namespace..UploadOptions)
+   * @returns {Promise}
+   * @fulfil {object} File info when uploading is finished
+   * @reject {any} Request error
    */
-  openUploadStream(options) {
+  upload(data, options) {
     let {
       fileId,
       filename,
       md5,
       contentType,
-      stream,
       knownLength,
       expires,
     } = options;
@@ -144,10 +128,9 @@ class Namespace {
     delete options.filename;
     delete options.md5;
     delete options.contentType;
-    delete options.stream;
     delete options.knownLength;
-    if (!stream) {
-      stream = new PassThrough;
+    if (!data) {
+      throw new TypeError('invalid data');
     }
     if (filename && !contentType) {
       contentType = mime.lookup(filename);
@@ -169,7 +152,7 @@ class Namespace {
       formData: {
         ...fields,
         file: {
-          value: stream,
+          value: data,
           options: {
             filename,
             contentType,
@@ -178,7 +161,24 @@ class Namespace {
         }
       },
     });
-    this.client.request(options)
+    return this.client.request(options)
+  }
+
+  /**
+   * Get upload stream
+   * @param {UploadOptions} [options] - Additional options, see [UploadOptions](#Namespace..UploadOptions)
+   * @param {ReadableStream} [options.stream] - Provide readable stream directly
+   * @returns {WritableStream} Writable stream for upload
+   */
+  openUploadStream(options) {
+    let {
+      stream,
+    } = options;
+    delete options.stream;
+    if (!stream) {
+      stream = new PassThrough;
+    }
+    this.upload(stream, options)
     .then(result => {
       stream.emit('file', result);
     })
@@ -191,31 +191,19 @@ class Namespace {
   /**
    * Upload a file from local file-system
    * @param {string} filePath - The path of file will be uploaded
+   * @param {UploadOptions} options - Upload options
    * @returns {Promise}
-   * @fulfil {object} File info when uploading is finished
-   * 
-   * ```javascript
-   * {
-   *   id: string   // Uploaded file id
-   *   md5: string  // The MD5 hash of the file
-   *   size: number // The total size of the file
-   * }
-   * ```
-   * 
+   * @fulfil {FileInfo} File info when uploading is finished
    * @reject {any} Request error
    */
-  uploadFromLocal(filePath) {
+  uploadFromLocal(filePath, options) {
     const fileStream = fs.createReadStream(filePath);
     const contentType = mime.contentType(filePath);
     const filename = path.basename(filePath);
-    const uploadStream = this.openUploadStream( {
+    return this.upload(fileStream, {
       filename,
       contentType,
-    });
-    fileStream.pipe(uploadStream);
-    return new Promise((resolve, reject) => {
-      uploadStream.on('file', resolve);
-      uploadStream.on('error', reject);
+      ...options
     });
   }
 

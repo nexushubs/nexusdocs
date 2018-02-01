@@ -13,14 +13,14 @@ export { Client, Namespace };
 /**
  * Server options
  * @typedef {object} Client~ServerOptions - Server options
- * @property {string} options.clientKey - NDS API key
- * @property {string} options.clientSecret - NDS API secret
- * @property {string} [options.hostname=127.0.0.1] - hostname
- * @property {boolean} [options.secure=false] - Whether to use HTTPS
- * @property {number} [options.port=4000] - Server Port
- * @property {string} [options.endPoint=/api] - API endpoint
- * @property {number} [options.defaultUrlExpires] - Default expires seconds
- * @property {number} [options.defaultRequestExpires] - Default expires seconds
+ * @property {string} clientKey - NDS API key
+ * @property {string} clientSecret - NDS API secret
+ * @property {string} [hostname=127.0.0.1] - hostname
+ * @property {boolean} [secure=false] - Whether to use HTTPS
+ * @property {number} [port=4000] - Server Port
+ * @property {string} [endPoint=/api] - API endpoint
+ * @property {number} [defaultUrlExpires] - Default expires seconds
+ * @property {number} [defaultRequestExpires] - Default expires seconds
  */
 
 /**
@@ -33,6 +33,29 @@ export { Client, Namespace };
  * @property {boolean} [json] - Set to `true` when providing `body`
  * @property {number|date} [expires] - Expires time in second, timestamp or Date object, the request will be invalid after this timestamp
  * @property {object} [signature] - Additional signature data besides `method`, `url`, `expires`
+ */
+
+ /**
+  * Upload request options
+  * @typedef {object} Namespace~UploadOptions - Upload options
+  * @extends RequestOptions
+  * @property {FileId} [fileId] - Specify fileId, see [FileId](#Namespace..FileId)
+  * @property {string} [filename] - Provide filename
+  * @property {string} [md5] - MD5 hash of the file if available
+  * @property {string} [contentType] - Provide content-type for download
+  * @property {number} [knownLength] - Provide stream total length if available
+  */
+
+/**
+ * Download options
+ * @typedef {object} Namespace~DownloadOptions - Download options
+ * @extends RequestOptions
+ * @property {boolean} [origin=false] - Download from the origin provider
+ * @property {boolean} [download=false] - Download with the original filename
+ * @property {string} [filename] - Download with new filename, this will set contentType & contentDisposition
+ * @property {object} [response] - Overwrite response header
+ * @property {string} [response.contentType] - Overwrite Content-Type
+ * @property {string} [response.contentDisposition] - Overwrite Content-Disposition
  */
 
 /**

@@ -31,7 +31,7 @@ export default class FSCache extends Base {
       chunkNumber,
     } = params;
     const fileName = this.getFilePath(identifier, chunkNumber);
-    console.log('$ writing: ', fileName);
+    // console.log('$ writing: ', fileName);
     const fileStream = fs.createWriteStream(fileName);
     readableStream.pipe(fileStream);
     return fileStream;

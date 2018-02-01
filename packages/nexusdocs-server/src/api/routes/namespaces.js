@@ -118,6 +118,7 @@ api.post('/:namespace/upload', checkAuth({ from: 'auto' }), upload(), wrap(async
     'dateUploaded',
     'metadata',
   ]);
+  console.log(`file ${file.files_id} uploaded!`);
   res.send({
     _id: file.files_id,
     ...data,
@@ -220,10 +221,8 @@ api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth
   const origin = boolean(req.query.origin);
   const bucket = await namespace.getBucket();
   const ext = getExtension(file.filename);
-  console.log(origin, !bucket.isNative(), bucket.support(ext))
   if (origin && !bucket.isNative() && bucket.support(ext)) {
     const url = await bucket.getConvertedUrl(file.store_id, { inputType: ext, commands });
-    console.log(url);
     res.redirect(url);
   } else {
     const cacheBuilder = () => namespace.convert(file, commands);

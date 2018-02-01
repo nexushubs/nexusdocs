@@ -7,6 +7,7 @@ const resizeMethodMap = {
   '!': 'fixed',
   '^': 'mfit',
 };
+const invalidOptionMessage = 'Invalid converting options';
 
 export default class Converter {
   constructor(inputType, commands, options) {
@@ -22,6 +23,8 @@ export default class Converter {
       const method = `_${command}`;
       if (this[method]) {
         this[method](options);
+      } else {
+        throw new ApiError(400, invalidOptionMessage, `OSS image: unknown option ${command}`);
       }
     });
   }
@@ -30,20 +33,20 @@ export default class Converter {
     const params = {};
     const inputs = regexCommandThumbnail.exec(options);
     if (!inputs) {
-      throw new ApiError(400, 'OSS image resizing: invalid options');
+      throw new ApiError(400, invalidOptionMessage, 'OSS image resizing: invalid image resizing options');
     }
     const [ undefined, width, height, method ] = inputs;
     if (width) {
       width = parseInt(width);
       if (_.isNaN(width)) {
-        throw new ApiError(400, 'OSS image resizing: invalid image width');
+        throw new ApiError(400, invalidOptionMessage, 'OSS image resizing: invalid image width');
       }
       params.w = width;
     }
     if (height) {
       height = parseInt(height);
       if (_.isNaN(height)) {
-        throw new ApiError(400, 'OSS image resizing: invalid image height');
+        throw new ApiError(400, invalidOptionMessage, 'OSS image resizing: invalid image height');
       }
       params.h = height;
     }
@@ -54,7 +57,7 @@ export default class Converter {
       } else if (method === '%') {
         const size = width || height;
         if (_.isNaN(size)) {
-          throw new ApiError(400, 'OSS image resizing: invalid percentage');
+          throw new ApiError(400, invalidOptionMessage, 'OSS image resizing: invalid percentage');
         }
         delete params.w;
         delete params.h;
@@ -62,7 +65,7 @@ export default class Converter {
       } else if (method === '>') {
         params.limit = 1;
       } else {
-        throw new ApiError(400, 'OSS image resizing: fitting method is invalid or not supported');
+        throw new ApiError(400, invalidOptionMessage, 'OSS image resizing: fitting method is invalid or not supported');
       }
     }
     const p = [];
@@ -78,7 +81,7 @@ export default class Converter {
       type = 'jpg';
     }
     if (!supportedOutputTypes.includes(type)) {
-      throw new ApiError(400, 'OSS image format: unsupported file type');
+      throw new ApiError(400, invalidOptionMessage, 'OSS image format: unsupported file type');
     }
     this.output.format = type;
   }
@@ -86,7 +89,7 @@ export default class Converter {
   _quality(q) {
     q = parseInt(q);
     if (_.isNaN(quality) || q <= 1 || q >= 100) {
-      throw new ApiError(400, 'OSS image quality: invalid or out of range (1~100)');
+      throw new ApiError(400, invalidOptionMessage, 'OSS image quality: invalid or out of range (1~100)');
     }
     this.output.quality = `Q_${q}`;
   }
@@ -94,7 +97,7 @@ export default class Converter {
   toString() {
     const outputType = this.output.format || this.inputType;
     if (this.output.q && !['jpg', 'webp'].includes(outputType)) {
-      throw new ApiError(400, 'OSS image quality: the format does not support quality option');
+      throw new ApiError(400, invalidOptionMessage, 'OSS image quality: the format does not support quality option');
     }
     let str = 'image';
     _.each(this.output, (value, key) => {
