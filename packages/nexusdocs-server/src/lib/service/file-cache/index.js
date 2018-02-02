@@ -88,12 +88,9 @@ export default class FileCache extends BaseService {
   }
 
   writeStreamToFile(inputStream, contentType) {
-    console.log('writeStreamToFile - 1');
     const filePath = path.normalize(`${this.tempDir}/${uuid.v4()}.${mime.extension(contentType)}`);
     const fileStream = fs.createWriteStream(filePath);
-    console.log('writeStreamToFile - 2');
     inputStream.pipe(fileStream);
-    console.log('writeStreamToFile - 3');
     return promisifyStream(fileStream)
     .then(() => filePath);
   }

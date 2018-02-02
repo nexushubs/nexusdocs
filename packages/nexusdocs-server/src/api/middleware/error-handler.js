@@ -5,7 +5,7 @@ export default function errorHandler(err, req, res, next) {
     err = new ApiError(400, 'Invalid Input', err.errors);
   }
   if (err instanceof ApiError) {
-    console.error(`=> ApiError: ${err.code}, ${err.message},`, err.errors);
+    console.error(`=> ApiError: ${err.code} ${err.message},`, err.errors);
   } else {
     const errors = process.env.NODE_ENV == 'production' ? undefined : err.stack.split('\n');
     console.error(err);

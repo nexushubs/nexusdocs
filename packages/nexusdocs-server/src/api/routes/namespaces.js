@@ -226,8 +226,8 @@ api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth
     res.redirect(url);
   } else {
     const cacheBuilder = () => namespace.convert(file, commands);
-    const key = `/namespaces${req.path}`;
-    FileCache.get(key, cacheBuilder)
+    const cacheKey = `convert:${namespace.name}:${file.store_id}:${commands}`;
+    FileCache.get(cacheKey, cacheBuilder)
     .then((cacheObject) => {
       if (!cacheObject) {
         throw new ApiError(500, null, 'Converting failed');

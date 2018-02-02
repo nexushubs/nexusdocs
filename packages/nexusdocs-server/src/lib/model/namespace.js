@@ -90,7 +90,7 @@ export default class Namespace extends BaseModel {
       try {
         await this.addStore(bucket, info);
       } catch(err) {
-        uploadStream.emit('error', err.errors);
+        uploadStream.emit('error', err);
       }
       uploadStream.emit('file', info);
     });
@@ -104,13 +104,19 @@ export default class Namespace extends BaseModel {
     }
     let store = await FileStore.get({
       namespace: this.data('name'),
-      md5: info.md5
+      md5: info.md5,
     });
     if (store) {
       if (info.status !== 'skipped') {
-        await bucket.delete(info._id);
+        try {
+          await bucket.delete(info._id);
+        } catch (err) {
+          console.error(err);
+        }
       }
-      const a = await store.collection.update({ _id: store.data('_id') }, {
+      await FileStore.collection.update({
+        _id: store._id
+      }, {
         $addToSet: { files_id: info.files_id },
       });
     } else {
@@ -133,7 +139,7 @@ export default class Namespace extends BaseModel {
     const { File } = this.model();
     return File.create({
       _id: info.files_id,
-      namespace: this.data('name'),
+      namespace: this.name,
       store_id: info.store_id,
       filename: info.filename,
       contentType: info.contentType,
@@ -230,7 +236,7 @@ export default class Namespace extends BaseModel {
       arvhive.on('error', reject);
       arvhive.pipe(storeStream);
       await Promise.all(_.map(files, async fileId => {
-        console.log('next file:', fileId);
+        // console.log('next file:', fileId);
         const file = await File.get(fileId);
         if (!file) {
           const err = new ApiError(404, `file not find: ${fileId}`);
@@ -239,13 +245,13 @@ export default class Namespace extends BaseModel {
         const fileStream = await bucket.openDownloadStream(file.store_id);
         let filename = file.filename;
         filename = getNewFilename(filenames, filename);
-        console.log('appending:', filename);
+        // console.log('appending:', filename);
         arvhive.append(fileStream, {
           name: filename,
           date: file.dateUploaded,
         });
       }));
-      console.log('arvhive.finalize()');
+      // console.log('arvhive.finalize()');
       arvhive.finalize();
     });
   }

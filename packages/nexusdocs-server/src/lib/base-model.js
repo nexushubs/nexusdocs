@@ -80,7 +80,7 @@ export default class BaseModel {
 
   prepareId(id) {
     if (id) {
-      if (_.isString(id) && /[0-9a-f]{24}/i.test(id)) {
+      if (_.isString(id) && /^[0-9a-f]{24}$/i.test(id)) {
         return ObjectId(id);
       } else {
         return id;
