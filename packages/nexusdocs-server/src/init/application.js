@@ -1,16 +1,17 @@
 import path from 'path';
-import EventEmetter from 'events';
+import EventEmitter from 'events';
 import _ from 'lodash';
 import decamelize from 'decamelize';
 import upperCamelCase from 'uppercamelcase';
 import camelCase from 'camelcase';
-
 import config from 'config';
 
+import packageJson from '../../package.json';
 import { connect, db } from '~/init/database';
 import { promisifyAll } from '~/lib/util';
 import * as models from '~/lib/model';
 import * as services from '~/lib/service';
+import createRestApi from '~/api';
 
 export function basePath () {
   return path.normalize(__dirname + '/..')
@@ -26,7 +27,7 @@ export function app() {
   return instance;
 }
 
-export default class Application extends EventEmetter {
+export default class Application extends EventEmitter {
   
   /**
    * NDS application constructor
@@ -58,6 +59,7 @@ export default class Application extends EventEmetter {
     this.service = this.service.bind(this);
     this.bindLoader = this.bindLoader.bind(this);
     this.started = false;
+    this.version = packageJson.version;
     instance = this;
   }
 
@@ -76,7 +78,7 @@ export default class Application extends EventEmetter {
       await this.autoload();
       if (enabled) {
         // lazy loading api routes
-        const api = require('~/api').default;
+        const api = createRestApi(this);
         this.api = api;
         promisifyAll(api, ['listen', 'close']);
         await api.listen(parseInt(port), hostname);

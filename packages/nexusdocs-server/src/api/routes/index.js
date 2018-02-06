@@ -21,7 +21,10 @@ routes.forEach(route => {
 
 api.get('/', (req, res, next) => {
   res.send({
+    server: 'nexusdocs-server',
     version: req.nds.version,
+    url: req.fullUrl,
+    serverTime: new Date,
   });
 });
 
