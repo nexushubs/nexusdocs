@@ -12,7 +12,7 @@ services:
       - ./database:/data/db:rw
 
   nds:
-    image: nexushubs/nexusdocs:alpine
+    image: nexushubs/nexusdocs:latest
     restart: on-failure:5
     environment:
       NDS_DATABASE: mongodb://mongo/nexusdocs
