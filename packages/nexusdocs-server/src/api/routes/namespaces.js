@@ -268,7 +268,7 @@ api.get('/:namespace/archives/:archive_id', checkAuth({ needAuth }), wrap(async 
   const { namespace, archive } = req.data;
   const { filename, store_id, size } = archive;
   const bucket = await namespace.getBucket();
-  const downloadStream = bucket.openDownloadStream(store_id);
+  const downloadStream = await bucket.openDownloadStream(store_id);
   const contentType = mime.lookup(filename);
   res.set('Content-Type', contentType);
   res.set('Content-Disposition', contentDisposition(filename));
