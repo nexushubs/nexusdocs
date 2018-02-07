@@ -35,7 +35,7 @@ export default class Converter {
     if (!inputs) {
       throw new ApiError(400, invalidOptionMessage, 'OSS image resizing: invalid image resizing options');
     }
-    const [ undefined, width, height, method ] = inputs;
+    let [ undefined, width, height, method ] = inputs;
     if (width) {
       width = parseInt(width);
       if (_.isNaN(width)) {
@@ -75,6 +75,18 @@ export default class Converter {
     this.output.resize = p.join(',');
   }
 
+  _rotate(r) {
+    if (r === 'auto') {
+      this.output['auto-orient'] = 1;
+    } else {
+      r = parseInt(r);
+      if (_.isNaN(r) || r % 90 !== 0) {
+        throw new ApiError(400, invalidOptionMessage, 'OSS image rotating: invalid degrees [0~360]');
+      }
+      this.output.rotate = r;
+    }
+  }
+
   _format(type) {
     const { supportedOutputTypes = [] } = this.options;
     if (type === 'jpeg') {
@@ -88,7 +100,7 @@ export default class Converter {
 
   _quality(q) {
     q = parseInt(q);
-    if (_.isNaN(quality) || q <= 1 || q >= 100) {
+    if (_.isNaN(q) || q <= 1 || q >= 100) {
       throw new ApiError(400, invalidOptionMessage, 'OSS image quality: invalid or out of range (1~100)');
     }
     this.output.quality = `Q_${q}`;

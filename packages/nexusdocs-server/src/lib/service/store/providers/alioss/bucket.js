@@ -46,9 +46,7 @@ export default class AliOSSProviderBucket extends BaseBucket {
       const filename = `${id}${path.extname(options.filename)}`;
       putOptions.headers['content-disposition'] = contentDisposition(filename);
     }
-    this.bucket.putStream(id, stream, putOptions)
-    .then(console.log)
-    .catch(console.err);
+    this.bucket.putStream(id, stream, putOptions);
     return stream;
   }
 
