@@ -140,7 +140,7 @@ class Client {
         }
         const contentType = response.headers['content-type'];
         if (!/^application\/json/i.test(contentType)) {
-          reject('invalid response');
+          reject(new Error('invalid response Content-Type'));
           return;
         }
         if (_.isObject(body)) {
@@ -151,7 +151,7 @@ class Client {
         try {
           result = JSONParse(body);
         } catch (error) {
-          reject(new TypeError('invalid json format'));
+          reject(new TypeError('invalid JSON format'));
         }
         if (response.statusCode != 200) {
           reject(result);
