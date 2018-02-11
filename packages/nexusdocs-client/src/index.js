@@ -1,4 +1,5 @@
-import 'source-map-support/register';
+// Only enable source-map in development
+// import 'source-map-support/register';
 
 /**
  * @module nexusdocs-client
