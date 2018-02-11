@@ -1,11 +1,14 @@
 const fs = require('fs');
 const path = require('path');
-const { expect } = require('chai');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const uuid = require('uuid');
 const mime = require('mime-types');
 const contentDisposition = require('content-disposition');
 
+const { expect } = chai;
+chai.use(chaiAsPromised);
 const { encodeRFC5987ValueChars } = require('./util');
 const createClient = require('../lib');
 
@@ -19,22 +22,40 @@ describe('File uploading and downloading', () => {
   const apiUrl = `${serverUrl}/api`;
   const ns = 'ns.a';
   const fileId = uuid.v4();
+  const fileIdBadBody = 'bad-body';
+  const fileIdMissing = 'missing-file';
+  const fileIdServerError = 'server-error';
   const testFile = `${__dirname}/test.txt`;
   const client = createClient(apiUrl);
   const namespace = client.getNamespace(ns);
 
   beforeEach(() => {
-    const api = nock(serverUrl)
+    const api = nock(serverUrl);
 
     api.post(`/api/namespaces/${ns}/upload`)
-      // .delay(500)
       .reply(200, { files_id: fileId });
     
     api.get(new RegExp(`\/api\/namespaces\/${ns}\/files\/${fileId}.+`))
-      // .delay(500)
       .reply(200, (uri, requestBody) => {
         return fs.createReadStream(testFile);
       });
+  
+    // Fake Good response
+    api.get(`/api/namespaces/${ns}/files/${fileId}/info`)
+      .reply(200, { files_id: fileId });
+  
+    // Fake 200 bad response
+    api.get(`/api/namespaces/${ns}/files/${fileIdBadBody}/info`)
+      .reply(200, 'This is not JSON');
+  
+    // Fake 400 response
+    api.get(`/api/namespaces/${ns}/files/${fileIdMissing}/info`)
+      .reply(404, { files_id: fileId });
+  
+    // Fake 500 response
+    api.get(`/api/namespaces/${ns}/files/${fileIdServerError}/info`)
+      .reply(200, 'Internal Server Error');
+      
   });
 
   describe('Init Options', () => {
@@ -105,7 +126,6 @@ describe('File uploading and downloading', () => {
 
   });
 
-
   describe('Downloading', () => {
     
     it('get download url', () => {
@@ -137,4 +157,28 @@ describe('File uploading and downloading', () => {
     
   });
 
-}); 
+  describe('Result Parsing', () => {
+    
+    it('get file info 200', () => {
+      const infoPromise = namespace.getFileInfo(fileId);
+      expect(infoPromise).to.be.eventually.have.property('files_id', fileId);
+    });
+    
+    it('get file info 200 with bad response', () => {
+      const infoPromise = namespace.getFileInfo(fileIdBadBody);
+      expect(infoPromise).to.be.eventually.rejectedWith(Error);
+    });
+    
+    it('get file info 404', () => {
+      const infoPromise = namespace.getFileInfo(fileIdMissing);
+      expect(infoPromise).to.be.eventually.rejectedWith(Error);
+    });
+    
+    it('get file info 500', () => {
+      const infoPromise = namespace.getFileInfo(fileIdServerError);
+      expect(infoPromise).to.be.eventually.rejectedWith(Error);
+    });
+
+  });
+
+});

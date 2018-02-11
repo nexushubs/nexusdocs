@@ -9,6 +9,7 @@ import {
   sortedJSONStringify,
   JSONParse,
 } from './util';
+import { ApiError } from './errors'
 import Signer from './signer';
 
 /**
@@ -138,25 +139,37 @@ class Client {
           reject(error);
           return;
         }
+        let errorMessage;
         const contentType = response.headers['content-type'];
-        if (!/^application\/json/i.test(contentType)) {
-          reject(new Error('invalid response Content-Type'));
-          return;
+        if (!contentType === 'application/json') {
+          errorMessage = `Invalid Response`;
+        } else if (!_.isObject(body)) {
+          const jsonErrorMessage = 'Invalid JSON format';
+          try {
+            body = JSONParse(body);
+          } catch (error) {
+            errorMessage = jsonErrorMessage;
+          } finally {
+            if (!_.isObject(body)) {
+              errorMessage = jsonErrorMessage;
+            }
+          }
         }
-        if (_.isObject(body)) {
-          resolve(body);
-          return;
+        if (response.statusCode >= 400 || errorMessage) {
+          if (_.isObject(body)) {
+            if (body.message) {
+              errorMessage = body.message;
+            }
+            if (body.errors) {
+              body = body.errors;
+            }
+          }
+          error = new ApiError(response.statusCode, errorMessage, body);
         }
-        let result;
-        try {
-          result = JSONParse(body);
-        } catch (error) {
-          reject(new TypeError('invalid JSON format'));
-        }
-        if (response.statusCode != 200) {
-          reject(result);
+        if (error) {
+          reject(error);
         } else {
-          resolve(result);
+          resolve(body);
         }
       });
     });
