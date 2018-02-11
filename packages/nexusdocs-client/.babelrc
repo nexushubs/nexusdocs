@@ -8,7 +8,6 @@
     "stage-3"
   ],
   "plugins": [
-    // "babel-plugin-add-module-exports",
     "transform-class-properties",
     ["module-resolver", {
       "root": ["./src"]
