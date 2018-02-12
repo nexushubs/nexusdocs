@@ -11,10 +11,7 @@
     "watch": "babel --out-dir lib src --source-maps --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:nexushubs/nexusdocs.git"
-  },
+  "repository": "https://github.com/nexushubs/nexusdocs/tree/master/packages/nexusdocs-client",
   "keywords": [
     "storage",
     "file",
