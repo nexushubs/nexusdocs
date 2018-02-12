@@ -8,7 +8,7 @@ import Application from '~/init/application';
 import { ApiError, ValidationError } from '~/lib/errors';
 export { ApiError } from '~/lib/errors';
 
-const MAX_CELL_WIDTH = 128;
+const MAX_CELL_CONTENT = 256;
 
 let app = null;
 
@@ -78,8 +78,8 @@ export function listToTable(list) {
         // value = value.toString();
       } else if (_.isObject(value)) {
         const v = mongoJSONStringify(value);
-        if (v.length > MAX_CELL_WIDTH) {
-          value = `${v.slice(0, MAX_CELL_WIDTH - 5)} ...${v.slice(-1)}`;
+        if (v.length > MAX_CELL_CONTENT) {
+          value = `${v.slice(0, MAX_CELL_CONTENT - 5)} ...${v.slice(-1)}`;
         } else {
           value = v;
         }

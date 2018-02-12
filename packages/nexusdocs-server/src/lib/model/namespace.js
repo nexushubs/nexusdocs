@@ -309,4 +309,25 @@ export default class Namespace extends BaseModel {
     const url = await bucket.getUrl(file.store_id, options);
     return url;
   }
+
+  async getStats() {
+    const { File, FileStore } = this.model();
+    const aggregateOptions = [
+      { $match: {
+        namespace: this.name,
+      }},
+      { $group: {
+        _id: null,
+        totalSize: { $sum: '$size' },
+        avgSize: { $avg: '$size' },
+        count: { $sum: 1 },
+      }},
+    ];
+    const fileStats = await File.collection.aggregate(aggregateOptions).toArray();
+    const storeStats = await FileStore.collection.aggregate(aggregateOptions).toArray();
+    return {
+      files: _.omit(fileStats[0], '_id'),
+      stores: _.omit(storeStats[0], '_id'),
+    };
+  }
 }
