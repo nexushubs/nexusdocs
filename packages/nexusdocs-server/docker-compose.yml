@@ -12,18 +12,18 @@ services:
       - ./database:/data/db:rw
 
   nds:
-    image: nexushubs/nexusdocs:latest
-    restart: on-failure:5
+    image: nexushubs/nexusdocs
+    restart: always
     environment:
       NDS_DATABASE: mongodb://mongo/nexusdocs
       UNOCONV_SERVER_URL: http://unoconv:4000
       FILE_CACHE_CLEAR_ON_STARTUP: 0
     ports:
-      - '4000:4000'
+      - '127.0.0.1:4000:4000'
     depends_on:
       - mongo
       - unoconv
 
   unoconv:
     image: alphakevin/unoconv-server
-    restart: on-failure:5
+    restart: always
