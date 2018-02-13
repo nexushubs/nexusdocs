@@ -4,6 +4,12 @@ NexusDocs server application
 
 [NexusDocs Documentation](https://github.com/nexushubs/nexusdocs/wiki)
 
+User Documentation
+
+* User Guides
+  * [Namespace](./docs/guides/namespace.md)
+  * [Provider](./docs/guides/provider.md)
+
 ## Install
 
 ### Install as npm package:
