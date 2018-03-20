@@ -298,15 +298,16 @@ class Namespace {
    * @param {RequestOptions} options - RequestOptions, see [RequestOptions](#Namespace..RequestOptions)
    */
   getArchiveUrl(files, options = {}) {
-    return this.createArchive(files)
-    .then(archive => {
-      const { _id: archive_id } = archive;
-      _.merge(options, {
-        method: 'GET',
-        url: `/namespaces/${this.name}/archives/${archive_id}`,
-      });
-      return this.client.getUrl(options);
-    });
+    const query = {
+      files: files.join(','),
+    };
+    const requestOptions = {
+      ...options,
+      method: 'GET',
+      qs: query,
+      url: `/namespaces/${this.name}/archive`,
+    };
+    return this.client.getUrl(requestOptions);
   }
 
 }

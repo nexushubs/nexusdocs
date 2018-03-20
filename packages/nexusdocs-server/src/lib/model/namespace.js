@@ -53,6 +53,10 @@ export default class Namespace extends BaseModel {
     return this.ensureUnique({name: data.name});
   }
 
+  /**
+   * Get namespace provider bucket
+   * @param {ObjectId} id 
+   */
   async getBucket(id) {
     id = this.prepareId(id);
     const { Store } = this.service();
@@ -61,6 +65,10 @@ export default class Namespace extends BaseModel {
     return Store.bucket(providers_id, bucket);
   }
 
+  /**
+   * Open a stream for uploading file binary
+   * @param {object} options 
+   */
   async openUploadStream(options = {}) {
     if (!this._active) {
       throw new Error('could not open upload stream on none instance');
@@ -97,6 +105,11 @@ export default class Namespace extends BaseModel {
     return uploadStream;
   }
 
+  /**
+   * Save file store info
+   * @param {Bucket} bucket 
+   * @param {object} info 
+   */
   async addStore(bucket, info) {
     const { File, FileStore } = this.model();
     if (!info.files_id) {
@@ -134,7 +147,11 @@ export default class Namespace extends BaseModel {
     info.store_id = store.data('_id');
     return this.addFile(info);
   }
-  
+
+  /**
+   * Save file info
+   * @param {object} info 
+   */
   async addFile(info) {
     const { File } = this.model();
     return File.create({
@@ -154,6 +171,10 @@ export default class Namespace extends BaseModel {
     });
   }
 
+  /**
+   * Open download stream
+   * @param {string} storeId 
+   */
   async openDownloadStream(storeId) {
     if (!this._active) {
       throw new Error('could not open upload stream on none instance');
@@ -163,6 +184,10 @@ export default class Namespace extends BaseModel {
     return downloadStream;
   }
 
+  /**
+   * Delete single file
+   * @param {string|File} file 
+   */
   async deleteFile(file) {
     if (!this._active) {
       throw new Error('could not delete file on none instance');
@@ -193,6 +218,9 @@ export default class Namespace extends BaseModel {
     return Promise.all(promises);
   }
 
+  /**
+   * Clean up namespace, this will delete all files in it
+   */
   async truncate() {
     // TODO move deleting operation to task queue
     if (!this._active) {
@@ -206,6 +234,44 @@ export default class Namespace extends BaseModel {
     return Promise.all(promises);
   }
 
+  /**
+   * Create a archive stream for files directly for downloading
+   * @param {string[]} files - files id array
+   * @param {number} [options.level=6] - zip level
+   */
+  async createArchiveStream(files, options = {}) {
+    const { level = 6 } = options;
+    // TODO move acreating archive operation to task queue
+    const { File } = this.model();
+    const archive = new archiver('zip', {
+      zlib: { level },
+    });
+    const bucket = await this.getBucket();
+    const filenames = [];
+    await Promise.all(_.map(files, async fileId => {
+      const file = await File.get(fileId);
+      if (!file) {
+        const err = new ApiError(404, `file not find: ${fileId}`);
+        archive.emit('error', err);
+      }
+      const fileStream = await bucket.openDownloadStream(file.store_id);
+      let filename = file.filename;
+      filename = getNewFilename(filenames, filename);
+      archive.append(fileStream, {
+        name: filename,
+        date: file.dateUploaded,
+      });
+    }));
+    archive.finalize();
+    return archive;
+  }
+
+  /**
+   * Creating archive and permanently stores it into namespace
+   * Use createArchiveStream instead when necessary
+   * @param {string[]} files id array
+   * @param {string} name 
+   */
   async createArchive(files, name) {
     // TODO move acreating archive operation to task queue
     const { Archive, File } = this.model();
@@ -256,6 +322,10 @@ export default class Namespace extends BaseModel {
     });
   }
 
+  /**
+   * Add archive info
+   * @param {object} info 
+   */
   async addArchive(info) {
     const { Archive } = this.model();
     const { _id: store_id, filename, files, size } = info;
@@ -267,6 +337,11 @@ export default class Namespace extends BaseModel {
     });
   }
 
+  /**
+   * Convert file format
+   * @param {File|string} file - File to be converted
+   * @param {string} commands - converting commands
+   */
   async convert(file, commands) {
     const { File, FileStore } = this.model();
     const { FileConverter } = this.service();
@@ -277,6 +352,13 @@ export default class Namespace extends BaseModel {
     return FileConverter.convert(fileStream, file.filename, commands);
   }
 
+  /**
+   * Get original provider URL
+   * @param {File|string} file 
+   * @param {boolean} [options.download=false] - For download (overwrite content-disposition header)
+   * @param {boolean} [options.processNative=false] - Process generate download url 
+   * @param {number} [options.expires] - URL expires timestamp
+   */
   async getOriginalUrl(file, options = {}) {
     const bucket = await this.getBucket();
     const { type } = bucket.provider.options;
@@ -310,6 +392,10 @@ export default class Namespace extends BaseModel {
     return url;
   }
 
+  /**
+   * Get namespace statistics information
+   * @returns {{files:number,stores:number}}
+   */
   async getStats() {
     const { File, FileStore } = this.model();
     const aggregateOptions = [
