@@ -1,6 +1,6 @@
 {
   "name": "nexusdocs-server",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "NexusHubs server, a storage engine proxy for multi provider",
   "main": "lib/app.js",
   "scripts": {
@@ -60,7 +60,7 @@
     "mongodb": "^2.2.33",
     "multer": "^1.3.0",
     "new-filename": "^1.0.1",
-    "nexusdocs-client": "^0.2.7",
+    "nexusdocs-client": "^0.2.8",
     "request": "^2.83.0",
     "schema-inspector": "^1.6.8",
     "sharp": "^0.18.4",

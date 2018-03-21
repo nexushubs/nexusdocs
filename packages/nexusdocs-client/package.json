@@ -1,6 +1,6 @@
 {
   "name": "nexusdocs-client",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Client SDK for nexusdocs-server",
   "main": "lib/index.js",
   "scripts": {
