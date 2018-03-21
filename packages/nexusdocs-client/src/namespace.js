@@ -298,8 +298,10 @@ class Namespace {
    * @param {RequestOptions} options - RequestOptions, see [RequestOptions](#Namespace..RequestOptions)
    */
   getArchiveUrl(files, options = {}) {
+    const { filename } = options;
     const query = {
       files: files.join(','),
+      filename,
     };
     const requestOptions = {
       ...options,

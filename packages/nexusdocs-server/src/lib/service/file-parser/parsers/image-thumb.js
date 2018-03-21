@@ -28,7 +28,7 @@ export default class ImageThumbParser extends BaseParser {
       .resize(thumbSize, thumbSize)
       .toBuffer('JPEG', (err, buffer) => {
         if (err) {
-          console.log(err.stack);
+          console.error(err.stack);
           reject(err);
           return;
         }

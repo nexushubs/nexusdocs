@@ -247,12 +247,16 @@ api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth
 }));
 
 api.get('/:namespace/archive', checkAuth(), wrap(async (req, res, next) => {
-  let { files, name = `archive-${(new Date).toISOString()}` } = req.query;
+  let { files, filename = `archive-${(new Date).toISOString()}` } = req.query;
   files = files.split(',');
-  name = name.replace(/\.zip$/, '');
+  if (!/\.zip$/.test(filename)) {
+    filename = `${filename}.zip`;
+  }
   const { namespace } = req.data;
   const archiveStream = await namespace.createArchiveStream(files);
-  res.set('Content-Disposition', contentDisposition(`${name}.zip`));
+  const contentType = mime.lookup(filename);
+  res.set('Content-Type', contentType);
+  res.set('Content-Disposition', contentDisposition(filename));
   archiveStream.pipe(res);
 }));
 
