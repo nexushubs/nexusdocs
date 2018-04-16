@@ -1,6 +1,7 @@
 import qs from 'qs';
 import Base64 from 'crypto-js/enc-base64';
 import JSONStringify from 'json-stable-stringify';
+import isStream from 'is-stream';
 
 export function promisifyStream(stream) {
   return new Promise((resolve, reject) => {

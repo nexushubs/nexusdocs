@@ -1,6 +1,6 @@
 {
   "name": "nexusdocs-client",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Client SDK for nexusdocs-server",
   "main": "lib/index.js",
   "scripts": {
@@ -40,6 +40,7 @@
     "content-disposition": "^0.5.2",
     "crypto-js": "^3.1.9-1",
     "decamelize": "^1.2.0",
+    "is-stream": "^1.1.0",
     "json-stable-stringify": "^1.0.1",
     "lodash": "^4.17.4",
     "mime-types": "^2.1.17",
