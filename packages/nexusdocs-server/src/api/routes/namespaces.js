@@ -5,9 +5,9 @@ import contentDisposition from 'content-disposition';
 import mime from 'mime-types';
 import boolean from 'boolean';
 
-import { ApiError } from '~/lib/errors';
-import { upload, checkAuth } from '~/api/middleware';
-import { getExtension, parseQueryStringHeaders, getBasename, diffTimestampFromNow } from '~/lib/util';
+import { ApiError } from 'lib/errors';
+import { upload, checkAuth } from 'api/middleware';
+import { getExtension, parseQueryStringHeaders, getBasename, diffTimestampFromNow } from 'lib/util';
 
 const api = express.Router();
 

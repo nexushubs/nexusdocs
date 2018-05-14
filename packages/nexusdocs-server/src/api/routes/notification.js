@@ -3,8 +3,8 @@ import wrap from 'express-wrap-async';
 
 const api = express.Router();
 
-import { ApiError } from '~/lib/errors';
-import { checkAuth } from '~/api/middleware';
+import { ApiError } from 'lib/errors';
+import { checkAuth } from 'api/middleware';
 
 // TODO
 

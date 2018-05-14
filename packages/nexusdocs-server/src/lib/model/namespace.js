@@ -5,9 +5,9 @@ import getNewFilename from 'new-filename';
 import { PassThrough } from 'stream';
 import qs from 'qs';
 
-import BaseModel from '~/lib/base-model';
-import { bucketName, isObjectId } from '~/lib/schema';
-import { ValidationError, buildValidationError } from '~/lib/errors';
+import BaseModel from 'lib/base-model';
+import { bucketName, isObjectId } from 'lib/schema';
+import { ValidationError, buildValidationError } from 'lib/errors';
 import { ApiError } from '../../../lib/lib/errors';
 
 export default class Namespace extends BaseModel {

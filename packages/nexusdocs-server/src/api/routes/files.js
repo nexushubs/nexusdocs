@@ -3,9 +3,9 @@ import express from 'express';
 import wrap from 'express-wrap-async';
 import contentDisposition from 'content-disposition';
 
-import { ApiError } from '~/lib/errors';
-import { upload, checkAuth } from '~/api/middleware';
-import { parseQueryStringHeaders } from '~/lib/util';
+import { ApiError } from 'lib/errors';
+import { upload, checkAuth } from 'api/middleware';
+import { parseQueryStringHeaders } from 'lib/util';
 
 const api = express.Router();
 

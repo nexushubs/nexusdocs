@@ -4,11 +4,11 @@ import inspector from 'schema-inspector';
 import camelCase from 'camelcase';
 import upperCamelCase from 'uppercamelcase';
 
-import BaseService from '~/lib/base-service';
+import BaseService from 'lib/base-service';
 import BaseCache from './base-cache';
 import FSCache from './cache/fs';
-import { ValidationError, buildValidationError } from '~/lib/errors';
-import { uuidRegexPattern, loadClasses, createErrorEvent } from '~/lib/util';
+import { ValidationError, buildValidationError } from 'lib/errors';
+import { uuidRegexPattern, loadClasses, createErrorEvent } from 'lib/util';
 
 // const DriverClasses = loadClasses('lib/resumable/cache');
 

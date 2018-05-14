@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-import { app } from '~/init/application';
+import { app } from 'init/application';
 
 export function providerType(schema, candidate) {
   const { Store } = app().service();

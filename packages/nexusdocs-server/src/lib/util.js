@@ -7,7 +7,7 @@ import EventEmitter from 'events';
 import camelCase from 'camelcase';
 import JSONStringify from 'json-stable-stringify';
 
-import { basePath } from '~/init/application';
+import { basePath } from 'init/application';
 
 export const uuidRegexPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

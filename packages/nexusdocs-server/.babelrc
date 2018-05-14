@@ -1,16 +1,17 @@
 {
   "presets": [
-    ["env", {
+    ["@babel/preset-env", {
       "targets": {
         "node": "8.8"
       }
     }],
-    "stage-3"
+    "@babel/preset-stage-3"
   ],
   "plugins": [
+    "@babel/plugin-transform-runtime",
     "transform-class-properties",
-    ["babel-plugin-root-import", {
-      "rootPathSuffix": "src"
+    ["module-resolver", {
+      "root": ["./src"]
     }]
   ]
 }

@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 
-import BaseService from '~/lib/base-service';
-import { loadClasses } from '~/lib/util';
+import BaseService from 'lib/base-service';
+import { loadClasses } from 'lib/util';
 
 export default class Store extends BaseService {
   

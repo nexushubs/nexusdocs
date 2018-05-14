@@ -1,5 +1,5 @@
-import BaseModel from '~/lib/base-model';
-import { providerType, bucketName } from '~/lib/schema';
+import BaseModel from 'lib/base-model';
+import { providerType, bucketName } from 'lib/schema';
 
 export default class Provider extends BaseModel {
 

@@ -7,11 +7,11 @@ import camelCase from 'camelcase';
 import config from 'config';
 
 import packageJson from '../../package.json';
-import { connect, db } from '~/init/database';
-import { promisifyAll } from '~/lib/util';
-import * as models from '~/lib/model';
-import * as services from '~/lib/service';
-import createRestApi from '~/api';
+import { connect, db } from 'init/database';
+import { promisifyAll } from 'lib/util';
+import * as models from 'lib/model';
+import * as services from 'lib/service';
+import createRestApi from 'api';
 
 export function basePath () {
   return path.normalize(__dirname + '/..')
