@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 
-import { ValidationError, buildValidationError } from '~/lib/errors';
-import { buildValidator } from '~/lib/validator';
-import { db } from '~/init/database';
+import { ValidationError, buildValidationError } from 'lib/errors';
+import { buildValidator } from 'lib/validator';
+import { db } from 'init/database';
 
 export default class BaseModel {
   

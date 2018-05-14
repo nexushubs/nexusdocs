@@ -1,4 +1,4 @@
-import { ApiError, ValidationError } from '~/lib/errors';
+import { ApiError, ValidationError } from 'lib/errors';
 
 export default function errorHandler(err, req, res, next) {
   if (err instanceof ValidationError) {

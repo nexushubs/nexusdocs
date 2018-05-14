@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import sharp from 'sharp';
 
-import { ApiError } from '~/lib/errors';
+import { ApiError } from 'lib/errors';
 import BaseConverter from '../base-converter';
 
 // Resize command pattern

@@ -5,7 +5,7 @@ import request from 'request';
 import contentDisposition from 'content-disposition';
 import { PassThrough } from 'stream';
 
-import { ApiError } from '~/lib/errors';
+import { ApiError } from 'lib/errors';
 import BaseConverter from '../base-converter';
 
 export default class DocumentConverter extends BaseConverter {

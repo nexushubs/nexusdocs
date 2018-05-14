@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 
-import { loadClass } from '~/lib/util';
+import { loadClass } from 'lib/util';
 
 export default class BaseProvider extends EventEmitter {
 

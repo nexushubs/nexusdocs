@@ -1,4 +1,4 @@
-import { getExtension } from '~/lib/util';
+import { getExtension } from 'lib/util';
 
 export default class BaseConverter {
   

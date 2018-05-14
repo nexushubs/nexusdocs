@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import Namespace from 'namespace';
 import request from 'request';
 import qs from 'qs';
 import parse from 'url-parse';
@@ -11,6 +10,7 @@ import {
 } from './util';
 import { ApiError } from './errors'
 import Signer from './signer';
+import Namespace from './namespace';
 
 /**
  * Class presenting NexusDocs client instance

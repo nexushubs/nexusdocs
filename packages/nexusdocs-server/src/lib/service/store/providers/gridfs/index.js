@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 
-import { db } from '~/init/database';
+import { db } from 'init/database';
 import BaseProvider from '../../base-provider';
 
 export default class GridFSProvider extends BaseProvider {

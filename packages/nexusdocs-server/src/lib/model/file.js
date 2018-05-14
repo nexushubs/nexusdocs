@@ -1,4 +1,4 @@
-import BaseModel from '~/lib/base-model';
+import BaseModel from 'lib/base-model';
 import uuid from 'uuid';
 
 export default class File extends BaseModel {

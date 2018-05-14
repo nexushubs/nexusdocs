@@ -2,8 +2,8 @@ import _ from 'lodash';
 import express from 'express';
 import wrap from 'express-wrap-async';
 
-import { ApiError } from '~/lib/errors';
-import { checkAuth } from '~/api/middleware';
+import { ApiError } from 'lib/errors';
+import { checkAuth } from 'api/middleware';
 
 const api = express.Router();
 

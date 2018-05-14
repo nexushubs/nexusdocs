@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import gm from 'gm';
 
-import { ApiError } from '~/lib/errors';
+import { ApiError } from 'lib/errors';
 import BaseConverter from '../base-converter';
 
 // Resize command pattern

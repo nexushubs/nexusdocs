@@ -4,9 +4,9 @@ import _ from 'lodash';
 import Table from 'cli-table';
 import { ObjectId } from 'mongodb';
 
-import Application from '~/init/application';
-import { ApiError, ValidationError } from '~/lib/errors';
-export { ApiError } from '~/lib/errors';
+import Application from 'init/application';
+import { ApiError, ValidationError } from 'lib/errors';
+export { ApiError } from 'lib/errors';
 
 const MAX_CELL_CONTENT = 256;
 

@@ -1,4 +1,4 @@
-import BaseModel from '~/lib/base-model';
+import BaseModel from 'lib/base-model';
 
 export default class Acl extends BaseModel {
 

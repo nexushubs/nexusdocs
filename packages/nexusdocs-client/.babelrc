@@ -1,16 +1,12 @@
 {
   "presets": [
-    ["env", {
+    ["@babel/preset-env", {
       "targets": {
         "node": "4.6.2"
       }
-    }],
-    "stage-3"
+    }]
   ],
   "plugins": [
-    "transform-class-properties",
-    ["module-resolver", {
-      "root": ["./src"]
-    }]
+    "@babel/plugin-transform-runtime"
   ]
 }

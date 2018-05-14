@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { spwan, spawn } from 'child_process';
 
-import { ApiError } from '~/lib/errors';
+import { ApiError } from 'lib/errors';
 import BaseConverter from '../base-converter';
 import { PassThrough } from 'stream';
 

@@ -10,9 +10,9 @@ import util from 'util';
 import uuid from 'uuid';
 import { PassThrough } from 'stream';
 
-import BaseService from '~/lib/base-service';
-import { ApiError } from '~/lib/errors';
-import { promisifyStream } from '~/lib/util';
+import BaseService from 'lib/base-service';
+import { ApiError } from 'lib/errors';
+import { promisifyStream } from 'lib/util';
 
 const mkdirp = util.promisify(_mkdirp);
 

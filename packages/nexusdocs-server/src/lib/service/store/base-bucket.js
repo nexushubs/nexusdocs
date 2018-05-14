@@ -4,10 +4,10 @@ import fs from 'fs';
 import path from 'path';
 import uuid from 'uuid';
 import mimeTypes from 'mime-types';
-import { Writable } from 'stream';
+import { Writable, Readable } from 'stream';
 import _ from 'lodash';
 
-import { uuidRegexPattern, promisifyStream } from '~/lib/util';
+import { uuidRegexPattern, promisifyStream } from 'lib/util';
 import UploadStream from './upload-stream';
 
 export default class BaseBucket extends EventEmitter {
@@ -54,7 +54,14 @@ export default class BaseBucket extends EventEmitter {
   }
     
   openDownloadStream(id) {
-    return this._openDownloadStream(id);
+    let downloadStream;
+    try {
+      downloadStream = this._openDownloadStream(id);
+    } catch(e) {
+      downloadStream = new Readable();
+      downloadStream.emit('error', e);
+    }
+    return downloadStream;
   }
 
   /**

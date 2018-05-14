@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { ApiError } from '~/lib/errors';
+import { ApiError } from 'lib/errors';
 
 const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/;
 const resizeMethodMap = {

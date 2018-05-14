@@ -3,7 +3,7 @@ import path from 'path';
 import config from 'config';
 import getStream from 'get-stream';
 
-import BaseService from '~/lib/base-service';
+import BaseService from 'lib/base-service';
 import * as parserClasses from './parsers';
 
 const NEED_BUFFER_PROP = 'needBuffer';

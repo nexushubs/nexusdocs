@@ -3,8 +3,8 @@ import crypto from 'crypto';
 import wrap from 'express-wrap-async';
 import { URL, URLSearchParams } from 'url';
 
-import { ApiError } from '~/lib/errors';
-import { urlSafeBase64Encode, sortedJSONStringify } from '~/lib/util';
+import { ApiError } from 'lib/errors';
+import { urlSafeBase64Encode, sortedJSONStringify } from 'lib/util';
 
 class Authorization {
 

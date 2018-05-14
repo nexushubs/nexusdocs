@@ -2,8 +2,8 @@ import crypto from 'crypto';
 import mime from 'mime-types';
 import { Transform } from 'stream';
 
-import { app } from '~/init/application';
-import { promisifyEvent } from '~/lib/util';
+import { app } from 'init/application';
+import { promisifyEvent } from 'lib/util';
 
 export default class UploadStream extends Transform {
 

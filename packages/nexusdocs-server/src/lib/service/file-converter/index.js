@@ -6,9 +6,9 @@ import getStream from 'get-stream';
 import mime, { contentType } from 'mime-types';
 import { PassThrough } from 'stream';
 
-import BaseService from '~/lib/base-service';
-import { getExtension } from '~/lib/util';
-import { ApiError } from '~/lib/errors';
+import BaseService from 'lib/base-service';
+import { getExtension } from 'lib/util';
+import { ApiError } from 'lib/errors';
 import * as converterClasses from './converters';
 
 export default class FileConverter extends BaseService {

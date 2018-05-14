@@ -1,4 +1,4 @@
-import BaseModel from '~/lib/base-model';
+import BaseModel from 'lib/base-model';
 import util from 'util';
 import crypto from 'crypto';
 import base32Encode from 'base32-encode';

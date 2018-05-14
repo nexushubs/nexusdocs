@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import util from 'util';
 import uuid from 'uuid';
 
-import BaseModel from '~/lib/base-model';
+import BaseModel from 'lib/base-model';
 
 export default class Archive extends BaseModel {
 

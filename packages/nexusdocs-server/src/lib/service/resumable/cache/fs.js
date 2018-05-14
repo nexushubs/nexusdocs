@@ -3,7 +3,7 @@ import os from 'os';
 import mkdirp from 'mkdirp';
 import _ from 'lodash';
 
-import { promisifyStream, promisifyAll } from '~/lib/util';
+import { promisifyStream, promisifyAll } from 'lib/util';
 import Base from '../base-cache';
 
 const _fs = promisifyAll(fs, ['unlink']);
