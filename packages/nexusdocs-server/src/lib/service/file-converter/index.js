@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import config from 'config';
-import filenamify from 'filenamify';
 import fs from 'fs';
 import getStream from 'get-stream';
 import mime, { contentType } from 'mime-types';
@@ -43,10 +42,6 @@ export default class FileConverter extends BaseService {
       options = {};
     }
     return options;
-  }
-
-  saveTempfile(stream) {
-    const filepath = `os.tempdir()/`
   }
 
   /**

@@ -4,7 +4,6 @@ import _ from 'lodash';
 import promisify from 'es6-promisify';
 import isStream from 'is-stream';
 import EventEmitter from 'events';
-import camelCase from 'camelcase';
 import JSONStringify from 'json-stable-stringify';
 
 import { basePath } from 'init/application';

@@ -1,6 +1,6 @@
 {
   "name": "nexusdocs-server",
-  "version": "0.2.12",
+  "version": "0.3.0",
   "description": "NexusHubs server, a storage engine proxy for multi provider",
   "main": "lib/app.js",
   "scripts": {
@@ -29,7 +29,7 @@
     "babel-plugin-module-resolver": "^3.1.1",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "eslint": "^4.19.1",
-    "nodemon": "^1.17.4"
+    "nodemon": "^1.17.5"
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.46",
@@ -50,7 +50,6 @@
     "es6-promisify": "^5.0.0",
     "express": "^4.16.3",
     "express-wrap-async": "^1.0.3",
-    "filenamify": "^2.0.0",
     "get-stream": "^3.0.0",
     "gm": "^1.23.1",
     "image-size": "^0.6.2",
@@ -62,8 +61,7 @@
     "mongodb": "^2.2.35",
     "multer": "^1.3.0",
     "new-filename": "^1.0.1",
-    "nexusdocs-client": "^0.2.8",
-    "request": "^2.85.0",
+    "request": "^2.87.0",
     "schema-inspector": "^1.6.8",
     "sharp": "^0.18.4",
     "source-map-support": "^0.5.6",
