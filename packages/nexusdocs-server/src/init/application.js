@@ -3,7 +3,6 @@ import EventEmitter from 'events';
 import _ from 'lodash';
 import decamelize from 'decamelize';
 import upperCamelCase from 'uppercamelcase';
-import camelCase from 'camelcase';
 import config from 'config';
 
 import packageJson from '../../package.json';
