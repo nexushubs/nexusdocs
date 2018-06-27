@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import boolean from 'boolean';
-import filenamify from 'filenamify';
 import fs from 'fs';
 import mime from 'mime-types';
 import _mkdirp from 'mkdirp';
