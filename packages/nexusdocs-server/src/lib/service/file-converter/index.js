@@ -52,7 +52,7 @@ export default class FileConverter extends BaseService {
    */
   async convert(inputStream, filename, commands) {
     const { FileCache } = this.service();
-    const ext = getExtension(filename);
+    const ext = getExtension(filename).toLowerCase();
     try {
       const ConverterClass = this.getConverterOptionsByExt(ext);
       if (!ConverterClass) {
