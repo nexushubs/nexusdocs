@@ -114,12 +114,12 @@ Server options
 | --- | --- | --- | --- |
 | clientKey | <code>string</code> |  | NDS API key |
 | clientSecret | <code>string</code> |  | NDS API secret |
-| hostname | <code>string</code> | <code>&quot;127.0.0.1&quot;</code> | hostname |
-| secure | <code>boolean</code> | <code>false</code> | Whether to use HTTPS |
-| port | <code>number</code> | <code>4000</code> | Server Port |
-| endPoint | <code>string</code> | <code>&quot;/api&quot;</code> | API endpoint |
-| defaultUrlExpires | <code>number</code> |  | Default expires seconds |
-| defaultRequestExpires | <code>number</code> |  | Default expires seconds |
+| [hostname] | <code>string</code> | <code>&quot;127.0.0.1&quot;</code> | hostname |
+| [secure] | <code>boolean</code> | <code>false</code> | Whether to use HTTPS |
+| [port] | <code>number</code> | <code>4000</code> | Server Port |
+| [endPoint] | <code>string</code> | <code>&quot;/api&quot;</code> | API endpoint |
+| [defaultUrlExpires] | <code>number</code> |  | Default expires seconds |
+| [defaultRequestExpires] | <code>number</code> |  | Default expires seconds |
 
 <a name="Namespace"></a>
 
@@ -349,10 +349,10 @@ some properties are added for additional use, see specified method
 | --- | --- | --- |
 | method | <code>string</code> | HTTP method of the request |
 | url | <code>string</code> | Path of the request, or full url |
-| body | <code>string</code> | Entire body for PATCH, PUT, POST or DELETE, `json` must be `true` and only plain object is allowed |
-| json | <code>boolean</code> | Set to `true` when providing `body` |
-| expires | <code>number</code> \| <code>date</code> | Expires time in second, timestamp or Date object, the request will be invalid after this timestamp |
-| signature | <code>object</code> | Additional signature data besides `method`, `url`, `expires` |
+| [body] | <code>string</code> | Entire body for PATCH, PUT, POST or DELETE, `json` must be `true` and only plain object is allowed |
+| [json] | <code>boolean</code> | Set to `true` when providing `body` |
+| [expires] | <code>number</code> \| <code>date</code> | Expires time in second, timestamp or Date object, the request will be invalid after this timestamp |
+| [signature] | <code>object</code> | Additional signature data besides `method`, `url`, `expires` |
 
 <a name="Namespace..UploadOptions"></a>
 
@@ -365,11 +365,11 @@ Upload request options
 
 | Name | Type | Description |
 | --- | --- | --- |
-| fileId | <code>FileId</code> | Specify fileId, see [FileId](#Namespace..FileId) |
-| filename | <code>string</code> | Provide filename |
-| md5 | <code>string</code> | MD5 hash of the file if available |
-| contentType | <code>string</code> | Provide content-type for download |
-| knownLength | <code>number</code> | Provide stream total length if available |
+| [fileId] | <code>FileId</code> | Specify fileId, see [FileId](#Namespace..FileId) |
+| [filename] | <code>string</code> | Provide filename |
+| [md5] | <code>string</code> | MD5 hash of the file if available |
+| [contentType] | <code>string</code> | Provide content-type for download |
+| [knownLength] | <code>number</code> | Provide stream total length if available |
 
 <a name="Namespace..DownloadOptions"></a>
 
@@ -382,12 +382,12 @@ Download options
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| origin | <code>boolean</code> | <code>false</code> | Download from the origin provider |
-| download | <code>boolean</code> | <code>false</code> | Download with the original filename |
-| filename | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
-| response | <code>object</code> |  | Overwrite response header |
-| response.contentType | <code>string</code> |  | Overwrite Content-Type |
-| response.contentDisposition | <code>string</code> |  | Overwrite Content-Disposition |
+| [origin] | <code>boolean</code> | <code>false</code> | Download from the origin provider |
+| [download] | <code>boolean</code> | <code>false</code> | Download with the original filename |
+| [filename] | <code>string</code> |  | Download with new filename, this will set contentType & contentDisposition |
+| [response] | <code>object</code> |  | Overwrite response header |
+| [response.contentType] | <code>string</code> |  | Overwrite Content-Type |
+| [response.contentDisposition] | <code>string</code> |  | Overwrite Content-Disposition |
 
 <a name="Namespace..FileId"></a>
 
@@ -455,8 +455,8 @@ File information
 | contentType | <code>string</code> | File content type |
 | size | <code>number</code> | File total length |
 | metadata | <code>object</code> | Additional information |
-| metadata.image | <code>ImageInfo</code> | Metadata for image files |
-| metadata.zip | <code>ZipInfo</code> | Zip file entries |
+| [metadata.image] | <code>ImageInfo</code> | Metadata for image files |
+| [metadata.zip] | <code>ZipInfo</code> | Zip file entries |
 
 <a name="Namespace..ConvertingOptions"></a>
 
@@ -469,9 +469,9 @@ File converting options
 | Name | Type | Description |
 | --- | --- | --- |
 | format | <code>string</code> | The output format, `documents`: `pdf`, `image`: `gif`, `jpeg`, `png`, `webp`, `tiff` |
-| resize | <code>string</code> | For `image`, resize the image `<width>x<height>{%}{@}{!}{<}{>}`    please check [GraphicsMagick](http://www.graphicsmagick.org/GraphicsMagick.html#details-resize).    notice: only `{!}{>}{^}` are available when the server is using `ImageSharpConverter` |
-| rotate | <code>string</code> \| <code>number</code> | For `image`, rotate the image by angle `{auto}{90}{180}{270}`,    if `auto` is set, the angle will be detected by gravity from EXIF |
-| quality | <code>number</code> | For`image`, set the output image quality 0 - 100, available for format `jpeg`, `tiff`, `webp` |
+| [resize] | <code>string</code> | For `image`, resize the image `<width>x<height>{%}{@}{!}{<}{>}`    please check [GraphicsMagick](http://www.graphicsmagick.org/GraphicsMagick.html#details-resize).    notice: only `{!}{>}{^}` are available when the server is using `ImageSharpConverter` |
+| [rotate] | <code>string</code> \| <code>number</code> | For `image`, rotate the image by angle `{auto}{90}{180}{270}`,    if `auto` is set, the angle will be detected by gravity from EXIF |
+| [quality] | <code>number</code> | For`image`, set the output image quality 0 - 100, available for format `jpeg`, `tiff`, `webp` |
 
 **Example**  
 Get a thumbnail of size 32px
