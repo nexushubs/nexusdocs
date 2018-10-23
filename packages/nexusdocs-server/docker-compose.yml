@@ -6,12 +6,14 @@ version: '2.0'
 services:
 
   mongo:
+    container_name: nexusdocs-mongodb
     image: mongo:3.6
     restart: always
     volumes:
       - ./database:/data/db:rw
 
   nds:
+    container_name: nexusdocs-server
     image: nexushubs/nexusdocs
     restart: always
     environment:
@@ -25,5 +27,6 @@ services:
       - unoconv
 
   unoconv:
+    container_name: nexusdocs-unoconv
     image: alphakevin/unoconv-server
     restart: always
