@@ -18,13 +18,13 @@ api.param('namespace', wrap(async (req, res, next) => {
   if (!namespaceObj) {
     throw new ApiError(404, null, 'Namespace not Found');
   }
-  req.data.namespace = namespaceObj;
+  res.locals.namespace = namespaceObj;
   next();
 }));
 
 // disable auth for GET APIs if namespace is public
 const needAuth = auth => {
-  const { namespace } = auth.req.data;
+  const { namespace } = auth.res.locals;
   return !namespace.isPublic;
 };
 
@@ -42,26 +42,26 @@ api.post('/', checkAuth({ role: 'admin' }), wrap(async (req, res, next) => {
 }));
 
 api.get('/:namespace', checkAuth({ needAuth }), wrap(async (req, res, next) => {
-  const { namespace } = req.data;
+  const { namespace } = res.locals;
   res.send(namespace.data());
 }));
 
 api.put('/:namespace', checkAuth({ role: 'admin' }), wrap(async (req, res, next) => {
-  const { namespace } = req.data;
+  const { namespace } = res.locals;
   const data = req.body;
   await namespace.update(data);
   res.send({});
 }));
 
 api.delete('/:namespace', checkAuth({ role: 'admin' }), wrap(async (req, res, next) => {
-  const { namespace } = req.data;
+  const { namespace } = res.locals;
   await namespace.delete();
   res.send({});
 }));
 
 api.post('/:namespace/urls', checkAuth(), wrap(async (req, res, next) => {
   const { File } = req.model();
-  const { namespace } = req.data;
+  const { namespace } = res.locals;
   const { e } = req.query;
   const { download, origin, expires: _expires, files: _files } = req.body;
   const fileIds = _.uniq(_files);
@@ -87,7 +87,7 @@ api.post('/:namespace/urls', checkAuth(), wrap(async (req, res, next) => {
 }));
 
 api.post('/:namespace/truncate', checkAuth(), wrap(async (req, res, next) => {
-  const { namespace } = req.data;
+  const { namespace } = res.locals;
   await namespace.truncate();
   res.send({});
 }));
@@ -138,7 +138,7 @@ api.param('files_id', wrap(async (req, res, next) => {
   if (!fileObj) {
     throw new ApiError(404, null, 'File not Found');
   }
-  req.data.file = fileObj;
+  res.locals.file = fileObj;
   next();
 }));
 
@@ -147,7 +147,7 @@ api.get([
   '/:namespace/files/:files_id/download',
 ], checkAuth({ needAuth }),
 wrap(async (req, res, next) => {
-  const { namespace, file } = req.data;
+  const { namespace, file } = res.locals;
   const { download: _download, origin: _origin, e } = req.query;
   const { contentType, filename, size, store_id } = file;
   const download = (/download$/.test(req.path) || boolean(_download));
@@ -175,7 +175,7 @@ wrap(async (req, res, next) => {
 }));
 
 api.get('/:namespace/files/:files_id/original-url', checkAuth({ needAuth }), wrap(async (req, res, next) => {
-  const { namespace, file } = req.data;
+  const { namespace, file } = res.locals;
   const { download: _download } = req.query;
   const { contentType, filename, size } = file;
   const download = boolean(_download);
@@ -193,14 +193,14 @@ api.get('/:namespace/files/:files_id/original-url', checkAuth({ needAuth }), wra
 }));
 
 api.delete('/:namespace/files/:files_id', checkAuth(), wrap(async (req, res, next) => {
-  const { namespace, file } = req.data;
+  const { namespace, file } = res.locals;
   const { files_id } = req.params;
   await namespace.deleteFile(file);
   res.send({});
 }));
 
 api.get('/:namespace/files/:files_id/info', checkAuth({ needAuth }), wrap(async (req, res, next) => {
-  const { file } = req.data;
+  const { file } = res.locals;
   const store = await file.getStore();
   const data = {
     _id: file._id,
@@ -215,7 +215,7 @@ api.get('/:namespace/files/:files_id/info', checkAuth({ needAuth }), wrap(async 
 
 api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth }), wrap(async (req, res, next) => {
   const { FileCache } = req.service();
-  const { namespace, file } = req.data;
+  const { namespace, file } = res.locals;
   const { commands } = req.params;
   const download = boolean(req.query.download);
   const origin = boolean(req.query.origin);
@@ -252,7 +252,7 @@ api.get('/:namespace/archive', checkAuth(), wrap(async (req, res, next) => {
   if (!/\.zip$/.test(filename)) {
     filename = `${filename}.zip`;
   }
-  const { namespace } = req.data;
+  const { namespace } = res.locals;
   const archiveStream = await namespace.createArchiveStream(files);
   const contentType = mime.lookup(filename);
   res.set('Content-Type', contentType);
@@ -262,7 +262,7 @@ api.get('/:namespace/archive', checkAuth(), wrap(async (req, res, next) => {
 
 api.post('/:namespace/archives', checkAuth(), wrap(async (req, res, next) => {
   const { files, filename } = req.body;
-  const { namespace } = req.data;
+  const { namespace } = res.locals;
   const archive = await namespace.createArchive(files, filename);
   res.send(archive.data());
 }));
@@ -274,12 +274,12 @@ api.param('archive_id', wrap(async (req, res, next, archiveId) => {
   if (!archive) {
     throw new ApiError(404, 'archive not found');
   }
-  req.data.archive = archive;
+  res.locals.archive = archive;
   next();
 }))
 
 api.get('/:namespace/archives/:archive_id', checkAuth({ needAuth }), wrap(async (req, res, next) => {
-  const { namespace, archive } = req.data;
+  const { namespace, archive } = res.locals;
   const { filename, store_id, size } = archive;
   const bucket = await namespace.getBucket();
   const downloadStream = await bucket.openDownloadStream(store_id);

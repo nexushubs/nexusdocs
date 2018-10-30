@@ -17,7 +17,7 @@ export class ResumableStorage {
           });
           return;
         }
-        const { namespace } = req.data;
+        const { namespace } = res.locals;
         try {
           const uploadOptions = {
             filename: status.filename,

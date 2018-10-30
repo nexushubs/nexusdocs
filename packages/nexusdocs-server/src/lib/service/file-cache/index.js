@@ -43,9 +43,12 @@ export default class FileCache extends BaseService {
 
   async initCache() {
     await this.initFSCache();
+    const {
+      updateCacheInterval = UPDATE_CACHE_INTERVAL
+    } = this.options; 
     this.memCacheTimer = setInterval(() => {
       this.updateCache();
-    }, UPDATE_CACHE_INTERVAL * 1000);
+    }, updateCacheInterval * 1000);
     return this.updateCache();
   }
 

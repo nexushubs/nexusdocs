@@ -14,7 +14,7 @@ export default function createRestApi(app) {
   api.use((req, res, next) => {
     app.bindLoader(req);
     res.set('X-Powered-By', 'nexusdocs-server');
-    req.data = {};
+    res.locals = {};
     const originalUrl = req.get('X-Original-URI') || req.get('X-Original-URL') || req.originalUrl;
     const protocol = req.get('X-Forwarded-Proto') || req.protocol;
     req.fullUrl = `${protocol}://${req.get('host')}${originalUrl}`;

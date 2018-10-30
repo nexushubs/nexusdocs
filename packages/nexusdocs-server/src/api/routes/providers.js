@@ -18,7 +18,7 @@ api.param('providers_id', wrap(async (req, res, next) => {
   if (!doc) {
     throw new ApiError(404);
   }
-  req.data.doc = doc;
+  res.locals.doc = doc;
   next();
 }));
 
@@ -36,7 +36,7 @@ api.post('/', wrap(async (req, res, next) => {
 }));
 
 api.get('/:providers_id', wrap(async (req, res, next) => {
-  res.send(req.data.doc);
+  res.send(res.locals.doc);
 }));
 
 api.put('/:providers_id', wrap(async (req, res, next) => {

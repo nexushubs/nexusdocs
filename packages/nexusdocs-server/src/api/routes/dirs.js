@@ -18,7 +18,7 @@ api.param('namespaces_id', wrap(async (req, res, next) => {
   if (!doc) {
     throw new ApiError(404, 'Namespace not Found');
   }
-  req.data.namespace = namespace;
+  res.locals.namespace = namespace;
   next();
 }));
 
@@ -29,7 +29,7 @@ api.param('path', wrap(async (req, res, next) => {
   if (!doc) {
     throw new ApiError(404, 'Dir not Found');
   }
-  req.data.Dir = doc;
+  res.locals.Dir = doc;
   next();
 }));
 
@@ -47,7 +47,7 @@ api.post('/:namespaces_id', wrap(async (req, res, next) => {
 }));
 
 api.get('/:namespaces_id/:path', wrap(async (req, res, next) => {
-  res.send(req.data.doc);
+  res.send(res.locals.doc);
 }));
 
 api.put('/:namespaces_id/:path', wrap(async (req, res, next) => {

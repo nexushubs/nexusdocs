@@ -7,7 +7,7 @@ export class BucketStorage {
   async _handleFile(req, file, callback) {
     try {
       const md5 = req.body.md5 || req.query.md5;
-      const { namespace } = req.data;
+      const { namespace } = res.locals;
       const uploadOptions = {
         filename: file.originalname,
         md5,
