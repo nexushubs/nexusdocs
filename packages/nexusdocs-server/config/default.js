@@ -22,6 +22,9 @@ module.exports = {
           disabled: true,
           thumbSize: 48,
         },
+        TextParser: {
+          maxLength: 5 * 1024 * 1024,
+        },
         ZipParser: {
           disabled: true,
         },

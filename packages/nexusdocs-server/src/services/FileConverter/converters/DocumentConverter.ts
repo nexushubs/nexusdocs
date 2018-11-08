@@ -6,11 +6,11 @@ import { PassThrough } from 'stream';
 
 import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
-import { IFileConverter } from '../types';
+import { IFileConverter, TConvertingOption } from '../types';
 
 export default class DocumentConverter extends BaseConverter implements IFileConverter {
 
-  public readonly extensions = [
+  static readonly extensions = [
     'doc',
     'docx',
     'xls',
@@ -19,16 +19,17 @@ export default class DocumentConverter extends BaseConverter implements IFileCon
     'pptx',
   ];
 
-  public readonly formats = [
+  static readonly formats = [
     'pdf',
+    'txt',
   ];
 
-  public readonly formatMap = {
+  static readonly formatMap = {
   };
 
   private commands = [];
   
-  prepare(command: string, options: string) {
+  prepare(command: string, options: TConvertingOption) {
     const method = `_${command}`;
     if (!this[method]) {
       throw new ApiError(400, null, 'DocumentConverter: invalid command');
@@ -40,7 +41,7 @@ export default class DocumentConverter extends BaseConverter implements IFileCon
   }
 
   _format(format) {
-    if (!this.formats.includes(format)) {
+    if (!DocumentConverter.formats.includes(format)) {
       throw new ApiError(400, null, 'DocumentConverter: unsupported format');
     }
     this.format = format;

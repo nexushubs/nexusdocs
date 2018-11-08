@@ -150,7 +150,7 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     } else {
       this.prepareData(data);
     }
-    await this.collection.update(query, { $set: this.data() });
+    await this.collection.updateOne(query, { $set: this.data() });
     return this;
   }
  

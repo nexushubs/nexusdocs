@@ -1,10 +1,9 @@
 import * as _ from 'lodash';
 import * as sharp from 'sharp';
-import { Readable } from 'stream';
 
 import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
-import { IFileConverter } from '../types';
+import { IFileConverter, TConvertingOption } from '../types';
 
 // Resize command pattern
 // http://www.graphicsmagick.org/GraphicsMagick.html#details-resize
@@ -13,7 +12,7 @@ const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/;
 
 export default class ImageSharpConverter extends BaseConverter implements IFileConverter {
 
-  public extensions = [
+  static extensions = [
     'gif',
     'jpeg',
     'jpg',
@@ -23,14 +22,14 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
     'webp',
   ];
 
-  public formats = [
+  static formats = [
     'jpeg',
     'png',
     'webp',
     'tiff',
   ];
 
-  public formatMap = {
+  static formatMap = {
     jpg: 'jpeg',
   };
 
@@ -41,7 +40,7 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
     this.commands.push([name, ...args])
   }
 
-  prepare(command: string, options: string) {
+  prepare(command: string, options: TConvertingOption) {
     const method = `_${command}`;
     if (!this[method]) {
       throw new ApiError(400, null, 'ImageConverter: invalid command');
@@ -84,7 +83,7 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
   }
 
   _format(format: string) {
-    if (!this.formats.includes(format)) {
+    if (!ImageSharpConverter.formats.includes(format)) {
       throw new ApiError(400, null, 'ImageConverter: unsupported format');
     }
     this.format = format;

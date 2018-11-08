@@ -174,15 +174,12 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
       throw new Error('could not delete file on none instance');
     }
     const { File, FileStore } = this.models;
-    let file: IFile;
-    if (!_.isObject(file)) {
-      file = await File.get(file);
-    };
+    let file: IFile = _.isString(fileId) ? await File.get(fileId) : fileId;
     if (!(file instanceof File.constructor)) {
       file = File.getInstance(file);
     }
     const info = file.data();
-    const count = await File.collection.count({
+    const count = await File.collection.countDocuments({
       _id: { $ne: info._id },
       namespace: this.data('name'),
       store_id: info.store_id,

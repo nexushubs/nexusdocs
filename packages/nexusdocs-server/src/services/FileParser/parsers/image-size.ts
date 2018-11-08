@@ -4,8 +4,8 @@ import { IFileParser } from '../types';
 
 export default class ImageSizeParser extends BaseParser implements IFileParser {
 
-  public key = 'image';
-  public extensions = [
+  static key = 'image';
+  static extensions = [
     'bmp',
     'cur',
     'gif',
@@ -19,7 +19,7 @@ export default class ImageSizeParser extends BaseParser implements IFileParser {
     'svg',
     'dds',
   ];
-  public needBuffer = true;
+  static needBuffer = true;
 
   async parse() {
     const { buffer } = this;

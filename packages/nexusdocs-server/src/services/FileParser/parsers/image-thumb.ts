@@ -6,14 +6,14 @@ import { IFileParser } from '../types';
 
 export default class ImageThumbParser extends BaseParser implements IFileParser {
 
-  public key = 'image';
-  public extensions = [
+  static key = 'image';
+  static extensions = [
     'gif',
     'jpeg',
     'jpg',
     'png',
   ];
-  public needBuffer = false;
+  static needBuffer = false;
   protected options: any;
 
   init(options) {

@@ -4,8 +4,10 @@ import { Readable } from 'stream';
 
 export type ConverterClassType = typeof ImageSharpConverter | typeof ImageGMConverter | typeof DocumentConverter;
 
+export type TConvertingOption = string | number;
+
 export interface IFileConverter {
-  prepare(command: string, options: string): void;
+  prepare(command: string, options: TConvertingOption): void;
 }
 
 export interface IFileData {
@@ -13,6 +15,12 @@ export interface IFileData {
   stream: Readable;
 }
 
+export interface IConvertingOptions {
+  [key: string]: TConvertingOption;
+}
+
+export type TConvertingOptionPair = [string, TConvertingOption];
+
 export interface IFileConverterService extends IBaseService {
-  convert(inputStream: Readable, filename: string, commands: string): Promise<IFileData>;
+  convert(inputStream: Readable, filename: string, commands: string | IConvertingOptions): Promise<IFileData>;
 }

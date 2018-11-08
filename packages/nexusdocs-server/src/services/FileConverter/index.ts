@@ -7,8 +7,9 @@ import { getExtension } from '../../lib/util';
 import { ApiError } from '../../lib/errors';
 import BaseService from '../BaseService';
 import * as converterClasses from './converters';
-import { ConverterClassType, IFileConverterService } from './types';
+import { ConverterClassType, IFileConverterService, TConvertingOptionPair } from './types';
 import { Readable } from 'stream';
+import { IConvertingOptions } from '../Store/types';
 
 export default class FileConverter extends BaseService implements IFileConverterService {
 
@@ -25,7 +26,7 @@ export default class FileConverter extends BaseService implements IFileConverter
       if (options.disabled) {
         return;
       }
-      _.each(Converter.prototype.extensions, ext => {
+      _.each(Converter.extensions, ext => {
         this.converters[ext] = Converter;
       });
     });
@@ -46,10 +47,7 @@ export default class FileConverter extends BaseService implements IFileConverter
     return options;
   }
 
-  /**
-   * Convert file format
-   */
-  async convert(inputStream: Readable, filename: string, commands: string) {
+  async convert(inputStream: Readable, filename: string, commands: string | IConvertingOptions) {
     const { FileCache } = this.services;
     const ext = getExtension(filename).toLowerCase();
     try {
@@ -63,7 +61,7 @@ export default class FileConverter extends BaseService implements IFileConverter
         buffer = await getStream.buffer(inputStream);
       }
       const converter = new Converter(inputStream, filename, buffer, options);
-      const commandParts = _.chunk(commands.split('/'), 2);
+      const commandParts = (_.isString(commands) ? _.chunk(commands.split('/'), 2) : _.toPairs(commands)) as TConvertingOptionPair[];
       commandParts.forEach(([command, options]) => {
         converter.prepare(command, options);
       });

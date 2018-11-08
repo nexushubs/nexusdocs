@@ -24,9 +24,14 @@ export interface ZipInfo {
   entries: ZipFileInfo[];
 }
 
+export interface TextInfo {
+  content: string;
+}
+
 export interface FileMetaData {
   image?: ImageInfo;
   zip?: ZipInfo;
+  text?: TextInfo;
 }
 
 export interface IFileParserService extends IBaseService {
@@ -34,8 +39,5 @@ export interface IFileParserService extends IBaseService {
 }
 
 export interface IFileParser {
-  key: string;
-  extensions: string[];
-  needBuffer: boolean;
   parse(): Promise<any>;
 }

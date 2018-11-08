@@ -24,7 +24,7 @@ export default class FileParser extends BaseService {
       if (options.disabled) {
         return;
       }
-      _.each(Parser.prototype.extensions, ext => {
+      _.each(Parser.extensions, ext => {
         if (!this.parsers[ext]) {
           this.parsers[ext] = [];
         }

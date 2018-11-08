@@ -3,7 +3,7 @@ import * as gm from 'gm';
 
 import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
-import { IFileConverter } from '../types';
+import { IFileConverter, TConvertingOption } from '../types';
 
 // Resize command pattern
 // http://www.graphicsmagick.org/GraphicsMagick.html#details-resize
@@ -12,7 +12,7 @@ const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/
 
 export default class ImageGMConverter extends BaseConverter implements IFileConverter {
 
-  public extensions = [
+  static extensions = [
     'bmp',
     'cur',
     'gif',
@@ -27,21 +27,21 @@ export default class ImageGMConverter extends BaseConverter implements IFileConv
     'dds',
   ];
 
-  public formats = [
+  static formats = [
     'jpeg',
     'gif',
     'png',
   ];
 
-  public formatMap = {
+  static formatMap = {
     jpg: 'jpeg',
   };
 
-  public needBuffer = true;
+  static needBuffer = true;
 
   private commands = [];
 
-  prepare(command: string, options: string) {
+  prepare(command: string, options: TConvertingOption) {
     const method = `_${command}`;
     if (!this[method]) {
       throw new ApiError(400, null, 'ImageConverter: invalid command');
@@ -68,7 +68,7 @@ export default class ImageGMConverter extends BaseConverter implements IFileConv
   }
 
   _format(format: string) {
-    if (!this.formats.includes(format)) {
+    if (!ImageGMConverter.formats.includes(format)) {
       throw new ApiError(400, null, 'ImageConverter: unsupported format');
     }
     this.format = format;

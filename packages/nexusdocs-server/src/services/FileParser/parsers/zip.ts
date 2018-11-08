@@ -4,11 +4,11 @@ import { IFileParser } from '../types';
 
 export default class ZipParser extends BaseParser implements IFileParser {
 
-  public key = 'zip';
-  public extensions = [
+  static key = 'zip';
+  static extensions = [
     'zip',
   ];
-  public needBuffer = false;
+  static needBuffer = false;
 
   parse() {
     const { stream } = this;
