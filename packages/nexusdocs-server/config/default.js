@@ -33,7 +33,7 @@ module.exports = {
           disabled: true,
         },
         DocumentConverter: {
-          uniconvServerURL: 'http://127.0.0.1:5000',
+          unoconvServerURL: 'http://127.0.0.1:5000',
         },
       }
     }

@@ -26,7 +26,7 @@ module.exports = {
     FileConverter: {
       converters: {
         DocumentConverter: {
-          uniconvServerURL: 'UNOCONV_SERVER_URL',
+          unoconvServerURL: 'UNOCONV_SERVER_URL',
         },
       }
     }

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es5",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "api/*": ["./api/*"],
+      "cli/*": ["./cli/*"],
+      "models/*": ["./models/*"],
+      "services/*": ["./services/*"],
+      "types/*": ["./types/*"],
+      "index/*": ["./index/*"],
+    },
+    "lib": [
+      "esnext"
+    ],
+  },
+}
