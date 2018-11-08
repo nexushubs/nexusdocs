@@ -15,7 +15,7 @@ User Documentation
 ### Install as npm package:
 
 ```bash
-npm install nexushubs-server
+yarn add nexushubs-server
 ```
 
 ### Install from source code:
@@ -23,7 +23,7 @@ npm install nexushubs-server
 ```bash
 git clone https://github.com/nexushubs/nexusdocs.git
 cd packages/nexusdocs-server
-npm install
+yarn
 ```
 
 ### Install default data:
