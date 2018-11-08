@@ -7,7 +7,7 @@ Client-SDK for [nexusdocs-server](https://github.com/nexushubs/nexusdocs/tree/ma
 ## Use
 
 ```bash
-npm install nexusdocs-client
+yarn add nexusdocs-client
 ```
 
 ## Modules

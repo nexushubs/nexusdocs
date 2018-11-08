@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es6",
+    "resolveJsonModule": true,
+    "lib": [
+      "esnext"
+    ],
+    "outDir": "../lib",
+  },
+}
