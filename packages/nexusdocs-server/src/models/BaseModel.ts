@@ -1,8 +1,8 @@
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { Db, Collection, FindOneOptions, FilterQuery, ObjectId } from 'mongodb';
 
-import { ValidationError, buildValidationError } from 'lib/errors';
-import { buildValidator, Validator } from 'lib/validator';
+import { ValidationError, buildValidationError } from '../lib/errors';
+import { buildValidator, Validator } from '../lib/validator';
 import Base from '../lib/Base';
 import { IBaseModel, IDocData, IGetOneQueryFilter } from './types';
 
@@ -176,7 +176,7 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
   async delete(id) {
     const _id = this.prepareId(id);
     await this.beforeDelete(_id);
-    await this.collection.remove({ _id });
+    await this.collection.deleteOne({ _id });
     if (!id) {
       this._deleted = true;
     }

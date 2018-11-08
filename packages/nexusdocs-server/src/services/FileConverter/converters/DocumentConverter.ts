@@ -1,10 +1,10 @@
-import _ from 'lodash';
-import mime from 'mime-types'
-import request from 'request';
-import contentDisposition from 'content-disposition';
+import * as _ from 'lodash';
+import * as mime from 'mime-types'
+import * as request from 'request';
+import * as contentDisposition from 'content-disposition';
 import { PassThrough } from 'stream';
 
-import { ApiError } from 'lib/errors';
+import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
 import { IFileConverter } from '../types';
 

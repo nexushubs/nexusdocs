@@ -1,17 +1,17 @@
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { Writable } from 'stream';
-import archiver from 'archiver';
+import * as archiver from 'archiver';
 import { ZlibOptions } from 'zlib';
 import getNewFilename from 'new-filename';
 import { PassThrough } from 'stream';
-import qs from 'qs';
+import * as qs from 'qs';
 
-import BaseModel from 'models/BaseModel';
-import { bucketName, isObjectId } from 'lib/schema';
-import { ValidationError, buildValidationError } from 'lib/errors';
-import { ApiError } from 'lib/errors';
+import BaseModel from '../models/BaseModel';
+import { bucketName, isObjectId } from '../lib/schema';
+import { ValidationError, buildValidationError } from '../lib/errors';
+import { ApiError } from '../lib/errors';
 import { INamespace, INamespaceData, IFile, IGetUrlOptions } from './types';
-import { IUploadStreamOptions, IStoreBucket, IUrlOptions } from 'services/Store/types';
+import { IUploadStreamOptions, IStoreBucket, IUrlOptions } from '../services/Store/types';
 
 export default class Namespace extends BaseModel<INamespace, INamespaceData> {
 

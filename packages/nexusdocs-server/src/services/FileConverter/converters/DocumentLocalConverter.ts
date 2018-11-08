@@ -1,8 +1,8 @@
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { spawn } from 'child_process';
 import { PassThrough } from 'stream';
 
-import { ApiError } from 'lib/errors';
+import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
 import { IFileConverter } from '../types';
 

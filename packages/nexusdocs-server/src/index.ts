@@ -1,8 +1,8 @@
 import 'source-map-support/register';
-import config from 'config';
+import * as config from 'config';
 import Application from './lib/Application';
-import packageJson from '../package.json';
-import { ApplicationOptions } from 'types/index';
+import { ApplicationOptions } from './types';
+const packageJson = require('../package.json');
 
 export default function createServer(options: ApplicationOptions = null) {
   return new Application(options);

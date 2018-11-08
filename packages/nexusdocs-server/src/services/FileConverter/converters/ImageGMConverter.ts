@@ -1,7 +1,7 @@
-import _ from 'lodash';
-import gm from 'gm';
+import * as _ from 'lodash';
+import * as gm from 'gm';
 
-import { ApiError } from 'lib/errors';
+import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
 import { IFileConverter } from '../types';
 

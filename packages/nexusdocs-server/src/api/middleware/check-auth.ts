@@ -1,11 +1,11 @@
-import _ from 'lodash';
-import crypto from 'crypto';
+import * as _ from 'lodash';
+import * as crypto from 'crypto';
 import { Request, Response } from 'express'
 import { wrap } from 'async-middleware';
 
-import { ApiError } from 'lib/errors';
-import { urlSafeBase64Encode, sortedJSONStringify } from 'lib/util';
-import Base from 'lib/Base';
+import { ApiError } from '../../lib/errors';
+import { urlSafeBase64Encode, sortedJSONStringify } from '../../lib/util';
+import Base from '../../lib/Base';
 
 export enum AuthFrom {
   Auto = 'auto',

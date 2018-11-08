@@ -1,8 +1,8 @@
-import _ from 'lodash';
-import sharp from 'sharp';
+import * as _ from 'lodash';
+import * as sharp from 'sharp';
 import { Readable } from 'stream';
 
-import { ApiError } from 'lib/errors';
+import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
 import { IFileConverter } from '../types';
 

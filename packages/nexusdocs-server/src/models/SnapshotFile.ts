@@ -1,4 +1,4 @@
-import BaseModel from 'models/BaseModel';
+import BaseModel from '../models/BaseModel';
 import { ISnapshotFile, ISnapshotFileData } from './types';
 
 export default class SnapshotFile extends BaseModel<ISnapshotFile, ISnapshotFileData> {

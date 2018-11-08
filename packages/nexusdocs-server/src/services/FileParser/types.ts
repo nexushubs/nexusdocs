@@ -1,5 +1,5 @@
-import { IBaseService } from "services/types";
-import { Readable } from "stream";
+import { IBaseService } from '../../services/types';
+import { Readable } from 'stream';
 
 export interface ImageSizeInfo {
   width?: number;

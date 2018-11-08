@@ -1,4 +1,4 @@
-import BaseModel from 'models/BaseModel';
+import BaseModel from '../models/BaseModel';
 import { IDirData, IDir } from './types';
 
 export default class Dir extends BaseModel<IDir, IDirData> {

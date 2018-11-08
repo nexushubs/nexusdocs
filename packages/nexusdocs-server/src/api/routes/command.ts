@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { wrap } from 'async-middleware';
 
-import { ApiError } from 'lib/errors';
-import { checkAuth } from 'api/middleware';
+import { ApiError } from '../../lib/errors';
+import { checkAuth } from '../middleware';
 
 const api = Router();
 

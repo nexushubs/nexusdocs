@@ -1,4 +1,4 @@
-import imageSize from 'image-size';
+import * as imageSize from 'image-size';
 import BaseParser from '../BaseParser';
 import { IFileParser } from '../types';
 

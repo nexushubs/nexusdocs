@@ -1,17 +1,17 @@
 import 'source-map-support/register';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import Table from 'cli-table';
 import { ObjectId } from 'mongodb';
 
-import Application from 'lib/Application';
-import { ApiError, ValidationError } from 'lib/errors';
-export { ApiError } from 'lib/errors';
+import Application from '../lib/Application';
+import { ApiError, ValidationError } from '../lib/errors';
+export { ApiError } from '../lib/errors';
 
 const MAX_CELL_CONTENT = 256;
 
 let app = null;
 
-export async function getApp() {
+export async function getApp(): Promise<Application> {
   if (!app) {
     app = new Application({ restful: { enabled: false }});
     app.on('error', err => console.error);
@@ -22,7 +22,7 @@ export async function getApp() {
   return app;
 }
 
-export async function run(fn) {
+export async function run(fn: (app: Application) => void) {
   const app = await getApp();
   try {
     await fn(app);

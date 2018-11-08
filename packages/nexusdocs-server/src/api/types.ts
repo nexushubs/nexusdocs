@@ -1,5 +1,5 @@
-import express from 'express';
-import Application from 'lib/Application';
+import * as express from 'express';
+import Application from '../lib/Application';
 
 export interface IRequestContext {
   app: Application;

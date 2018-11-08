@@ -1,8 +1,8 @@
-import multer from 'multer';
+import * as multer from 'multer';
 
 import createResumableStorage from './resumable-storage';
 import createBucketStorage from './bucket-storage';
-import { ApiError } from 'lib/errors';
+import { ApiError } from '../../lib/errors';
 
 const storages = {
   bucket: createBucketStorage(),

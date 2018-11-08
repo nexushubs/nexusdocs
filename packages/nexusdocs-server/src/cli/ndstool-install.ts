@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import config from 'config';
-import program from 'commander';
+import * as _ from 'lodash';
+import * as config from 'config';
+import * as program from 'commander';
 import {
   run,
   printCollection,
@@ -13,7 +13,7 @@ program
 function install() {
   run(async app => {
     const { db } = app;
-    const { Provider, Namespace, Client } = app.model();
+    const { Provider, Namespace, Client } = app.models;
     let database = program.database;
     if (!program.database) {
       const { database: _database } = config.get('Application');

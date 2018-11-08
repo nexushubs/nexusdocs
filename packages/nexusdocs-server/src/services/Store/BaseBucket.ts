@@ -1,11 +1,11 @@
-import uuid from 'uuid';
-import mimeTypes from 'mime-types';
+import * as uuid from 'uuid';
+import * as mime from 'mime-types';
 import { Readable } from 'stream';
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 import UploadStream from './UploadStream';
 import BaseProvider from './BaseProvider';
-import Base from 'lib/Base';
+import Base from '../../lib/Base';
 import { IUrlOptions, IBaseBucket, IConvertingOptions } from './types';
 
 export default class BaseBucket extends Base implements IBaseBucket {
@@ -40,7 +40,7 @@ export default class BaseBucket extends Base implements IBaseBucket {
     const id = uuid.v4();
     const uploadOptions = {
       filename: filename || id,
-      contentType: contentType || mimeTypes.lookup(filename) || 'application/octet-stream',
+      contentType: contentType || mime.lookup(filename) || 'application/octet-stream',
     };
     let providerUploadStream = null;
     if (!skip) {

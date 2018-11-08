@@ -1,9 +1,9 @@
-import { IBase } from "types";
+import { IBase } from '../types';
 import { Collection, FindOneOptions, FilterQuery, ObjectId } from 'mongodb';
-import { Validator } from 'lib/validator';
-import { Writable, Readable } from "stream";
+import { Validator } from '../lib/validator';
+import { Writable, Readable } from 'stream';
 import { Archiver } from 'archiver';
-import { IUrlOptions } from "services/Store/types";
+import { IUrlOptions } from '../services/Store/types';
 
 export interface IDocData {
   _id?: ObjectId|string;

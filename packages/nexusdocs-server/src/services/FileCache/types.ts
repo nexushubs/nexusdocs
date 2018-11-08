@@ -1,6 +1,6 @@
 import { Readable } from 'stream'
-import { ICache } from 'models/types';
-import { IBaseService } from 'services/types';
+import { ICache } from '../../models/types';
+import { IBaseService } from '../../services/types';
 
 export interface ICacheObject {
   contentType: string;

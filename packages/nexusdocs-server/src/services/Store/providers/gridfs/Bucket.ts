@@ -1,6 +1,7 @@
 import { GridFSBucket, Db } from 'mongodb';
-import BaseBucket from 'services/Store/BaseBucket';
-import { IStoreBucket } from 'services/Store/types';
+
+import { IStoreBucket } from '../../types';
+import BaseBucket from '../../BaseBucket';
 
 
 export default class GridFSProviderBucket extends BaseBucket implements IStoreBucket {
@@ -42,8 +43,8 @@ export default class GridFSProviderBucket extends BaseBucket implements IStoreBu
   truncate() {
     const { bucketName } = this;
     return Promise.all([
-      this._db.collection(`${bucketName}.files`).remove({}),
-      this._db.collection(`${bucketName}.chunks`).remove({}),
+      this._db.collection(`${bucketName}.files`).deleteMany({}),
+      this._db.collection(`${bucketName}.chunks`).deleteMany({}),
     ]);
   }
 

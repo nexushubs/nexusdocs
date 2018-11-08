@@ -1,5 +1,5 @@
-import { Readable, Writable } from "stream";
-import { IBaseService } from "services/types";
+import { Readable, Writable } from 'stream';
+import { IBaseService } from '../../services/types';
 
 export type TIdentifier = string;
 

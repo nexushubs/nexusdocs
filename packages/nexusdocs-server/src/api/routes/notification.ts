@@ -3,9 +3,9 @@ import { wrap } from 'async-middleware';
 
 const api = Router();
 
-import { ApiError } from 'lib/errors';
-import { checkAuth } from 'api/middleware';
-import { UserRole } from 'api/middleware/check-auth';
+import { ApiError } from '../../lib/errors';
+import { checkAuth } from '../middleware';
+import { UserRole } from '../middleware/check-auth';
 
 // TODO
 

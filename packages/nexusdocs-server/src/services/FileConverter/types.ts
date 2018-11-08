@@ -1,6 +1,6 @@
-import { ImageSharpConverter, ImageGMConverter, DocumentConverter } from "./converters";
-import { IBaseService } from "services/types";
-import { Readable } from "stream";
+import { ImageSharpConverter, ImageGMConverter, DocumentConverter } from './converters';
+import { IBaseService } from '../../services/types';
+import { Readable } from 'stream';
 
 export type ConverterClassType = typeof ImageSharpConverter | typeof ImageGMConverter | typeof DocumentConverter;
 

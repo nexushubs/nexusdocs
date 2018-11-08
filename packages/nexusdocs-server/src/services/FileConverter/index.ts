@@ -1,11 +1,11 @@
-import _ from 'lodash';
-import config from 'config';
-import getStream from 'get-stream';
-import mime from 'mime-types';
+import * as _ from 'lodash';
+import * as config from 'config';
+import * as getStream from 'get-stream';
+import * as mime from 'mime-types';
 
-import BaseService from 'services/BaseService';
-import { getExtension } from 'lib/util';
-import { ApiError } from 'lib/errors';
+import { getExtension } from '../../lib/util';
+import { ApiError } from '../../lib/errors';
+import BaseService from '../BaseService';
 import * as converterClasses from './converters';
 import { ConverterClassType, IFileConverterService } from './types';
 import { Readable } from 'stream';

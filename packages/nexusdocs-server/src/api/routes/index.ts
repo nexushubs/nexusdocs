@@ -1,5 +1,4 @@
-import express from 'express';
-import packageJson from '../../../package.json';
+import * as express from 'express';
 
 const api = express.Router();
 
@@ -21,6 +20,7 @@ routes.forEach(route => {
 });
 
 api.get('/', (req, res, next) => {
+  const packageJson = require('../../../package.json');
   res.send({
     server: packageJson.name,
     version: packageJson.version,

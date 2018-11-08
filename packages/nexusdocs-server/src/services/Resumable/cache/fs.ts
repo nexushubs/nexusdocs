@@ -1,8 +1,8 @@
-import fs from 'fs';
-import os from 'os';
-import util from 'util';
-import mkdirp from 'mkdirp';
-import _ from 'lodash';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as util from 'util';
+import * as mkdirp from 'mkdirp';
+import * as _ from 'lodash';
 
 import { IResumableCache, ResumableParams, TIdentifier } from '../types';
 import { Readable, Writable, PassThrough } from 'stream';

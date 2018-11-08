@@ -1,4 +1,4 @@
-import { app } from "lib/Application";
+import { app } from '../../lib/Application';
 
 export class BucketStorage {
 

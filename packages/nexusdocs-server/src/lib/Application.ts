@@ -1,16 +1,17 @@
-import path from 'path';
-import _ from 'lodash';
-import express from 'express';
-import config from 'config';
+import * as path from 'path';
+import * as _ from 'lodash';
+import * as express from 'express';
+import * as config from 'config';
 
-import packageJson from '../../package.json';
-import { connect } from 'lib/database';
-import { promisifyAll } from 'lib/util';
-import * as models from 'models';
-import * as services from 'services';
-import createRestApi from 'api';
+import { Server } from 'http';
+import { connect } from '../lib/database';
+import * as models from '../models';
+import * as services from '../services';
+import createRestApi from '../api';
 import Base from './Base.js';
-import { ApplicationOptions } from 'types';
+import { ApplicationOptions } from '../types';
+
+const packageJson = require('../../package.json');
 
 export function basePath () {
   return path.normalize(__dirname + '/..')
@@ -29,6 +30,7 @@ export default class Application extends Base {
   
   public options: ApplicationOptions = null;
   public api: express.Application = null;
+  public server: Server;
   public startTime: number = null;
   public started: boolean = false;
   public readonly version: string = (<any> packageJson).version;
@@ -74,8 +76,9 @@ export default class Application extends Base {
         // lazy loading api routes
         const api = createRestApi(this);
         this.api = api;
-        promisifyAll(api, ['listen', 'close']);
-        await api.listen(port, hostname);
+        await new Promise((resolve, reject) => {
+          this.server = api.listen(port, hostname, resolve)
+        })
       }
       this.started = true;
       this.emit('start');

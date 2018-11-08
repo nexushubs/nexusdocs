@@ -1,19 +1,18 @@
-import _ from 'lodash';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import util from 'util';
-import boolean from 'boolean';
-import mime from 'mime-types';
-import _mkdirp from 'mkdirp';
-import uuid from 'uuid';
+import * as _ from 'lodash';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import * as util from 'util';
+import * as boolean from 'boolean';
+import * as mime from 'mime-types';
+import * as _mkdirp from 'mkdirp';
+import * as uuid from 'uuid';
 import { PassThrough, Readable } from 'stream';
 
-import BaseService from 'services/BaseService';
-import { ApiError } from 'lib/errors';
-import { promisifyStream } from 'lib/util';
+import BaseService from '../BaseService';
+import { promisifyStream } from '../../lib/util';
 import { ICacheObject, ICacheOptions, IFileCacheService, TCacheBuilder } from './types';
-import { INamespace, ICache } from 'models/types';
+import { INamespace, ICache } from '../../models/types';
 
 const mkdirp = util.promisify(_mkdirp);
 
@@ -91,7 +90,7 @@ export default class FileCache extends BaseService implements IFileCacheService 
     }, Promise.resolve());
     return Promise.all([
       cleanFilePromise,
-      Cache.collection.remove(query),
+      Cache.collection.deleteMany(query),
     ]).then(() => {
       console.log(`# FileCache: ${expiredCaches.length} removed`);
     });
@@ -110,9 +109,9 @@ export default class FileCache extends BaseService implements IFileCacheService 
     const { Cache, File, FileStore } = this.models;
     const bucket = await namespace.getBucket(null);
     return Promise.all([
-      Cache.collection.remove({}),
-      File.collection.remove({ namespace: CACHE_NAMESPACE }),
-      FileStore.collection.remove({ namespace: CACHE_NAMESPACE }),
+      Cache.collection.deleteMany({}),
+      File.collection.deleteMany({ namespace: CACHE_NAMESPACE }),
+      FileStore.collection.deleteMany({ namespace: CACHE_NAMESPACE }),
       bucket.truncate(),
     ]).then(() => {
       console.log(`# FileCache: cache cleared!`);

@@ -1,4 +1,4 @@
-import { Writable, Readable } from "stream";
+import { Writable, Readable } from 'stream';
 
 export interface IFileUploadInfo {
   _id?: string;

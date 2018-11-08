@@ -1,6 +1,6 @@
 import 'source-map-support/register';
-import program from 'commander';
-import packageJson from '../../package.json';
+import * as program from 'commander';
+const packageJson = require('../../package.json');
 
 program
   .version(packageJson.version);

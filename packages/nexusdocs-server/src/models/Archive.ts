@@ -1,7 +1,7 @@
-import crypto from 'crypto';
-import uuid from 'uuid';
+import * as crypto from 'crypto';
+import * as uuid from 'uuid';
 
-import BaseModel from 'models/BaseModel';
+import BaseModel from '../models/BaseModel';
 import { IArchive, IArchiveData } from './types';
 
 export default class Archive extends BaseModel<IArchive, IArchiveData> {

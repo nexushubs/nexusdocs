@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import program from 'commander';
+import * as _ from 'lodash';
+import * as program from 'commander';
 import {
   ApiError,
   run,
@@ -18,7 +18,7 @@ program
       description: options.desc,
     };
     run(async app => {
-      const { Client } = app.model();
+      const { Client } = app.models;
       const instance = await Client.create(doc);
       printDoc(instance.data());
     });
@@ -34,12 +34,12 @@ program
       description: options.desc,
     };
     run(async app => {
-      const { Client } = app.model();
+      const { Client } = app.models;
       const client = await Client.get({ name });
       if (!client) {
         throw new ApiError(404, 'client not found');
       }
-      await client.update(update);
+      await client.update({ name }, update);
       printDoc(client.data());
     });
   });
@@ -48,7 +48,7 @@ program
   .command('update-secret <name>')
   .action((name) => {
     run(async app => {
-      const { Client } = app.model();
+      const { Client } = app.models;
       const client = await Client.get({ name });
       if (!client) {
         throw new ApiError(404, 'client not found');
@@ -62,7 +62,7 @@ program
   .command('update-auth <name>')
   .action((name) => {
     run(async app => {
-      const { Client } = app.model();
+      const { Client } = app.models;
       const client = await Client.get({ name });
       if (!client) {
         throw new ApiError(404, 'client not found');
@@ -78,7 +78,7 @@ program
   .option('-q, --quiet', 'only display names')
   .action((options) => {
     run(async app => {
-      const { Client } = app.model();
+      const { Client } = app.models;
       const list = await Client.getAll({}, {});
       if (!options.quiet) {
         printList(list)
@@ -93,7 +93,7 @@ program
   .command('info <name>')
   .action((name, options) => {
     run(async app => {
-      const { Client } = app.model();
+      const { Client } = app.models;
       const client = await Client.get({ name }, {});
       if (!client) {
         throw new ApiError(404, 'client not found');
@@ -110,7 +110,7 @@ program
   .option('-e, --entry [entry]', 'server entry', '/api')
   .action((name, options) => {
     run(async app => {
-      const { Client } = app.model();
+      const { Client } = app.models;
       const client = await Client.get({ name }, {});
       if (!client) {
         throw new ApiError(404, 'client not found');
@@ -129,8 +129,8 @@ program
   .command('remove <name>')
   .action((name, options) => {
     run(async app => {
-      const { Client } = app.model();
-      const { result } = await Client.collection.remove({ name });
+      const { Client } = app.models;
+      const { result } = await Client.collection.deleteOne({ name });
       console.log(`${result.n} items removed.`);
     });
   });

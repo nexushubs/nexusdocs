@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import gm from 'gm';
+import * as _ from 'lodash';
+import * as gm from 'gm';
 import dataurl from 'dataurl';
 import BaseParser from '../BaseParser';
 import { IFileParser } from '../types';

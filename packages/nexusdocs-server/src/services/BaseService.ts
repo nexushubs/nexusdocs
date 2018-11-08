@@ -1,5 +1,5 @@
-import EventEmitter from 'events';
-import Base from 'lib/Base';
+import * as EventEmitter from 'events';
+import Base from '../lib/Base';
 import { IBaseService } from './types';
 
 export default class BaseService extends Base implements IBaseService {

@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import program from 'commander';
-import boolean from 'boolean';
+import * as _ from 'lodash';
+import * as program from 'commander';
+import * as boolean from 'boolean';
 
 import {
   ApiError,
@@ -25,7 +25,7 @@ program
       isPublic: _.isUndefined(options.public) ? undefined : boolean(options.public),
     };
     run(async app => {
-      const { Namespace } = app.model();
+      const { Namespace } = app.models;
       const instance = await Namespace.createByProviderName(doc);
       printDoc(instance.data());
     });
@@ -45,12 +45,12 @@ program
       description: options.desc,
     };
     run(async app => {
-      const { Namespace } = app.model();
+      const { Namespace } = app.models;
       const namespace = await Namespace.get({ name });
       if (!namespace) {
         throw new ApiError(404, 'namespace not found');
       }
-      await namespace.update(update);
+      await namespace.update({ name }, update);
       printDoc(namespace.data());
     });
   });
@@ -62,7 +62,7 @@ program
   .option('-q, --quiet', 'only display names')
   .action((options) => {
     run(async app => {
-      const { Namespace } = app.model();
+      const { Namespace } = app.models;
       const list = await Namespace.getAll();
       if (!options.quiet) {
         printList(list)
@@ -77,7 +77,7 @@ program
   .command('info <name>')
   .action((name) => {
     run(async app => {
-      const { Namespace } = app.model();
+      const { Namespace } = app.models;
       const namespace = await Namespace.get({ name });
       if (!namespace) {
         throw new ApiError(404, 'namespace not found');
@@ -92,16 +92,16 @@ program
   .command('remove <name>')
   .action((name) => {
     run(async app => {
-      const { Namespace } = app.model();
+      const { Namespace } = app.models;
       const namespace = await Namespace.get({ name });
       if (!namespace) {
         throw new ApiError(404, 'namespace not found');
       }
       const info = await namespace.getStats();
-      if (info.files.count > 0 || info.stores.count > 0) {
+      if (info.files > 0 || info.stores > 0) {
         throw new ApiError(400, 'There are files in the namespace, could not remove!');
       }
-      const result = await Namespace.collection.remove({ name });
+      const result = await Namespace.collection.deleteOne({ name });
       console.log(`namespace ${namespace.name} removed!`);
     });
   });

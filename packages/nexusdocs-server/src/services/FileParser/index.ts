@@ -1,9 +1,9 @@
-import _ from 'lodash';
-import path from 'path';
-import config from 'config';
-import getStream from 'get-stream';
+import * as _ from 'lodash';
+import * as path from 'path';
+import * as config from 'config';
+import * as getStream from 'get-stream';
 
-import BaseService from 'services/BaseService';
+import BaseService from '../BaseService';
 import * as parserClasses from './parsers';
 import { Readable } from 'stream';
 

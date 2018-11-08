@@ -1,15 +1,15 @@
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { Router } from 'express';
 import { wrap } from 'async-middleware';
-import contentDisposition from 'content-disposition';
-import mime from 'mime-types';
-import boolean from 'boolean';
+import * as contentDisposition from 'content-disposition';
+import * as mime from 'mime-types';
+import * as boolean from 'boolean';
 
-import { app } from 'lib/Application';
-import { ApiError } from 'lib/errors';
-import { upload, checkAuth } from 'api/middleware';
-import { getExtension, parseQueryStringHeaders, getBasename, diffTimestampFromNow } from 'lib/util';
-import { UserRole, AuthFrom } from 'api/middleware/check-auth';
+import { app } from '../../lib/Application';
+import { ApiError } from '../../lib/errors';
+import { getExtension, parseQueryStringHeaders, getBasename, diffTimestampFromNow } from '../../lib/util';
+import { upload, checkAuth } from '../middleware';
+import { UserRole, AuthFrom } from '../middleware/check-auth';
 
 const api = Router();
 

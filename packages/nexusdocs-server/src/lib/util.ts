@@ -1,11 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import _ from 'lodash';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as _ from 'lodash';
 import { promisify } from 'es6-promisify';
-import isStream from 'is-stream';
-import JSONStringify from 'json-stable-stringify';
+import * as isStream from 'is-stream';
+import * as JSONStringify from 'json-stable-stringify';
 
-import { basePath } from 'lib/Application';
+import { basePath } from '../lib/Application';
 import { Readable } from 'stream';
 
 export const uuidRegexPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

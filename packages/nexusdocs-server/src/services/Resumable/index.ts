@@ -1,13 +1,13 @@
-import _ from 'lodash';
-import inspector from 'schema-inspector';
-import camelCase from 'camelcase';
+import * as _ from 'lodash';
+import * as inspector from 'schema-inspector';
+import * as camelCase from 'camelcase';
 
-import BaseService from 'services/BaseService';
+import BaseService from '../BaseService';
 import FSCache from './cache/fs';
-import { ValidationError, buildValidationError } from 'lib/errors';
-import { uuidRegexPattern, loadClasses, createErrorEvent } from 'lib/util';
+import { ValidationError, buildValidationError } from '../../lib/errors';
+import { uuidRegexPattern, loadClasses, createErrorEvent } from '../../lib/util';
 import { ChunkStatus, IResumableCache, ResumableParams, IStatusCache, IResumableService } from './types';
-import { ObjectPropertySchema, VarType, VarSchema } from 'types/schema';
+import { ObjectPropertySchema, VarType, VarSchema } from '../../types/schema';
 import { Readable } from 'stream';
 
 // const DriverClasses = loadClasses('lib/resumable/cache');

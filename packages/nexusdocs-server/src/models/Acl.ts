@@ -1,4 +1,4 @@
-import BaseModel from 'models/BaseModel';
+import BaseModel from '../models/BaseModel';
 import { IAcl, IAclData } from './types';
 
 export default class Acl extends BaseModel<IAcl, IAclData> {

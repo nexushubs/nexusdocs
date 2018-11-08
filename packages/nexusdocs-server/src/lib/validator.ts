@@ -1,5 +1,5 @@
-import inspector from 'schema-inspector';
-import _ from 'lodash';
+import * as inspector from 'schema-inspector';
+import * as _ from 'lodash';
 
 export class Validator {
 

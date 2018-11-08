@@ -1,8 +1,8 @@
-import { EventEmitter } from "events";
-import { Db, MongoClient } from "mongodb";
-import Application from "./Application";
-import { IModels } from "models/types";
-import { IServices } from "services/types";
+import { EventEmitter } from 'events';
+import { Db, MongoClient } from 'mongodb';
+import Application from './Application';
+import { IModels } from '../models/types';
+import { IServices } from '../services/types';
 
 const models: IModels = {}
 const services: IServices = {}

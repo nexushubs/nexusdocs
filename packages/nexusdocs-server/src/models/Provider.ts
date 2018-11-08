@@ -1,5 +1,5 @@
-import BaseModel from 'models/BaseModel';
-import { providerType, bucketName } from 'lib/schema';
+import BaseModel from '../models/BaseModel';
+import { providerType, bucketName } from '../lib/schema';
 import { ObjectId } from 'bson';
 import { IProvider, IProviderData } from './types';
 

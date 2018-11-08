@@ -1,4 +1,4 @@
-import { getExtension } from 'lib/util';
+import { getExtension } from '../../lib/util';
 import { Readable } from 'stream';
 
 export default class BaseConverter {

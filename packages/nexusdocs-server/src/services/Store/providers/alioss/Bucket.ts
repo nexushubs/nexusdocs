@@ -1,11 +1,11 @@
-import contentDisposition from 'content-disposition';
-import path from 'path';
+import * as contentDisposition from 'content-disposition';
+import * as path from 'path';
 import { PassThrough } from 'stream';
 import OSS, { PutStreamOptions } from 'ali-oss';
 
+import { IStoreBucket, IUrlOptions, IConvertingOptions } from '../../types';
+import BaseBucket from '../../BaseBucket';
 import { convert } from './Converter';
-import BaseBucket from 'services/Store/BaseBucket';
-import { IStoreBucket, IUrlOptions, IConvertingOptions } from 'services/Store/types';
 
 export default class AliOSSProviderBucket extends BaseBucket implements IStoreBucket {
 

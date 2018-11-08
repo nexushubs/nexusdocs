@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import fs from 'fs';
-import _ from 'lodash';
-import program from 'commander';
+import * as fs from 'fs';
+import * as _ from 'lodash';
+import * as program from 'commander';
 
 const CONFIG_FILE = 'config/custom-environment-variables.js';
 const ENV_FILE = '.envrc';

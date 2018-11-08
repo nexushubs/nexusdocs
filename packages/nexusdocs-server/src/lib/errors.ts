@@ -1,5 +1,5 @@
-import status from 'statuses';
-import _ from 'lodash';
+import * as status from 'statuses';
+import * as _ from 'lodash';
 
 export class ApiError extends Error {
 

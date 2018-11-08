@@ -1,12 +1,12 @@
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { Router } from 'express';
 import { wrap } from 'async-middleware';
-import contentDisposition from 'content-disposition';
+import * as contentDisposition from 'content-disposition';
 
-import { app } from 'lib/Application';
-import { ApiError } from 'lib/errors';
-import { checkAuth } from 'api/middleware';
-import { UserRole } from 'api/middleware/check-auth';
+import { app } from '../../lib/Application';
+import { ApiError } from '../../lib/errors';
+import { checkAuth } from '../middleware';
+import { UserRole } from '../middleware/check-auth';
 
 const api = Router();
 

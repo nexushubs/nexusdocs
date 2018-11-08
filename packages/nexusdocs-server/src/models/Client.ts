@@ -1,8 +1,10 @@
-import BaseModel from 'models/BaseModel';
-import util from 'util';
-import crypto from 'crypto';
-import base32Encode from 'base32-encode';
+import * as util from 'util';
+import * as crypto from 'crypto';
+import base32Encode = require('base32-encode');
+
+import BaseModel from '../models/BaseModel';
 import { IClient, IClientData } from './types';
+import request = require('request');
 
 const randomBytes = util.promisify(crypto.randomBytes);
 

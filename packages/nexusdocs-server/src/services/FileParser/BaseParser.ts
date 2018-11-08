@@ -1,4 +1,4 @@
-import { Readable } from "stream";
+import { Readable } from 'stream';
 
 export default class BaseParser {
 

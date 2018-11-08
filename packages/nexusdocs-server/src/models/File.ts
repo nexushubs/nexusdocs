@@ -1,5 +1,5 @@
-import BaseModel from 'models/BaseModel';
-import uuid from 'uuid';
+import BaseModel from '../models/BaseModel';
+import * as uuid from 'uuid';
 import { IFile, IFileData } from './types';
 
 export default class File extends BaseModel<IFile, IFileData> {

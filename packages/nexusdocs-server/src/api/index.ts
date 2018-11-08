@@ -1,6 +1,6 @@
-import express from 'express';
+import * as express from 'express';
 import { wrap } from 'async-middleware';
-import cors from 'cors';
+import * as cors from 'cors';
 
 import routes from './routes';
 import { errorHandler } from './middleware';
@@ -12,7 +12,6 @@ export default function createRestApi(app) {
 
   // bind app handlers
   api.use((req, res, next) => {
-    app.bindLoader(req);
     res.set('X-Powered-By', 'nexusdocs-server');
     res.locals = {};
     const originalUrl = req.get('X-Original-URI') || req.get('X-Original-URL') || req.originalUrl;

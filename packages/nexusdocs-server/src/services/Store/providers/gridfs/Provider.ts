@@ -20,7 +20,7 @@ export default class GridFSProvider extends BaseProvider {
 
   async init() {
     const { params } = this.options;
-    this._client = await MongoClient.connect(params.database);
+    this._client = await MongoClient.connect(params.database, { useNewUrlParser: true });
     this._db = this._client.db();
   }
 

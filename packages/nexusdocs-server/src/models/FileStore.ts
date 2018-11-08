@@ -1,4 +1,4 @@
-import BaseModel from 'models/BaseModel';
+import BaseModel from '../models/BaseModel';
 import { IFileStore, IFileStoreData } from './types';
 
 export default class FileStore extends BaseModel<IFileStore, IFileStoreData> {

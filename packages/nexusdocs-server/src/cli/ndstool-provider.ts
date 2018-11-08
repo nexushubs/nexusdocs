@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import program from 'commander';
+import * as _ from 'lodash';
+import * as program from 'commander';
 import {
   run,
   makeObject,
@@ -7,7 +7,7 @@ import {
   printList,
   printDoc,
 } from './util';
-import { ApiError } from 'lib/errors';
+import { ApiError } from '../lib/errors';
 
 program
   .command('add <name>')
@@ -24,7 +24,7 @@ program
       description: options.desc,
     };
     run(async app => {
-      const { Provider } = app.model();
+      const { Provider } = app.models;
       const instance = await Provider.create(doc);
       printDoc(instance.data());
     });
@@ -42,12 +42,12 @@ program
       description: options.desc,
     };
     run(async app => {
-      const { Provider } = app.model();
+      const { Provider } = app.models;
       const provider = await Provider.get({ name });
       if (!provider) {
         throw new ApiError(404, 'provider not found');
       }
-      await provider.update(update);
+      await provider.update({ name }, update);
       printDoc(provider.data());
     });
   });
@@ -63,7 +63,7 @@ program
       query.type = options.type;
     }
     run(async app => {
-      const { Provider } = app.model();
+      const { Provider } = app.models;
       const list = await Provider.getAll(query);
       if (!options.quiet) {
         printList(list)
@@ -78,7 +78,7 @@ program
   .command('info <name>')
   .action((name, options) => {
     run(async app => {
-      const { Provider } = app.model();
+      const { Provider } = app.models;
       const provider = await Provider.get({ name });
       if (!provider) {
         throw new ApiError(404, 'provider not found');
@@ -91,8 +91,8 @@ program
   .command('remove <name>')
   .action((name) => {
     run(async app => {
-      const { Provider } = app.model();
-      const { result } = await Provider.collection.remove({ name });
+      const { Provider } = app.models;
+      const { result } = await Provider.collection.deleteOne({ name });
       console.log(`${result.n} items removed.`);
     });
   });

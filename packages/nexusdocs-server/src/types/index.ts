@@ -1,4 +1,4 @@
-import { IAcl, IArchive, ICache, IClient, IDir, IFile, IFileStore, INamespace, IProvider, ISnapshot, ISnapshotFile, IModels } from "models/types";
+import { IModels } from '../models/types';
 
 export interface ApplicationOptions {
   database?: string;
