@@ -98,7 +98,7 @@ program
         throw new ApiError(404, 'namespace not found');
       }
       const info = await namespace.getStats();
-      if (info.files > 0 || info.stores > 0) {
+      if (info.files.count > 0 || info.stores.count > 0) {
         throw new ApiError(400, 'There are files in the namespace, could not remove!');
       }
       const result = await Namespace.collection.deleteOne({ name });
