@@ -4,6 +4,7 @@ import { Validator } from '../lib/validator';
 import { Writable, Readable } from 'stream';
 import { Archiver } from 'archiver';
 import { IUrlOptions } from '../services/Store/types';
+import EsIndex from './EsIndex';
 
 export interface IDocData {
   _id?: ObjectId|string;
@@ -19,6 +20,7 @@ export interface IClientUrlOptions {
 export type IGetOneQueryFilter = string | ObjectId | FilterQuery<any>;
 
 export interface IBaseModel<T,S> extends IBase {
+  es: EsIndex;
   defaultQueryOptions: FindOneOptions;
   _active: boolean;
   _deleted: boolean;
@@ -38,7 +40,7 @@ export interface IBaseModel<T,S> extends IBase {
   beforeCreate(data: S): Promise<void>;
   create(data: S, skipHooks?: boolean): Promise<any>;
   beforeUpdate(query: FilterQuery<any>, data: S): Promise<void>;
-  update(query: FilterQuery<any>, data: any): Promise<this>
+  update(query: FilterQuery<any>|S, data: S): Promise<this>
   getAll(query?: FilterQuery<any>, options?: FindOneOptions): Promise<any[]>;
   get(query: IGetOneQueryFilter, options?: FindOneOptions): Promise<T>;
   beforeDelete(id: ObjectId): Promise<void>;
@@ -134,9 +136,15 @@ export interface IFileStoreData extends IDocData {
 
 export interface IFileStore extends IBaseModel<IFileStore, IFileStoreData>, IFileStoreData {}
 
+export interface IFileStats {
+  totalSize: number;
+  avgSize: number;
+  count: number;
+}
+
 export interface INamespaceStats {
-  files: number;
-  stores: number;
+  files: IFileStats;
+  stores: IFileStats;
 }
 
 export interface INamespaceData extends IDocData {
@@ -150,6 +158,11 @@ export interface INamespaceData extends IDocData {
 
 export interface IGetUrlOptions extends IUrlOptions {
   processNative?: boolean;
+}
+
+export interface ISimilarDocQuery {
+  id?: string;
+  content?: string;
 }
 
 export interface INamespace extends IBaseModel<INamespace, INamespaceData>, INamespaceData {
@@ -167,7 +180,8 @@ export interface INamespace extends IBaseModel<INamespace, INamespaceData>, INam
   addArchive(info): Promise<IArchive>;
   convert(file: string|IFile, commands: string): Promise<any>;
   getOriginalUrl(file: string|IFile, options: any): Promise<string>;
-  getStats(): Promise<INamespaceStats>
+  getStats(): Promise<INamespaceStats>;
+  searchSimilarDoc(query: ISimilarDocQuery): Promise<any>;
 }
 
 export interface IProviderData extends IDocData {

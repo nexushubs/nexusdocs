@@ -12,9 +12,6 @@ export default class FileStore extends BaseModel<IFileStore, IFileStoreData> {
     status: { type: 'string' },
     metadata: { type: 'object' },
   };
-
-  findFromNamespace(namespace, files_id, filename) {
-
-  }
+  esSync = true;
 
 }

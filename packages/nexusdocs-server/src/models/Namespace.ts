@@ -10,7 +10,7 @@ import BaseModel from '../models/BaseModel';
 import { bucketName, isObjectId } from '../lib/schema';
 import { ValidationError, buildValidationError } from '../lib/errors';
 import { ApiError } from '../lib/errors';
-import { INamespace, INamespaceData, IFile, IGetUrlOptions } from './types';
+import { INamespace, INamespaceData, IFile, IGetUrlOptions, INamespaceStats, ISimilarDocQuery, IFileData, IFileStoreData } from './types';
 import { IUploadStreamOptions, IStoreBucket, IUrlOptions } from '../services/Store/types';
 
 export default class Namespace extends BaseModel<INamespace, INamespaceData> {
@@ -96,6 +96,7 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
       try {
         await this.addStore(bucket, info);
       } catch(err) {
+        console.error(err);
         uploadStream.emit('error', err);
       }
       uploadStream.emit('file', info);
@@ -120,10 +121,16 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
           console.error(err);
         }
       }
-      await FileStore.collection.update({
+      await FileStore.collection.updateOne({
         _id: store._id
       }, {
         $addToSet: { files_id: info.files_id },
+      });
+      await FileStore.es.update(store._id, {
+        script: {
+          source: `ctx._source.files_id.add(params.files_id)`,
+          params: { files_id: info.files_id },
+        },
       });
     } else {
       store = await FileStore.create({
@@ -138,12 +145,12 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
       });
     }
     info.store_id = store.data('_id');
-    return this.addFile(info);
+    await this.addFile(info);
   }
 
   async addFile(info) {
     const { File } = this.models;
-    return File.create({
+    await File.create({
       _id: info.files_id,
       namespace: this.data('name'),
       store_id: info.store_id,
@@ -179,22 +186,27 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
       file = File.getInstance(file);
     }
     const info = file.data();
-    const count = await File.collection.countDocuments({
-      _id: { $ne: info._id },
-      namespace: this.data('name'),
-      store_id: info.store_id,
-    });
-    let promises: Promise<any>[] = [
-      file.delete(),
-    ];
-    if (count === 0) {
-      const bucket = await this.getBucket();
-      promises = [ ...promises,
-        bucket.delete(info.store_id),
-        FileStore.delete(info.store_id),
-      ];
+    const store = await FileStore.get(file.store_id);
+    if (!store) {
+      throw new ApiError(500, 'file store broken', { store_id: file.store_id});
     }
-    return Promise.all(promises);
+    await file.delete();
+    _.pull(store.files_id, file._id);
+    if (store.files_id.length === 0) {
+      const bucket = await this.getBucket();
+      await bucket.delete(info.store_id);
+      await FileStore.delete(info.store_id);
+    } else {
+      await FileStore.collection.update({ _id: store._id }, {
+        $pull: { files_id: file._id },
+      });
+      await FileStore.es.update(store._id, {
+        script: {
+          source: `ctx._source.files_id.remove(ctx._source.files_id.indexOf(params.file_id))`,
+          params: { file_id: file._id },
+        },
+      });
+    }
   }
 
   /**
@@ -348,9 +360,8 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
 
   /**
    * Get namespace statistics information
-   * @returns {{files:number,stores:number}}
    */
-  async getStats() {
+  async getStats(): Promise<INamespaceStats> {
     const { File, FileStore } = this.models;
     const aggregateOptions = [
       { $match: {
@@ -369,5 +380,48 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
       files: _.omit(fileStats[0], '_id'),
       stores: _.omit(storeStats[0], '_id'),
     };
+  }
+
+  async searchSimilarDoc(query: ISimilarDocQuery = {}) {
+    const { FileStore, File } = this.models;
+    if (!this._active) {
+      throw new ApiError(500, 'invalid_query', 'can not perform similar doc search on none active instance');
+    }
+    const { id, content } = query;
+    let likeQuery;
+    if (id) {
+      likeQuery = {
+        like: [{
+          ...this.es.context,
+          _id: id,
+        }]
+      };
+    } else if (content) {
+      likeQuery = {
+        like: content,
+      };
+    } else {
+      throw new ApiError(400, 'invalid_query', 'id or content must be provided');
+    }
+    const { hits } = await FileStore.es.search({
+      _source: ['files_id', 'metadata'],
+      query: {
+        bool: {
+          must: [{
+            more_like_this: likeQuery
+          }],
+          filter: [{
+            term: { namespace: this.data('name') }
+          }]
+        }
+      }
+    });
+    console.log(hits);
+    const file_ids = _.flatten(_.map(hits.hits, '_source.files_id'));
+    const files = await File.collection.find({ _id: { $in: file_ids }}, { projection: { filename: 1 }});
+    hits.hits.forEach(hit => {
+      (<any>hit)._files = (<IFileStoreData>hit._source).files_id.map(file_id => _.find(files, { _id: file_id }))
+    })
+    return hits;
   }
 }

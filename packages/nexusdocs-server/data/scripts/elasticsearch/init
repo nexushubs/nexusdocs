@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+ELASTICSEARCH_URI="${ELASTICSEARCH_URI:-http://127.0.0.1:9200}"
+CONTENT_TYPE="Content-Type: application/json"
+
+echo "ELASTICSEARCH_URI=$ELASTICSEARCH_URI"
+indexes=( "files.store" )
+
+for index in "${indexes[@]}"
+do
+  echo
+  echo "> removing index [$index]"
+  curl -X DELETE "$ELASTICSEARCH_URI/$index"
+  echo
+  echo "> creating index [$index]"
+  curl -X PUT -H "$CONTENT_TYPE" -d "@indexes/$index.json" "$ELASTICSEARCH_URI/$index"
+  echo
+  echo "> done!"
+done

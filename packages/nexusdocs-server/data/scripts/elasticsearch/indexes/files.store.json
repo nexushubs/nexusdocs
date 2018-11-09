@@ -1,0 +1,56 @@
+{
+  "settings": {
+    "index": {
+      "analysis": {
+        "analyzer": {
+          "default": {
+            "type": "smartcn"
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "files.store": {
+      "properties": {
+        "namespace": {
+          "type": "keyword"
+        },
+        "files_id": {
+          "type": "keyword"
+        },
+        "contentType": {
+          "type": "keyword"
+        },
+        "md5": {
+          "type": "keyword"
+        },
+        "metadata": {
+          "properties": {
+            "text": {
+              "properties": {
+                "content": {
+                  "type": "text",
+                  "term_vector": "yes"
+                }
+              }
+            },
+            "image": {
+              "properties": {
+                "width": {
+                  "type": "integer"
+                },
+                "height": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

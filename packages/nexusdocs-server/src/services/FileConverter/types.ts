@@ -10,7 +10,7 @@ export interface IFileConverter {
   prepare(command: string, options: TConvertingOption): void;
 }
 
-export interface IFileData {
+export interface IFileContent {
   contentType: string;
   stream: Readable;
 }
@@ -22,5 +22,5 @@ export interface IConvertingOptions {
 export type TConvertingOptionPair = [string, TConvertingOption];
 
 export interface IFileConverterService extends IBaseService {
-  convert(inputStream: Readable, filename: string, commands: string | IConvertingOptions): Promise<IFileData>;
+  convert(inputStream: Readable, filename: string, commands: string | IConvertingOptions): Promise<IFileContent>;
 }

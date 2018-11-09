@@ -7,7 +7,7 @@ import { getExtension } from '../../lib/util';
 import { ApiError } from '../../lib/errors';
 import BaseService from '../BaseService';
 import * as converterClasses from './converters';
-import { ConverterClassType, IFileConverterService, TConvertingOptionPair } from './types';
+import { ConverterClassType, IFileConverterService, TConvertingOptionPair, IFileContent } from './types';
 import { Readable } from 'stream';
 import { IConvertingOptions } from '../Store/types';
 
@@ -47,8 +47,7 @@ export default class FileConverter extends BaseService implements IFileConverter
     return options;
   }
 
-  async convert(inputStream: Readable, filename: string, commands: string | IConvertingOptions) {
-    const { FileCache } = this.services;
+  async convert(inputStream: Readable, filename: string, commands: string | IConvertingOptions): Promise<IFileContent> {
     const ext = getExtension(filename).toLowerCase();
     try {
       const Converter = this.getConverterOptionsByExt(ext);

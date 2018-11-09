@@ -4,6 +4,7 @@ import { IFileConverterService } from './FileConverter/types';
 import { IFileParserService } from './FileParser/types';
 import { IResumableService } from './Resumable/types';
 import { IStoreService } from './Store/types';
+import { IElasticsearchService } from './Elasticsearch/types';
 
 export interface IBaseService extends IBase {
   init(options: any): Promise<any>;
@@ -11,6 +12,7 @@ export interface IBaseService extends IBase {
 }
 
 export interface IServices {
+  Elasticsearch?: IElasticsearchService;
   FileCache?: IFileCacheService;
   FileConverter?: IFileConverterService;
   FileParser?: IFileParserService;

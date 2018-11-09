@@ -10,6 +10,7 @@ import { ApiError } from '../../lib/errors';
 import { getExtension, parseQueryStringHeaders, getBasename, diffTimestampFromNow } from '../../lib/util';
 import { upload, checkAuth } from '../middleware';
 import { UserRole, AuthFrom } from '../middleware/check-auth';
+import { INamespace } from '../../models/types';
 
 const api = Router();
 
@@ -293,6 +294,18 @@ api.get('/:namespace/archives/:archive_id', checkAuth({ needAuth }), wrap(async 
   res.set('Content-Disposition', contentDisposition(filename));
   res.set('Content-Length', size);
   downloadStream.pipe(res);
+}));
+
+api.post('/:namespace/search/similar-doc', checkAuth({ needAuth }), wrap(async (req, res, next) => {
+  const { namespace } = res.locals;
+  const result = await (namespace as INamespace).searchSimilarDoc(req.body);
+  res.send(result);
+}));
+
+api.get('/:namespace/stats', checkAuth({ needAuth }), wrap(async (req, res, next) => {
+  const { namespace } = res.locals;
+  const result = await (namespace as INamespace).getStats();
+  res.send(result);
 }));
 
 export default api;

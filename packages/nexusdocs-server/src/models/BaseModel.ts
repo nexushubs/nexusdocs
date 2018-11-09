@@ -5,6 +5,7 @@ import { ValidationError, buildValidationError } from '../lib/errors';
 import { buildValidator, Validator } from '../lib/validator';
 import Base from '../lib/Base';
 import { IBaseModel, IDocData, IGetOneQueryFilter } from './types';
+import EsIndex from './EsIndex';
 
 export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
   
@@ -16,7 +17,9 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
   public validators: {[key: string]: any};
   public schema: any;
   public collectionName: string;
-  public collection: Collection
+  public collection: Collection;
+  public esSync: boolean;
+  private _es: EsIndex;
   
   constructor(data) {
     super()
@@ -33,6 +36,20 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     const instance = new (<any> this.constructor)(data);
     instance.init();
     return instance;
+  }
+
+  get es(): EsIndex {
+    if (!this.esSync) {
+      throw new Error('elasticsearch sync is not activated on this collection');
+    }
+    if (this._active) {
+      return this.models[this.constructor.name].es;
+    } else {
+      if (!this._es) {
+        this._es = new EsIndex(this.collectionName);
+      }
+      return this._es;
+    }
   }
 
   init() {
@@ -100,7 +117,7 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     }
   }
 
-  prepareData(data: any = null, validateOptions: any = {}) {
+  prepareData(data: S = null, validateOptions: any = {}) {
     if (data) {
       this.validate(data, validateOptions);
       return data;
@@ -111,10 +128,10 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     }
   }
 
-  async beforeCreate(data: any) {
+  async beforeCreate(data: S) {
   }
 
-  async create(data, skipHooks) {
+  async create(data: any, skipHooks) {
     if (!skipHooks) {
       await this.beforeCreate(data);
     }
@@ -126,17 +143,25 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     data._id = data._id || this.generateId();
     await this.collection.insertOne(data);
     const instance = this.getInstance(data);
+    if (this.esSync) {
+      const { _id, ...rest } = data;
+      await this.es.create( _id, rest);
+    }
+    await this.afterCreate(data);
     return instance;
   }
 
-  async beforeUpdate(query: FilterQuery<any>, data: any) {
+  async afterCreate(data: S) {
+  }
+
+  async beforeUpdate(query: FilterQuery<any>, data: S) {
   }
     
-  async update(query: FilterQuery<any>, data: any = null) {
+  async update(query: FilterQuery<any>|S, data: S = null) {
     let useInstance = false;
     if (_.isNull(data) && this._active) {
       useInstance = true;
-      data = query;
+      data = query as S;
       query = this.data('_id');
     }
     if (!_.isPlainObject(query)) {
@@ -151,6 +176,15 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
       this.prepareData(data);
     }
     await this.collection.updateOne(query, { $set: this.data() });
+    if (this.esSync) {
+      if (this._active) {
+        data = this.data();
+      } else {
+        data = await this.collection.findOne(query);
+      }
+      const { _id, ...rest } = data as any;
+      await this.es.update(_id, { doc: rest });
+    }
     return this;
   }
  
@@ -180,6 +214,10 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     if (!id) {
       this._deleted = true;
     }
+    if (this.esSync) {
+      await this.es.delete(_id);
+    }
+
     return this;
   }
 

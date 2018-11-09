@@ -1,3 +1,4 @@
+export { default as Elasticsearch } from './Elasticsearch';
 export { default as FileCache } from './FileCache';
 export { default as FileConverter } from './FileConverter';
 export { default as FileParser } from './FileParser';
