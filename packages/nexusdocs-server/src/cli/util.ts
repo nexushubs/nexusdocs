@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import * as _ from 'lodash';
-import Table from 'cli-table';
+import * as Table from 'cli-table';
 import { ObjectId } from 'mongodb';
 
 import Application from '../lib/Application';

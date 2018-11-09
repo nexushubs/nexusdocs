@@ -392,7 +392,8 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     if (id) {
       likeQuery = {
         like: [{
-          ...this.es.context,
+          _index: FileStore.collectionName,
+          _type: FileStore.collectionName,
           _id: id,
         }]
       };
