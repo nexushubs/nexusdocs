@@ -32,6 +32,9 @@ module.exports = {
         ZipParser: {
           disabled: true,
         },
+        TextParser: {
+          disabled: true,
+        },
       },
     },
     FileConverter: {

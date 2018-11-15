@@ -7,6 +7,8 @@ import Base from '../lib/Base';
 import { IBaseModel, IDocData, IGetOneQueryFilter } from './types';
 import EsIndex from './EsIndex';
 
+const COLLECTION_PREFIX = 'docs';
+
 export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
   
   public defaultQueryOptions: FindOneOptions;
@@ -46,14 +48,14 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
       return this.models[this.constructor.name].es;
     } else {
       if (!this._es) {
-        this._es = new EsIndex(this.collectionName);
+        this._es = new EsIndex(`${COLLECTION_PREFIX}.${this.collectionName}`);
       }
       return this._es;
     }
   }
 
   init() {
-    const collection = this.db.collection(`docs.${this.collectionName}`);
+    const collection = this.db.collection(`${COLLECTION_PREFIX}.${this.collectionName}`);
     this.collection = collection;
     this.bindDataProperties();
     const aliases = ['find', 'findOne'];
@@ -144,6 +146,7 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     await this.collection.insertOne(data);
     const instance = this.getInstance(data);
     if (this.esSync) {
+      console.log('syncing elasticsearch!!!', data);
       const { _id, ...rest } = data;
       await this.es.create( _id, rest);
     }

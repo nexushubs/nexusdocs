@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+ELASTICSEARCH_HOST="${ELASTICSEARCH_HOST:-127.0.0.1}"
+ELASTICSEARCH_PORT="${ELASTICSEARCH_PORT:-9200}"
+CONTENT_TYPE="Content-Type: application/json"
+ELASTICSEARCH_URI="http://$ELASTICSEARCH_HOST:$ELASTICSEARCH_PORT"
+
+echo "elasticsearch: $ELASTICSEARCH_URI"
+
+for index in "$@"
+do
+  pipeline="pipelines/$index.js"
+  if [ ! -f "$pipeline" ]; then
+    echo "pipeline for index [$index] [$pipeline] not found!"
+  else
+    echo
+    echo "> processing index [$index]"
+    transporter run "$pipeline"
+  fi
+done

@@ -4,14 +4,14 @@
       "analysis": {
         "analyzer": {
           "default": {
-            "type": "smartcn"
+            "type": "ik_max_word"
           }
         }
       }
     }
   },
   "mappings": {
-    "files.store": {
+    "docs.files.store": {
       "properties": {
         "namespace": {
           "type": "keyword"

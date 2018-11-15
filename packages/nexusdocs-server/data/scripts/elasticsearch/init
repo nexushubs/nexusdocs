@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
 
-ELASTICSEARCH_URI="${ELASTICSEARCH_URI:-http://127.0.0.1:9200}"
+ELASTICSEARCH_HOST="${ELASTICSEARCH_HOST:-127.0.0.1}"
+ELASTICSEARCH_PORT="${ELASTICSEARCH_PORT:-9200}"
 CONTENT_TYPE="Content-Type: application/json"
+ELASTICSEARCH_URI="http://$ELASTICSEARCH_HOST:$ELASTICSEARCH_PORT"
 
-echo "ELASTICSEARCH_URI=$ELASTICSEARCH_URI"
-indexes=( "files.store" )
+echo "elasticsearch: $ELASTICSEARCH_URI"
 
-for index in "${indexes[@]}"
+for index in "$@"
 do
-  echo
-  echo "> removing index [$index]"
-  curl -X DELETE "$ELASTICSEARCH_URI/$index"
-  echo
-  echo "> creating index [$index]"
-  curl -X PUT -H "$CONTENT_TYPE" -d "@indexes/$index.json" "$ELASTICSEARCH_URI/$index"
-  echo
-  echo "> done!"
+  mapping="indexes/$index.json"
+  if [ ! -f "$mapping" ]; then
+    echo "index [$index] not found!"
+  else
+    echo
+    echo "> removing index [$index]"
+    curl -X DELETE "$ELASTICSEARCH_URI/$index"
+    echo
+    echo "> creating index [$index]"
+    curl -X PUT -H "$CONTENT_TYPE" -d "@$mapping" "$ELASTICSEARCH_URI/$index"
+    echo
+    echo "> done!"
+  fi
 done

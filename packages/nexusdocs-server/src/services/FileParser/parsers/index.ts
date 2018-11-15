@@ -1,4 +1,4 @@
-export { default as ZipParser } from './zip';
-export { default as TextParser } from './text';
-export { default as ImageSizeParser } from './image-size';
-export { default as ImageThumbParser } from './image-thumb';
+export { default as ZipParser } from './ZipParser';
+export { default as TextParser } from './TextParser';
+export { default as ImageSizeParser } from './ImageSizeParser';
+export { default as ImageThumbParser } from './ImageThumbParser';

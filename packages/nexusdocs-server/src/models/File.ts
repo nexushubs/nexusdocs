@@ -20,6 +20,7 @@ export default class File extends BaseModel<IFile, IFileData> {
     dateDeleted: { type: 'date', optional: true },
     isDelete: { type: 'boolean' },
   };
+  esSync = true;
 
   async openDownloadStream(id) {
     const { Namespace, FileStore } = this.models;

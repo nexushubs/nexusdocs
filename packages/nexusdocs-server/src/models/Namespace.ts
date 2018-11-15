@@ -388,41 +388,33 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
       throw new ApiError(500, 'invalid_query', 'can not perform similar doc search on none active instance');
     }
     const { id, content } = query;
-    let likeQuery;
+    let result;
     if (id) {
-      likeQuery = {
-        like: [{
-          _index: FileStore.collectionName,
-          _type: FileStore.collectionName,
-          _id: id,
-        }]
-      };
-    } else if (content) {
-      likeQuery = {
-        like: content,
-      };
-    } else {
-      throw new ApiError(400, 'invalid_query', 'id or content must be provided');
-    }
-    const { hits } = await FileStore.es.search({
-      _source: ['files_id', 'metadata'],
-      query: {
-        bool: {
-          must: [{
-            more_like_this: likeQuery
-          }],
-          filter: [{
-            term: { namespace: this.data('name') }
-          }]
+      const file = await File.get(id);
+      console.log(file._id)
+      const { hits } = await File.es.search({
+        query: {
+          bool: {
+            filter: [
+              { term: { namespace: this.data('name') } },
+            ],
+            should: [
+              { match: { md5: { query: file.md5, boost: 10 } } },
+              { match: { filename: { query: file.filename, boost: 5 } } },
+              { term: { contentType: file.contentType } },
+            ],
+            must_not: {
+              term: {
+                _id: file._id,
+              },
+            }
+          }
         }
-      }
-    });
-    console.log(hits);
-    const file_ids = _.flatten(_.map(hits.hits, '_source.files_id'));
-    const files = await File.collection.find({ _id: { $in: file_ids }}, { projection: { filename: 1 }});
-    hits.hits.forEach(hit => {
-      (<any>hit)._files = (<IFileStoreData>hit._source).files_id.map(file_id => _.find(files, { _id: file_id }))
-    })
-    return hits;
+      });
+      result = hits;
+    } else if (content) {
+      throw new ApiError(501, 'Searching similar doc by content is not implemented')
+    }
+    return result;
   }
 }
