@@ -124,6 +124,7 @@ $ ./ndstool --help
 
 The build-in [docker-compose.yml](./docker-compose.yml) starts 3 containers:
 
+* `elasticsearch` for searching file meta info
 * `unoconv` for converting office document
 * `mongo` build-in mongodb server, you can replace to your own
 * `nds` NexusDocs server, with full run-time code
