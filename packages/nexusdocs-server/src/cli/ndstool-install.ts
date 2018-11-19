@@ -1,6 +1,8 @@
 import * as _ from 'lodash';
+import * as path from 'path';
 import * as config from 'config';
 import * as program from 'commander';
+import { execFileSync } from 'child_process';
 import {
   run,
   printCollection,
@@ -26,7 +28,7 @@ function install() {
         name: 'default',
         type: 'gridfs',
         params: {
-          database: `${database}/ndsfile`,
+          database: 'ndsfile',
         },
         buckets: ['public', 'private'],
         description: 'Default provider',
@@ -38,7 +40,7 @@ function install() {
         name: 'nexusdocs',
         type: 'gridfs',
         params: {
-          database: `${database}/ndscache`,
+          database: 'ndscache',
         },
         buckets: ['cache'],
         description: 'nexusdocs cache provider',
@@ -90,6 +92,14 @@ function install() {
         description: 'default client of <admin> role',
       }),
     });
+    tasks.push({
+      description: 'creating elasticsearch indices',
+      task: () => {
+        execFileSync('./init', ['docs.files' ,'docs'], {
+          cwd: path.normalize(`${__dirname}/../../data/elasticsearch`),
+        });
+      }
+    })
     let hasError = false;
     let runner = Promise.resolve();
     console.log('writing initializing data');
