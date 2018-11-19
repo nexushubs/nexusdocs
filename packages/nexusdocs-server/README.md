@@ -82,15 +82,19 @@ server {
 
 ## Config by Environment Variables
 
-| Env | Description |
-| --- | ----------- |
-| `NDS_DATABASE` | Mongodb database URL |
-| `NDS_RESTFUL_ENABLED` | Whether to start API Server |
-| `NDS_RESTFUL_HOSTNAME` | API Server bind hostname |
-| `NDS_RESTFUL_PORT` | API Server bind port |
-| `NDS_RESTFUL_TRUSTED_PROXY` | Trusted Proxy, see http://expressjs.com/en/4x/api.html#trust.proxy.options.table |
-| `NDS_RESTFUL_SERVER_URL` | Custom server url, default to '' |
-| `NDS_DEBUG_REQUEST` | Switch whether to debug HTTP requests |
+| Env                         | Default                               | Description                                                                      |
+| --------------------------- | ------------------------------------- | -------------------------------------------------------------------------------- |
+| `NDS_DATABASE`              | `mongodb://127.0.0.1:27017/nexusdocs` | Mongodb database URL                                                             |
+| `ELASTICSEARCH_HOST`        | `127.0.0.1`                           | Mongodb database URL                                                             |
+| `ELASTICSEARCH_PORT`        | `9200`                                | Mongodb database URL                                                             |
+| `NDS_RESTFUL_ENABLED`       | `true`                                | Whether to start API Server                                                      |
+| `NDS_RESTFUL_HOSTNAME`      | `127.0.0.1`                           | API Server bind hostname                                                         |
+| `NDS_RESTFUL_PORT`          | `4000`                                | API Server bind port                                                             |
+| `NDS_RESTFUL_TRUSTED_PROXY` | `127.0.0.1`                           | Trusted Proxy, see http://expressjs.com/en/4x/api.html#trust.proxy.options.table |
+| `NDS_RESTFUL_SERVER_URL`    | `N/A`                                 | Custom server url, default to ''                                                 |
+| `NDS_DEBUG_REQUEST`         | `true`                                | Switch whether to debug HTTP requests                                            |
+
+For more environment config, see [custom-environment-variables.js](./config/custom-environment-variables.js)
 
 ## Command Line Tool
 

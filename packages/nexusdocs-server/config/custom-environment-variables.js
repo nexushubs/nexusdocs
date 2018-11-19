@@ -13,6 +13,10 @@ module.exports = {
     }
   },
   services: {
+    Elasticsearch: {
+      host: 'ELASTICSEARCH_HOST',
+      port: 'ELASTICSEARCH_PORT',
+    },
     FileCache: {
       clearOnStartup: 'FILE_CACHE_CLEAR_ON_STARTUP',
     },
