@@ -216,7 +216,7 @@ export default class FileCache extends BaseService implements IFileCacheService 
         expiresAt,
         timestamp: now,
       };
-      Cache.collection.update({ _id: key}, data, { upsert: true });
+      Cache.collection.updateOne({ _id: key }, { $set: data }, { upsert: true });
     });
     uploadStream.on('error', console.error);
   }

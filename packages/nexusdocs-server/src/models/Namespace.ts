@@ -115,11 +115,13 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     });
     if (store) {
       if (info.status !== 'skipped') {
-        try {
-          await bucket.delete(info._id);
-        } catch (err) {
-          console.error(err);
-        }
+        setImmediate(async () => {
+          try {
+            await bucket.delete(info._id);
+          } catch (err) {
+            console.error(err);
+          }
+        })
       }
       await FileStore.collection.updateOne({
         _id: store._id
@@ -197,7 +199,7 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
       await bucket.delete(info.store_id);
       await FileStore.delete(info.store_id);
     } else {
-      await FileStore.collection.update({ _id: store._id }, {
+      await FileStore.collection.updateOne({ _id: store._id }, {
         $pull: { files_id: file._id },
       });
       await FileStore.es.update(store._id, {

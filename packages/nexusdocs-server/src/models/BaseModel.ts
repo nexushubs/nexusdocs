@@ -146,7 +146,6 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     await this.collection.insertOne(data);
     const instance = this.getInstance(data);
     if (this.esSync) {
-      console.log('syncing elasticsearch!!!', data);
       const { _id, ...rest } = data;
       await this.es.create( _id, rest);
     }

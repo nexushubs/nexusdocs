@@ -2,6 +2,7 @@ import { GridFSBucket, Db } from 'mongodb';
 
 import { IStoreBucket } from '../../types';
 import BaseBucket from '../../BaseBucket';
+import Provider from './Provider'
 
 
 export default class GridFSProviderBucket extends BaseBucket implements IStoreBucket {
@@ -12,7 +13,7 @@ export default class GridFSProviderBucket extends BaseBucket implements IStoreBu
 
   constructor(provider, bucketName) {
     super(provider, bucketName);
-    this._db = this.provider.db;
+    this._db = (this.provider as Provider)._db;
     bucketName = `fs.${this.formatName(provider.name)}.${this.formatName(this.name)}`;
     this.bucketName = bucketName;
     this.bucket = new GridFSBucket(this._db, { bucketName });
