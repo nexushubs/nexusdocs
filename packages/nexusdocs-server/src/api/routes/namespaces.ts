@@ -296,6 +296,13 @@ api.get('/:namespace/archives/:archive_id', checkAuth({ needAuth }), wrap(async 
   downloadStream.pipe(res);
 }));
 
+api.get('/:namespace/search/similar-doc', checkAuth({ needAuth }), wrap(async (req, res, next) => {
+  const { namespace } = res.locals;
+  const { id } = req.query;
+  const result = await (namespace as INamespace).searchSimilarDoc({ id });
+  res.send(result);
+}));
+
 api.post('/:namespace/search/similar-doc', checkAuth({ needAuth }), wrap(async (req, res, next) => {
   const { namespace } = res.locals;
   const result = await (namespace as INamespace).searchSimilarDoc(req.body);

@@ -1,5 +1,4 @@
 import * as getStream from 'get-stream';
-import * as iconv from 'iconv-lite';
 import BaseParser from '../BaseParser';
 import { IFileParser } from '../types';
 

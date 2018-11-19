@@ -391,7 +391,6 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     let result;
     if (id) {
       const file = await File.get(id);
-      console.log(file._id)
       const { hits } = await File.es.search({
         query: {
           bool: {
