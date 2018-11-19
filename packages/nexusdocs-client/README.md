@@ -144,6 +144,7 @@ Class presenting NexusDocs namespace instance
         * [.truncate()](#Namespace+truncate) ⇒ <code>Promise</code>
         * [.createArchive(files)](#Namespace+createArchive) ⇒ <code>Promise</code>
         * [.getArchiveUrl(files, options)](#Namespace+getArchiveUrl)
+        * [.searchSimilarDoc(fileId)](#Namespace+searchSimilarDoc)
     * _inner_
         * [~RequestOptions](#Namespace..RequestOptions) : <code>object</code>
         * [~UploadOptions](#Namespace..UploadOptions) : <code>object</code>
@@ -335,6 +336,17 @@ Archive files then return download URL
 | --- | --- | --- |
 | files | <code>Array.&lt;FileId&gt;</code> | file id array, see [FileId](#Namespace..FileId) |
 | options | <code>RequestOptions</code> | RequestOptions, see [RequestOptions](#Namespace..RequestOptions) |
+
+<a name="Namespace+searchSimilarDoc"></a>
+
+### namespace.searchSimilarDoc(fileId)
+Search similar doc of specified file
+
+**Kind**: instance method of [<code>Namespace</code>](#Namespace)  
+
+| Param | Type |
+| --- | --- |
+| fileId | <code>string</code> | 
 
 <a name="Namespace..RequestOptions"></a>
 

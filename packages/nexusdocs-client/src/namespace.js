@@ -299,17 +299,31 @@ class Namespace {
    */
   getArchiveUrl(files, options = {}) {
     const { filename } = options;
-    const query = {
-      files: files.join(','),
-      filename,
-    };
     const requestOptions = {
       ...options,
       method: 'GET',
-      qs: query,
       url: `/namespaces/${this.name}/archive`,
+      qs: {
+        files: files.join(','),
+        filename,
+      },
     };
     return this.client.getUrl(requestOptions);
+  }
+
+  /**
+   * Search similar doc of specified file
+   * @param {string} fileId 
+   */
+  searchSimilarDoc(fileId) {
+    const requestOptions = {
+      method: 'GET',
+      url: `/namespaces/${this.name}/search/similar-doc`,
+      qs: {
+        id: fileId,
+      },
+    };
+    return this.client.request(requestOptions);
   }
 
 }
