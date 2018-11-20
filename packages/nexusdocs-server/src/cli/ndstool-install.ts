@@ -95,8 +95,9 @@ function install() {
     tasks.push({
       description: 'creating elasticsearch indices',
       task: () => {
-        execFileSync('./init', ['docs.files' ,'docs'], {
-          cwd: path.normalize(`${__dirname}/../../data/elasticsearch`),
+        const dir = path.normalize(`${__dirname}/../../data/elasticsearch`)
+        execFileSync(`${dir}/init`, ['docs.files' ,'docs'], {
+          cwd: dir,
         });
       }
     })

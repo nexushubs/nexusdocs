@@ -1,28 +1,22 @@
 FROM node:carbon-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
+
+RUN apk add --update --no-cache curl python gcc g++ make libc6-compat && \
+    apk add --update --no-cache vips-dev fftw-dev build-base \
+      --repository http://dl-cdn.alpinelinux.org/alpine/edge/testing/ \
+      --repository http://dl-cdn.alpinelinux.org/alpine/edge/main
+
 COPY . .
+
+RUN yarn && \
+    yarn build && \
+    yarn cache clean && \
+    ln -s -f /app/ndstool /usr/bin/ndstool
+    # && apk del .build-deps
 
 ENV NDS_RESTFUL_HOSTNAME 0.0.0.0
 ENV NDS_RESTFUL_PORT 4000
-
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-
-RUN apk update \
-    apk add --no-cache \
-        vips-dev \
-        fftw-dev \
-    && apk add --no-cache --virtual .gyp \
-        python \
-        make \
-        g++ \
-    && yarn \
-    && rm -rf lib/* \
-    && yarn build \
-    && yarn cache clean \
-    && ln -s -f /usr/src/app/ndstool /usr/bin/ndstool \
-    && rm -rf /var/lib/apt/lists/* \
-    && apk del .gyp
 
 EXPOSE 4000
 
