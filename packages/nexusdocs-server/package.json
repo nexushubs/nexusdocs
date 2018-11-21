@@ -1,6 +1,6 @@
 {
   "name": "nexusdocs-server",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "NexusHubs server, a storage engine proxy for multi provider",
   "main": "lib/index.js",
   "scripts": {
