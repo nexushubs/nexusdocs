@@ -317,11 +317,12 @@ class Namespace {
    */
   searchSimilarDoc(fileId) {
     const requestOptions = {
-      method: 'GET',
+      method: 'POST',
       url: `/namespaces/${this.name}/search/similar-doc`,
-      qs: {
+      body: {
         id: fileId,
       },
+      json: true,
     };
     return this.client.request(requestOptions);
   }

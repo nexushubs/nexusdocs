@@ -23,13 +23,13 @@ export default class GridFSProviderBucket extends BaseBucket implements IStoreBu
     return name.replace(/\./g, '_');
   }
 
-  _openUploadStream(id, options) {
+  async _openUploadStream(id, options) {
     const { filename } = options;
     delete options.filename;
     return this.bucket.openUploadStreamWithId(id, filename, options);
   }
 
-  _openDownloadStream(id: string, options) {
+  async _openDownloadStream(id: string, options) {
     return this.bucket.openDownloadStream(<any>id, options);
   }
 

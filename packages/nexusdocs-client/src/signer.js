@@ -84,7 +84,7 @@ export default class Signer {
   /**
    * Sign a request with body
    * @ignore
-   * @param {ReqestOptions} requestOptions 
+   * @param {RequestOptions} requestOptions 
    */
   signRequest(requestOptions) {
     let { method, url, expires, signature = {}, json, body } = requestOptions;

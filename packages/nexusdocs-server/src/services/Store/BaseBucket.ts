@@ -35,7 +35,7 @@ export default class BaseBucket extends Base implements IBaseBucket {
     return this.name === 'gridfs';
   }
 
-  openUploadStream(options: any = {}) {
+  async openUploadStream(options: any = {}) {
     const { filename, contentType, fileId, md5, size, skip } = options;
     const id = uuid.v4();
     const uploadOptions = {
@@ -44,7 +44,7 @@ export default class BaseBucket extends Base implements IBaseBucket {
     };
     let providerUploadStream = null;
     if (!skip) {
-      providerUploadStream = this._openUploadStream(id, { ...uploadOptions });
+      providerUploadStream = await this._openUploadStream(id, { ...uploadOptions });
     }
     const uploadStream = new UploadStream(id, providerUploadStream, {
       ...uploadOptions,
@@ -55,10 +55,10 @@ export default class BaseBucket extends Base implements IBaseBucket {
     return uploadStream;
   }
     
-  openDownloadStream(id) {
+  async openDownloadStream(id) {
     let downloadStream;
     try {
-      downloadStream = this._openDownloadStream(id);
+      downloadStream = await this._openDownloadStream(id);
     } catch(e) {
       downloadStream = new Readable();
       downloadStream.emit('error', e);

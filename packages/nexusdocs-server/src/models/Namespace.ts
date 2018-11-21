@@ -393,6 +393,9 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     let result;
     if (id) {
       const file = await File.get(id);
+      if (!file) {
+        throw new ApiError(400, 'file_not_exists', 'the file specified does not exist');
+      }
       const { hits } = await File.es.search({
         query: {
           bool: {

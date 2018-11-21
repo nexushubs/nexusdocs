@@ -76,14 +76,14 @@ export interface IBaseBucket {
   supportedInputTypes: string[]; 
   isConvertingSupported(type: string, commands?: string): boolean;
   isNative(): boolean;
-  openUploadStream(options: IUploadStreamOptions): Writable;
-  openDownloadStream(id: string): Readable;
+  openUploadStream(options: IUploadStreamOptions): Promise<Writable>;
+  openDownloadStream(id: string): Promise<Readable>;
   getDownloadUrl(fileId: string, filename?: string): Promise<string>;
 }
 
 export interface IStoreBucket extends IBaseBucket {
-  _openUploadStream(fileId: string, options: IBucketUploadOptions);
-  _openDownloadStream(fileId: string, options: IBucketUploadOptions);
+  _openUploadStream(fileId: string, options: IBucketUploadOptions): Promise<Writable>;
+  _openDownloadStream(fileId: string, options: IBucketUploadOptions): Promise<Readable>;
   getUrl(fileId: string, options: IUrlOptions): Promise<string>;
   getConvertedUrl(fileId: string, options: IConvertingOptions): Promise<string>;
   delete(fileId: string): Promise<void>

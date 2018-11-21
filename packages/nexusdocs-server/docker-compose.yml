@@ -39,3 +39,5 @@ services:
     container_name: nexusdocs-unoconv
     image: alphakevin/unoconv-server
     restart: always
+    ports:
+      - '127.0.0.1:5000:4000'

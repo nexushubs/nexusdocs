@@ -1,7 +1,8 @@
+import * as _ from 'lodash';
 import * as contentDisposition from 'content-disposition';
 import * as path from 'path';
 import { PassThrough } from 'stream';
-import OSS, { PutStreamOptions } from 'ali-oss';
+import * as OSS from 'ali-oss';
 
 import { IStoreBucket, IUrlOptions, IConvertingOptions } from '../../types';
 import BaseBucket from '../../BaseBucket';
@@ -27,12 +28,12 @@ export default class AliOSSProviderBucket extends BaseBucket implements IStoreBu
     'webp',
   ];
 
-  private bucket: OSS;
+  private bucket: any;
 
   constructor(provider, bucketName) {
     super(provider, bucketName);
     const { params } = this.provider.options;
-    this.bucket = new OSS({
+    this.bucket = new (OSS as any)({
       ...params,
       bucket: bucketName,
     });
@@ -45,7 +46,7 @@ export default class AliOSSProviderBucket extends BaseBucket implements IStoreBu
     };
     if (options.filename) {
       const filename = `${id}${path.extname(options.filename)}`;
-      putOptions.headers['content-disposition'] = contentDisposition(filename);
+      _.set(putOptions, 'headers.content-disposition', contentDisposition(filename));
     }
     await this.bucket.putStream(id, stream, putOptions);
     return stream;
