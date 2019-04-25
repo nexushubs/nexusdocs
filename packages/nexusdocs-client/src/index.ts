@@ -35,5 +35,3 @@ export { Client, Namespace };
 export default function createClient(options: ServerOptions) {
   return new Client(options);
 }
-
-module.exports = createClient;
