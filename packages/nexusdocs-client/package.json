@@ -36,13 +36,11 @@
     "@types/url-parse": "^1.4.3",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^4.19.1",
     "jsdoc-to-markdown": "^3.0.4",
     "mocha": "^4.1.0",
     "nock": "^9.2.5",
     "source-map-support": "^0.5.6",
-    "typescript": "^3.4.5",
-    "uuid": "^3.2.1"
+    "typescript": "^3.4.5"
   },
   "dependencies": {
     "content-disposition": "^0.5.2",
@@ -54,7 +52,6 @@
     "mime-types": "^2.1.18",
     "qs": "^6.5.2",
     "request": "^2.87.0",
-    "type-is": "^1.6.16",
     "url-parse": "^1.4.4"
   }
 }
