@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2018",
+    "resolveJsonModule": true,
+    "lib": [
+      "esnext",
+    ],
+    "sourceMap": true,
+    "outDir": "../lib",
+    "declaration": true,
+    "declarationDir": "../typings",
+  },
+}

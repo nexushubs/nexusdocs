@@ -1,22 +1,24 @@
-import _ from 'lodash';
-import request from 'request';
-import qs from 'qs';
-import parse from 'url-parse';
+import * as _ from 'lodash';
+import * as request from 'request';
+import * as qs from 'qs';
+import * as parse from 'url-parse';
 
 import {
-  urlSafeBase64Encode,
-  sortedJSONStringify,
   JSONParse,
 } from './util';
 import { ApiError } from './errors'
 import Signer from './signer';
 import Namespace from './namespace';
+import { RequestOptions, ServerOptions, NamespaceOptions } from './types';
 
 /**
  * Class presenting NexusDocs client instance
- * @typicalname client
  */
 class Client {
+
+  public options: ServerOptions;
+  public defaultOptions: ServerOptions;
+  public signer: Signer;
 
   /**
    * Creates an instance of NDS Client.
@@ -25,9 +27,9 @@ class Client {
    * ```xml
    * http://<clientKey>:<clientSecret>@<hostname>:<port><endPoint>
    * ```
-   * @param {ServerOptions|string} options - Server options, see [ServerOptions](#Client..ServerOptions)
+   * @param options - Server options
    */
-  constructor(options = {}) {
+  constructor(options: ServerOptions = {}) {
     this.defaultOptions = {
       hostname: '127.0.0.1',
       secure: false,
@@ -49,14 +51,14 @@ class Client {
       options.clientKey = username;
       options.clientSecret = decodeURIComponent(password);
       if (query.defaultUrlExpires) {
-        options.defaultUrlExpires = query.defaultUrlExpires
+        options.defaultUrlExpires = parseInt(query.defaultUrlExpires);
       }
     }
     this.options = _.defaults(options, this.defaultOptions);
     this.signer = new Signer(options);
   }
 
-  getFullUrl(url) {
+  getFullUrl(url: string) {
     const { secure, port } = this.options;
     const schema = secure ? 'https' : 'http';
     if (!url) {
@@ -71,7 +73,7 @@ class Client {
     return `${schema}://${this.options.hostname}${portStr}${this.options.endPoint}${url}`;
   }
 
-  buildUrl(options) {
+  buildUrl(options: RequestOptions) {
     let { url } = options;
     if (/^https?/.test(url)) {
       return url;
@@ -83,63 +85,40 @@ class Client {
     options.url = this.getFullUrl(url);
   }
 
-  getUrl(options) {
+  getUrl(options: RequestOptions) {
     this.buildUrl(options);
     this.signer.signUrl(options);
     return options.url;
   }
 
   /**
-   * @protected
-   * @ignore
-   * @param {RequestOptions} options 
-   */
-  processHeader(options) {
-    const { signature, expires } = options;
-    if (signature && options.expires) {
-      options.headers = options.headers || {}
-      options.headers.Authorization = this.getAuthorizationHeader(signature, expires),
-      delete options.signature;
-      delete options.expires;
-    }
-  }
-
-  /**
    * Request NDS server and return a stream like object
    * @protected
-   * @ignore
-   * @param {RequestOptions} options 
-   * @returns {WritableStream}
+   * @param options 
    */
-  requestAsStream(options) {
+  requestAsStream(options: RequestOptions) {
     this.buildUrl(options);
     this.signer.signRequest(options);
-    return request(options);
+    return request(options as any);
   }
 
   /**
    * Request NDS and return a Promise
    * @protected
    * @ignore
-   * @param {RequestOptions} options - See [Namespace~RequestOptions](#Namespace..RequestOptions)
-   * @returns {Promise}
-   * @fulfil {object} - NDS response object
-   * @reject {object} - NDS error object
-   * 
-   * - `error.status`: Status code
-   * - `error.error`: The error message
-   * - `error.description`: The error description
+   * @param options - See [Namespace~RequestOptions](#Namespace..RequestOptions)
+   * @returns Promise of request result
    */
-  request(options) {
+  request(options: RequestOptions) {
     this.buildUrl(options);
     this.signer.signRequest(options);
     return new Promise((resolve, reject) => {
-      request(options, (error, response, body) => {
+      request(options as any, (error, response, body) => {
         if (error) {
           reject(error);
           return;
         }
-        let errorMessage;
+        let errorMessage: string;
         const contentType = response.headers['content-type'];
         if (contentType.indexOf('application/json') !== 0) {
           errorMessage = `Invalid Response`;
@@ -156,7 +135,7 @@ class Client {
           }
         }
         if (response.statusCode >= 400 || errorMessage) {
-          if (_.isObject(body)) {
+          if (_.isPlainObject(body)) {
             if (body.message) {
               errorMessage = body.message;
             }
@@ -177,11 +156,11 @@ class Client {
 
   /**
    * Get namespace instance
-   * @param {string} name - The name
-   * @param {object} [options] - Additional options
-   * @returns {Namespace} Namespace instance
+   * @param name - The name
+   * @param options - Additional options
+   * @returns Namespace instance
    */
-  getNamespace(name, options) {
+  getNamespace(name: string, options: NamespaceOptions) {
     return new Namespace(this, name, options);
   }
 

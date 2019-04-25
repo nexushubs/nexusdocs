@@ -1,7 +1,6 @@
-import qs from 'qs';
-import Base64 from 'crypto-js/enc-base64';
-import JSONStringify from 'json-stable-stringify';
-import isStream from 'is-stream';
+import * as qs from 'qs';
+import * as JSONStringify from 'json-stable-stringify';
+import * as isStream from 'is-stream';
 
 export function promisifyStream(stream) {
   return new Promise((resolve, reject) => {
@@ -14,32 +13,32 @@ export function promisifyStream(stream) {
   });
 }
 
-export function getTimestamp(t) {
+export function getTimestamp(t?: Date | number) {
   if (typeof t === 'undefined') {
     t = new Date;
   }
   if (t instanceof Date) {
-    t = parseInt(t.valueOf() / 1000);
+    t = Math.round(t.valueOf() / 1000);
   }
   // if t is before 2017-01-01, assume it is a time period
   if (typeof t === 'number' && t < new Date('2017-01-01').valueOf() / 1000) {
-    t = parseInt(Date.now() / 1000) + t;
+    t = Math.round(Date.now() / 1000) + t;
   }
   return t;
 }
 
-export function urlSafeBase64Encode(str) {
+export function urlSafeBase64Encode(str: string) {
   return str
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
 }
 
-export function sortedJSONStringify(obj) {
+export function sortedJSONStringify(obj: any) {
   return JSONStringify(obj, (a, b) => a.key < b.key ? 1 : -1);
 }
 
-export function sortObjectKey(obj) {
+export function sortObjectKey(obj: any) {
   const sorted = {};
   Object.keys(obj).sort().forEach(key => {
     sorted[key] = obj[key];
@@ -54,13 +53,13 @@ export function addUrlParams(url, params) {
 
 const regISODate = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
 
-const dateParser = (key, value) => {
+const dateParser = (key: string, value: any) => {
   if (typeof value === 'string' && regISODate.test(value)) {
     return new Date(value);
   }
   return value;
 };
 
-export function JSONParse(str) {
+export function JSONParse(str: string) {
   return JSON.parse(str, dateParser);
 }

@@ -1,42 +1,42 @@
-import _ from 'lodash';
-import qs from 'qs';
-import hmacSHA1 from 'crypto-js/hmac-sha1';
-import Base64 from 'crypto-js/enc-base64';
+import * as _ from 'lodash';
+import * as qs from 'qs';
+import hmacSHA1 = require('crypto-js/hmac-sha1');
+import Base64 = require('crypto-js/enc-base64');
 
 import {
   urlSafeBase64Encode,
   sortedJSONStringify,
-  sortObjectKey,
-  promisifyStream,
   getTimestamp,
   addUrlParams,
 } from './util';
+import { ServerOptions, RequestOptions } from './types';
 
 /**
  * Class for signing request
- * @typicalname signer
  */
 export default class Signer {
 
-  constructor(options) {
+  public options: ServerOptions;
+
+  constructor(options: ServerOptions) {
     this.options = options;
   }
 
-  getToken(str) {
+  getToken(str: string) {
     const { clientKey, clientSecret } = this.options;
     const signature = hmacSHA1(str, clientSecret);
     const encodedSignature = urlSafeBase64Encode(Base64.stringify(signature));
     return `${clientKey}.${encodedSignature}`;
   }
 
-  getSecuredUrl(url, signatureBody) {
+  getSecuredUrl(url: string, signatureBody: any) {
     const signatureStr = sortedJSONStringify(signatureBody);
     return addUrlParams(url, {
       token: this.getToken(signatureStr),
     });
   }
 
-  getAuthorizationHeader(signature, expires) {
+  getAuthorizationHeader(signature: any, expires: number) {
     const data = {
       ...signature,
       expires,
@@ -46,12 +46,12 @@ export default class Signer {
     return `NDS expires="${expires}",token="${token}"`;
   }
 
-  getFullUrl(requestOptions) {
-    let { url, baseUrl, qs } = requestOptions;
+  getFullUrl(options: RequestOptions) {
+    let { url, baseUrl } = options;
     if (/^https?/.test(url)) {
       return url;
     }
-    url = `{baseUrl}{url}`;
+    url = `${baseUrl}${url}`;
     const separator = /\?/.test(url) ? '&' : '?';
     if (!_.isEmpty(options.qs)) {
       url += separator + qs.stringify(options.qs);
@@ -60,11 +60,9 @@ export default class Signer {
 
   /**
    * Sign a URL for secured request
-   * @ignore
-   * @param {RequestOptions} requestOptions
    */
-  signUrl(requestOptions) {
-    let { method, url, expires } = requestOptions;
+  signUrl(options) {
+    let { method, url, expires } = options;
     if (!expires) {
       expires = this.options.defaultUrlExpires;
     }
@@ -76,18 +74,15 @@ export default class Signer {
       url,
     };
     url = this.getSecuredUrl(url, signatureBody);
-    requestOptions.url = url;
-    // console.log('Signer.signUrl() => ', url);
+    options.url = url;
     return url;
   }
 
   /**
    * Sign a request with body
-   * @ignore
-   * @param {RequestOptions} requestOptions 
    */
-  signRequest(requestOptions) {
-    let { method, url, expires, signature = {}, json, body } = requestOptions;
+  signRequest(options: RequestOptions) {
+    let { method, url, expires, signature = {}, json, body } = options;
     if (!expires) {
       expires = this.options.defaultRequestExpires;
     }
@@ -98,17 +93,15 @@ export default class Signer {
       url,
       expires,
     };
-    // console.log('\nsignature:', signature);
     if (json) {
       signature.body = sortedJSONStringify(body);
     }
-    _.merge(requestOptions, {
+    _.merge(options, {
       headers: {
         Authorization: this.getAuthorizationHeader(signature, expires),
       },
     });
-    // console.log('Signer.signRequest() => ', requestOptions);
-    return requestOptions;
+    return options;
   }
 
 }

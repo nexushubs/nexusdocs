@@ -1,13 +1,26 @@
-import _ from 'lodash';
-import fs from 'fs';
-import path from 'path';
-import mime from 'mime-types';
-import decamelize from 'decamelize';
-import contentDisposition from 'content-disposition';
-import { PassThrough } from 'stream';
+import * as _ from 'lodash';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as mime from 'mime-types';
+import * as contentDisposition from 'content-disposition';
+import { PassThrough, Readable } from 'stream';
+import decamelize = require('decamelize');
 
 import Client from './client';
-import { promisifyStream, getTimestamp } from './util';
+import { promisifyStream } from './util';
+import {
+  NamespaceOptions,
+  RequestOptions,
+  Query,
+  FileId,
+  DownloadOptions,
+  ConvertingOptions,
+  UploadUrlOptions,
+  UploadOptions,
+  UploadStreamOptions,
+} from './types';
+
+const defaultMimeType = 'application/octet-stream';
 
 /**
  * Class presenting NexusDocs namespace instance
@@ -21,13 +34,18 @@ import { promisifyStream, getTimestamp } from './util';
  */
 class Namespace {
   
+  public client: Client;
+  public name: string;
+  public options: NamespaceOptions;
+  public baseUrl: string;
+
   /**
    * Namespace Class constructor
-   * @param {Client} client - NDS Client instance
-   * @param {string} name - The name of namespace
-   * @param {object} options
+   * @param client - NDS Client instance
+   * @param name - The name of namespace
+   * @param options
    */
-  constructor(client, name, options = {}) {
+  constructor(client: Client, name: string, options: NamespaceOptions = {}) {
     this.client = client;
     this.name = name;
     this.options = options;
@@ -36,15 +54,13 @@ class Namespace {
 
   /**
    * Get URL for upload
-   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
-   * @param {boolean} [options.resumable] - If upload with resumbable.js
-   * @param {date} [options.expires] - Timestamp the Request will available before
+   * @param options - Additional options
    * @returns {string} URL for upload
    */
-  getUploadUrl(options = {}) {
+  getUploadUrl(options: UploadUrlOptions = {}) {
     const url = `/namespaces/${this.name}/upload`;
     let { resumable, expires } = options;
-    const query = {};
+    const query: Query = {};
     if (resumable) {
       query.resumable = 1;
     }
@@ -59,18 +75,18 @@ class Namespace {
 
   /**
    * Get file URL for view or download
-   * @param {FileId} fileId - File identifier, see [FileId](#Namespace..FileId)
-   * @param {DownloadOptions} [options] - Additional options, see [DownloadOptions](#Namespace..DownloadOptions)
-   * @returns {string} file URL
+   * @param fileId - File identifier
+   * @param options - Additional options
+   * @returns file URL
    */
-  getDownloadUrl(fileId, options = {}) {
+  getDownloadUrl(fileId: FileId, options: DownloadOptions = {}): string {
     const { filename, download, origin, response = {}, } = options;
     delete options.filename;
     delete options.download;
     delete options.response;
-    const query = {};
+    const query: Query = {};
     if (filename) {
-      response.contentType = mime.contentType(filename);
+      response.contentType = mime.contentType(filename) || undefined;
       response.contentDisposition = contentDisposition(filename);
     }
     if (download) {
@@ -88,34 +104,32 @@ class Namespace {
       method: 'GET',
       url: `/namespaces/${this.name}/files/${fileId}`,
       qs: query,
-    });
-    return this.client.getUrl(options);
+    } as RequestOptions);
+    return this.client.getUrl(options as RequestOptions);
   }
 
   /**
    * Get the converted file URL for view or download
-   * @param {FileId} fileId - File identifier, see [FileId](#Namespace..FileId)
-   * @param {ConvertingOptions} converting - Converting options, see [ConvertingOptions](#Namespace..ConvertingOptions)
-   * @param {DownloadOptions} [options] - Additional options, see [DownloadOptions](#Namespace..DownloadOptions)
-   * @returns {string} The converted file URL
+   * @param fileId - File identifier
+   * @param converting - Converting options
+   * @param options - Additional options
+   * @returns The converted file URL
    */
-  getConvertedUrl(fileId, converting = {}, options = {}) {
+  getConvertedUrl(fileId: FileId, converting: ConvertingOptions = {}, options: RequestOptions = {}) {
     let str = `${fileId}/convert`;
     _.each(converting, (value, key) => {
-      str += `/${key}/${encodeURIComponent(value)}`;
+      str += `/${key}/${encodeURIComponent(value.toString())}`;
     });
     return this.getDownloadUrl(str, options);
   }
 
   /**
    * Upload file from Buffer, ReadableStream
-   * @param {data} Buffer|ReadableStream - File data
-   * @param {UploadOptions} [options] - Additional options, see [UploadOptions](#Namespace..UploadOptions)
-   * @returns {Promise}
-   * @fulfil {object} File info when uploading is finished
-   * @reject {any} Request error
+   * @param data - File data
+   * @param options - Additional options
+   * @returns Promise of uploading request
    */
-  upload(data, options) {
+  upload(data: Buffer| Readable, options: UploadOptions) {
     let {
       fileId,
       filename,
@@ -133,10 +147,10 @@ class Namespace {
       throw new TypeError('invalid data');
     }
     if (filename && !contentType) {
-      contentType = mime.lookup(filename);
+      contentType = mime.lookup(filename) || undefined;
     }
     if (!contentType) {
-      contentType = 'application/octet-stream';
+      contentType = defaultMimeType;
     }
     const fields = _.omitBy({
       fileId,
@@ -166,11 +180,10 @@ class Namespace {
 
   /**
    * Get upload stream
-   * @param {UploadOptions} [options] - Additional options, see [UploadOptions](#Namespace..UploadOptions)
-   * @param {ReadableStream} [options.stream] - Provide readable stream directly
-   * @returns {WritableStream} Writable stream for upload
+   * @param options - Additional options
+   * @returns A writable stream for upload
    */
-  openUploadStream(options) {
+  openUploadStream(options: UploadStreamOptions) {
     let {
       stream,
     } = options;
@@ -190,15 +203,13 @@ class Namespace {
 
   /**
    * Upload a file from local file-system
-   * @param {string} filePath - The path of file will be uploaded
-   * @param {UploadOptions} options - Upload options
-   * @returns {Promise}
-   * @fulfil {FileInfo} File info when uploading is finished
-   * @reject {any} Request error
+   * @param filePath - The path of file will be uploaded
+   * @param options - Upload options
+   * @returns Promise of uploading request
    */
-  uploadFromLocal(filePath, options) {
+  uploadFromLocal(filePath: string, options: UploadOptions) {
     const fileStream = fs.createReadStream(filePath);
-    const contentType = mime.contentType(filePath);
+    const contentType = mime.contentType(filePath) || defaultMimeType;
     const filename = path.basename(filePath);
     return this.upload(fileStream, {
       filename,
@@ -209,25 +220,23 @@ class Namespace {
 
   /**
    * Get a readable stream for download
-   * @param {FileId} fileId - The file needed to download later, see [FileId](#Namespace..FileId)
-   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
-   * @returns {ReadableStream} - the readable stream
+   * @param fileId - The file needed to download later
+   * @param options - Additional options
+   * @returns the readable stream
    */
-  openDownloadStream(fileId, options = {}) {
-    
+  openDownloadStream(fileId: FileId, options: RequestOptions = {}) {
     this.getDownloadUrl(fileId, options);
     return this.client.requestAsStream(options);
   }
 
   /**
    * Download a file to local file-system
-   * @param {FileId} fileId - The file id, see [FileId](#Namespace..FileId)
-   * @param {string} filePath - The path of file will be saved
-   * @param {RequestOptions} [options] - Additional options, see [RequestOptions](#Namespace..RequestOptions)
-   * @returns {Promise}
-   * @fulfil {any} Download finished
+   * @param fileId - The file id
+   * @param filePath - The path of file will be saved
+   * @param options - Additional options
+   * @returns Promise of downloading request
    */
-  downloadToLocal(fileId, filePath, options = {}) {
+  downloadToLocal(fileId: FileId, filePath: string, options: DownloadOptions = {}) {
     const fileStream = fs.createWriteStream(filePath);
     const stream = this.openDownloadStream(fileId, options);
     stream.pipe(fileStream);
@@ -236,11 +245,10 @@ class Namespace {
 
   /**
    * Get file information
-   * @param {FileId} fileId
-   * @returns {Promise}
-   * @fulfil {FileInfo} file information
+   * @param fileId
+   * @returns Promise of file info
    */
-  getFileInfo(fileId) {
+  getFileInfo(fileId: FileId) {
     const options = {
       method: 'GET',
       url: `/namespaces/${this.name}/files/${fileId}/info`,
@@ -250,12 +258,10 @@ class Namespace {
   
   /**
    * Delete a file on the server
-   * @param {FileId} fileId - The file to be deleted, see [FileId](#Namespace..FileId)
-   * @returns {Promise}
-   * @fulfil {object} When deletion is finished
-   * @reject {any} When a error occur
+   * @param fileId - The file to be deleted
+   * @returns Promise of deleting request
    */
-  delete(fileId) {
+  delete(fileId: FileId) {
     const options = {
       method: 'DELETE',
       url: `/namespaces/${this.name}/files/${fileId}`,
@@ -265,7 +271,6 @@ class Namespace {
 
   /**
    * Delete all files in this namespace
-   * @returns {Promise}
    */
   truncate() {
     const options = {
@@ -277,10 +282,9 @@ class Namespace {
 
   /**
    * Create an archive
-   * @param {FileId[]} files - file id array
-   * @returns {Promise}
+   * @param files - file id array
    */
-  createArchive(files) {
+  createArchive(files: FileId[]) {
     const options = {
       method: 'POST',
       url: `/namespaces/${this.name}/archives`,
@@ -294,10 +298,10 @@ class Namespace {
 
   /**
    * Archive files then return download URL
-   * @param {FileId[]} files - file id array, see [FileId](#Namespace..FileId)
-   * @param {RequestOptions} options - RequestOptions, see [RequestOptions](#Namespace..RequestOptions)
+   * @param files - file id array
+   * @param options - RequestOptions
    */
-  getArchiveUrl(files, options = {}) {
+  getArchiveUrl(files: FileId[], options: DownloadOptions = {}) {
     const { filename } = options;
     const requestOptions = {
       ...options,
@@ -313,9 +317,9 @@ class Namespace {
 
   /**
    * Search similar doc of specified file
-   * @param {string} fileId 
+   * @param fileId 
    */
-  searchSimilarDoc(fileId) {
+  searchSimilarDoc(fileId: FileId) {
     const requestOptions = {
       method: 'POST',
       url: `/namespaces/${this.name}/search/similar-doc`,
