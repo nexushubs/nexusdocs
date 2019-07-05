@@ -120,7 +120,7 @@ class Client {
         }
         let errorMessage: string;
         const contentType = response.headers['content-type'];
-        if (contentType.indexOf('application/json') !== 0) {
+        if (!contentType || contentType.indexOf('application/json') !== 0) {
           errorMessage = `Invalid Response`;
         } else if (!_.isObject(body)) {
           const jsonErrorMessage = 'Invalid JSON format';
