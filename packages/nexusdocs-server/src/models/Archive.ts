@@ -2,12 +2,22 @@ import * as crypto from 'crypto';
 import * as uuid from 'uuid';
 
 import BaseModel from '../models/BaseModel';
-import { IArchive, IArchiveData } from './types';
+import { IBaseData } from './types';
 
-export default class Archive extends BaseModel<IArchive, IArchiveData> {
+export interface ArchiveData extends IBaseData {
+  filename?: string;
+  namespace?: string;
+  md5?: string;
+  store_id?: string;
+  size?: number;
+  files?: string[];
+  dateCreated?: Date;
+}
 
-  collectionName = 'archives';
-  schema = {
+class Archive extends BaseModel<Archive, ArchiveData> {
+
+  static collectionName = 'archives';
+  static schema = {
     filename: { type: 'string' },
     namespace: { type: 'string' },
     md5: { type: 'string' },
@@ -19,7 +29,7 @@ export default class Archive extends BaseModel<IArchive, IArchiveData> {
     dateCreated: { type: 'date' },
   };
 
-  getHash(files) {
+  getHash(files: string[]) {
     const hash = crypto.createHash('md5');
     files.sort();
     files.forEach(fileId => {
@@ -34,9 +44,13 @@ export default class Archive extends BaseModel<IArchive, IArchiveData> {
     data.dateCreated = new Date;
   }
   
-  getByFiles(files) {
+  getByFiles(files: string[]) {
     const md5 = this.getHash(files);
     return this.get({ md5 });
   }
 
 }
+
+interface Archive extends ArchiveData {}
+
+export default Archive;

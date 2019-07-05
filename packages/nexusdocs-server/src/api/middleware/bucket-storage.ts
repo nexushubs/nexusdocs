@@ -1,16 +1,17 @@
-import { app } from '../../lib/Application';
-
 export class BucketStorage {
 
   async _handleFile(req, file, callback) {
     try {
       const md5 = req.body.md5 || req.query.md5;
-      const { Namespace } = app().models;
+      const { namespace } = req.locals;
+      if (!namespace) {
+        throw new Error('namespace not initialized');
+      }
       const uploadOptions = {
         filename: file.originalname,
         md5,
       };
-      const uploadStream = await Namespace.openUploadStream(uploadOptions);
+      const uploadStream = await namespace.openUploadStream(uploadOptions);
       uploadStream.on('file', data => {
         callback(null, data);
       });

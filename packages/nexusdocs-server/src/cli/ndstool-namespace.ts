@@ -63,7 +63,7 @@ program
   .action((options) => {
     run(async app => {
       const { Namespace } = app.models;
-      const list = await Namespace.getAll();
+      const list = await Namespace.collection.find({}).toArray();
       if (!options.quiet) {
         printList(list)
         console.log(`${list.length} items listed.`);

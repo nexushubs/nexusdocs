@@ -1,16 +1,30 @@
-import BaseModel from '../models/BaseModel';
-import { IAcl, IAclData } from './types';
+import BaseModel from './BaseModel';
+import { IBaseData } from './types';
 
-export default class Acl extends BaseModel<IAcl, IAclData> {
+export interface AclData extends IBaseData {
+  filename?: string;
+  namespace?: string;
+  md5?: string;
+  store_id?: string;
+  size?: number;
+  files?: string[];
+  dateCreated?: Date;
+}
 
-  collectionName = 'clients';
-  schema = {
+class Acl extends BaseModel<Acl, AclData> {
+
+  static collectionName = 'clients';
+  static schema = {
     clients_id: { type: 'string' },
     target: { type: 'string' },
     namespace: { type: 'string' },
     files_id: { type: 'string' },
   };
-  defaultQueryOptions = {
+  static defaultQueryOptions = {
   };
   
 }
+
+interface Acl extends AclData {}
+
+export default Acl

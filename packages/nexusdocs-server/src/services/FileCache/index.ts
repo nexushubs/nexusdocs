@@ -12,7 +12,7 @@ import { PassThrough, Readable } from 'stream';
 import BaseService from '../BaseService';
 import { promisifyStream } from '../../lib/util';
 import { ICacheObject, ICacheOptions, IFileCacheService, TCacheBuilder } from './types';
-import { INamespace, ICache } from '../../models/types';
+import { Namespace, Cache } from '../../models';
 
 const mkdirp = util.promisify(_mkdirp);
 
@@ -28,7 +28,7 @@ export default class FileCache extends BaseService implements IFileCacheService 
   private memCaches: Map<string, { timestamp: number, promise: Promise<any>}> = new Map();
   private memCacheTimer = null;
   private tempDir: string;
-  private namespace: INamespace;
+  private namespace: Namespace;
 
   async init() {
     const { Namespace } = this.models;
@@ -128,7 +128,7 @@ export default class FileCache extends BaseService implements IFileCacheService 
     return !expired;
   }
 
-  async isExpired(cache: ICache) {
+  async isExpired(cache: Cache) {
     if (!cache) {
       return true;
     }
@@ -176,7 +176,7 @@ export default class FileCache extends BaseService implements IFileCacheService 
     });
   }
 
-  async unset(key: string|ICache) {
+  async unset(key: string|Cache) {
     const { namespace } = this;
     const { Cache, File } = this.models;
     let cache;

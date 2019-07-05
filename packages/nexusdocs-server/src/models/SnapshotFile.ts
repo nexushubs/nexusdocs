@@ -1,11 +1,19 @@
-import BaseModel from '../models/BaseModel';
-import { ISnapshotFile, ISnapshotFileData } from './types';
+import BaseModel from './BaseModel';
+import { IBaseData } from './types';
 
-export default class SnapshotFile extends BaseModel<ISnapshotFile, ISnapshotFileData> {
+export interface SnapshotFileData extends IBaseData {
+  namespace: string;
+}
 
-  collectionName = 'snapshots';
-  schema = {
+class SnapshotFile extends BaseModel<SnapshotFile, SnapshotFileData> {
+
+  static collectionName = 'snapshots';
+  static schema = {
     namespace: { type: 'string' },
   };
 
 }
+
+interface SnapshotFile extends SnapshotFileData {}
+
+export default SnapshotFile;

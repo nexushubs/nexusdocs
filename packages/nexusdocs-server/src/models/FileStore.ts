@@ -1,10 +1,20 @@
-import BaseModel from '../models/BaseModel';
-import { IFileStore, IFileStoreData } from './types';
+import BaseModel from './BaseModel';
+import { IBaseData } from './types';
 
-export default class FileStore extends BaseModel<IFileStore, IFileStoreData> {
+export interface FileStoreData extends IBaseData {
+  namespace?: string,
+  files_id?: string[],
+  contentType?: string,
+  size?: number,
+  md5?: string,
+  status?: string,
+  metadata?: any,
+}
 
-  collectionName = 'files.store';
-  schema = {
+class FileStore extends BaseModel<FileStore, FileStoreData> {
+
+  static collectionName = 'files.store';
+  static schema = {
     namespace: { type: 'string' },
     files_id: { type: 'array', items: { type: 'string', optional: true } },
     contentType: { type: 'string' },
@@ -12,6 +22,10 @@ export default class FileStore extends BaseModel<IFileStore, IFileStoreData> {
     status: { type: 'string' },
     metadata: { type: 'object' },
   };
-  esSync = true;
+  static esSync = true;
 
 }
+
+interface FileStore extends FileStoreData {}
+
+export default FileStore;

@@ -1,8 +1,8 @@
 
 import Base from '../../lib/Base';
-import { IBaseProvider, IProviderOptions, IStoreBucket } from './types';
+import { IProviderOptions, IStoreBucket } from './types';
 
-export default class BaseProvider extends Base implements IBaseProvider {
+export default class BaseProvider extends Base {
 
   public options: IProviderOptions;
   public name: string;

@@ -1,11 +1,27 @@
 import BaseModel from '../models/BaseModel';
 import * as uuid from 'uuid';
-import { IFile, IFileData } from './types';
+import { IBaseData } from './types';
 
-export default class File extends BaseModel<IFile, IFileData> {
+export interface FileData extends IBaseData {
+  namespace?: string;
+  filename?: string;
+  store_id?: string;
+  size?: number;
+  md5?: string;
+  path?: string;
+  contentType?: string;
+  aliases?: string[];
+  metadata?: any;
+  dateStarted?: Date;
+  dateUploaded?: Date;
+  dateDeleted?: Date;
+  isDelete?: boolean;
+}
 
-  collectionName = 'files';
-  schema = {
+class File extends BaseModel<File, FileData> {
+
+  static collectionName = 'files';
+  static schema = {
     namespace: { type: 'string' },
     filename: { type: 'string' },
     store_id: { type: 'string' },
@@ -20,7 +36,7 @@ export default class File extends BaseModel<IFile, IFileData> {
     dateDeleted: { type: 'date', optional: true },
     isDelete: { type: 'boolean' },
   };
-  esSync = true;
+  static esSync = true;
 
   async openDownloadStream(id) {
     const { Namespace, FileStore } = this.models;
@@ -41,3 +57,7 @@ export default class File extends BaseModel<IFile, IFileData> {
   }
 
 }
+
+interface File extends FileData {}
+
+export default File;

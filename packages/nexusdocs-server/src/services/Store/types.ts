@@ -1,4 +1,7 @@
 import { Writable, Readable } from 'stream';
+import { KeyValueMap } from '../../types/common';
+import BaseBucket from './BaseBucket';
+import BaseProvider from './BaseProvider';
 
 export interface IFileUploadInfo {
   _id?: string;
@@ -14,11 +17,12 @@ export interface IFileUploadInfo {
 }
 
 export interface IUploadStreamOptions {
-  filename?: string;
-  contentType?: string;
-  md5?: string;
-  size?: number;
-  fileId?: string;
+  filename?: string,
+  contentType?: string,
+  fileId?: string,
+  md5?: string,
+  size?: number,
+  skip?: boolean,
 }
 
 export interface IStoreProvider {
@@ -31,8 +35,8 @@ export interface IBucketUploadOptions {
 }
 
 export interface IBucketDownloadOptions {
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
 }
 
 export interface IUrlOptions {
@@ -49,15 +53,6 @@ export interface IConvertingOptions {
   expires?: number;
 }
 
-export interface IUploadStreamOptions {
-  filename?: string,
-  contentType?: string,
-  fileId?: string,
-  md5?: string,
-  size?: number,
-  skip?: boolean,
-}
-
 export interface IBucketOptions {
 
 }
@@ -70,38 +65,29 @@ export interface IProviderOptions {
   Bucket: { new(provider: IStoreProvider, options: IBucketOptions): IStoreBucket };
 }
 
-export interface IBaseBucket {
-  provider: IBaseProvider;
-  name: string;
-  supportedInputTypes: string[]; 
-  isConvertingSupported(type: string, commands?: string): boolean;
-  isNative(): boolean;
-  openUploadStream(options: IUploadStreamOptions): Promise<Writable>;
-  openDownloadStream(id: string): Promise<Readable>;
-  getDownloadUrl(fileId: string, filename?: string): Promise<string>;
+export interface ITruncateResult {
+  deletedCount: number;
 }
 
-export interface IStoreBucket extends IBaseBucket {
+export interface IStoreBucket {
   _openUploadStream(fileId: string, options: IBucketUploadOptions): Promise<Writable>;
-  _openDownloadStream(fileId: string, options: IBucketUploadOptions): Promise<Readable>;
+  _openDownloadStream(fileId: string, options?: IBucketDownloadOptions): Promise<Readable>;
   getUrl(fileId: string, options: IUrlOptions): Promise<string>;
   getConvertedUrl(fileId: string, options: IConvertingOptions): Promise<string>;
-  delete(fileId: string): Promise<void>
+  delete(fileId: string): Promise<void>;
+  truncate(): Promise<ITruncateResult>
 }
 
-export interface IBaseProvider {
-  options: IProviderOptions;
-  name: string;
-  buckets: {[key: string]: IStoreBucket};
-  bucket(id: any): Promise<IStoreBucket>;
-}
-
-export interface IStoreProvider extends IBaseProvider{
+export interface IStoreProvider {
   destroy(): Promise<any>;
 }
 
+export interface IProvider extends BaseProvider, IBucket {}
+
+export interface IBucket extends BaseBucket<IProvider, IBucket>, IStoreBucket {}
+
 export interface IStoreService {
   provider(id: any, forceReload: boolean): Promise<any>;
-  bucket(providerQuery: any, bucketName: string): Promise<IStoreBucket>;
+  bucket(providerQuery: any, bucketName: string): Promise<IBucket & IStoreBucket>;
   hasType(type: string): boolean;
 }

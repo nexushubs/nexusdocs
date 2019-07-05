@@ -6,11 +6,6 @@ import { IResumableService } from './Resumable/types';
 import { IStoreService } from './Store/types';
 import { IElasticsearchService } from './Elasticsearch/types';
 
-export interface IBaseService extends IBase {
-  init(options: any): Promise<any>;
-  stop(): Promise<any>;
-}
-
 export interface IServices {
   Elasticsearch?: IElasticsearchService;
   FileCache?: IFileCacheService;

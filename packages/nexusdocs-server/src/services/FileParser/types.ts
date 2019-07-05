@@ -1,4 +1,3 @@
-import { IBaseService } from '../../services/types';
 import { Readable } from 'stream';
 
 export interface ImageSizeInfo {
@@ -34,7 +33,7 @@ export interface FileMetaData {
   text?: TextInfo;
 }
 
-export interface IFileParserService extends IBaseService {
+export interface IFileParserService {
   parse(filename: string, stream: Readable): Promise<FileMetaData>;
 }
 

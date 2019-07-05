@@ -9,8 +9,9 @@ export class Validator {
   private lastError: any;
 
   constructor(schema: any, options = {}) {
-    let sanitization, validation;
-    if (_.isObject(schema)) {
+    let sanitization: any;
+    let validation: any;
+    if (_.isPlainObject(schema)) {
       if (schema.sanitization && schema.validation) {
         sanitization = schema.sanitization
         validation = schema.validation;

@@ -4,11 +4,12 @@ import * as path from 'path';
 import { PassThrough } from 'stream';
 import * as OSS from 'ali-oss';
 
-import { IStoreBucket, IUrlOptions, IConvertingOptions } from '../../types';
+import { IStoreBucket, IUrlOptions, IConvertingOptions, IUploadStreamOptions, IBucketDownloadOptions } from '../../types';
 import BaseBucket from '../../BaseBucket';
 import { convert } from './Converter';
+import { Provider } from '.';
 
-export default class AliOSSProviderBucket extends BaseBucket implements IStoreBucket {
+export default class AliOSSProviderBucket extends BaseBucket<Provider, AliOSSProviderBucket> implements IStoreBucket {
 
   public supportedInputTypes = [
     'bmp',
@@ -30,7 +31,7 @@ export default class AliOSSProviderBucket extends BaseBucket implements IStoreBu
 
   private bucket: any;
 
-  constructor(provider, bucketName) {
+  constructor(provider: Provider, bucketName: string) {
     super(provider, bucketName);
     const { params } = this.provider.options;
     this.bucket = new (OSS as any)({
@@ -39,7 +40,7 @@ export default class AliOSSProviderBucket extends BaseBucket implements IStoreBu
     });
   }
 
-  async _openUploadStream(id, options) {
+  async _openUploadStream(id: string, options?: IUploadStreamOptions) {
     const stream = new PassThrough;
     const putOptions: any = {
       mime: options.contentType,
@@ -52,7 +53,7 @@ export default class AliOSSProviderBucket extends BaseBucket implements IStoreBu
     return stream;
   }
 
-  async _openDownloadStream(id, options) {
+  async _openDownloadStream(id: string, options?: IBucketDownloadOptions) {
     const result = await this.bucket.getStream(id);
     return result.stream;
   }
@@ -84,6 +85,12 @@ export default class AliOSSProviderBucket extends BaseBucket implements IStoreBu
 
   async delete(id: string) {
     await this.bucket.delete(id);
+  }
+
+  async truncate() {
+    return {
+      deletedCount: 0,
+    };
   }
   
 }

@@ -1,12 +1,20 @@
-import BaseModel from '../models/BaseModel';
+import BaseModel from './BaseModel';
 import { providerType, bucketName } from '../lib/schema';
-import { ObjectId } from 'bson';
-import { IProvider, IProviderData } from './types';
+import { IBaseData } from './types';
 
-export default class Provider extends BaseModel<IProvider, IProviderData> {
+export interface ProviderData extends IBaseData {
+  type?: string;
+  name?: string;
+  description?: string;
+  params?: any;
+  isSystem?: boolean;
+  buckets?: string[];
+}
 
-  collectionName = 'providers';
-  schema = {
+class Provider extends BaseModel<Provider, ProviderData> {
+
+  static collectionName = 'providers';
+  static schema = {
     type: { type: 'string', $providerType: 1 },
     name: { type: 'string', pattern: 'alphaNumeric' },
     description: { type: 'string', optional: true },
@@ -16,19 +24,27 @@ export default class Provider extends BaseModel<IProvider, IProviderData> {
       type: 'string', $bucketName: 1 },
     },
   };
-  validators = {
+  static validators = {
     providerType,
     bucketName,
   };
-  defaultQueryOptions = {
+  static defaultQueryOptions = {
   }
   
-  beforeCreate(data) {
-    return this.ensureUnique({name: data.name});
+  async beforeCreate(data: Partial<ProviderData>) {
+    if (data.name) {
+      await this.ensureUnique({ name: data.name });
+    }
   }
 
-  beforeUpdate(id: ObjectId, data: any) {
-    return this.ensureUnique({name: data.name});
+  async beforeUpdate(data: Partial<ProviderData>) {
+    if (data.name) {
+      await this.ensureUnique({ name: data.name });
+    }
   }
 
 }
+
+interface Provider extends ProviderData {}
+
+export default Provider;

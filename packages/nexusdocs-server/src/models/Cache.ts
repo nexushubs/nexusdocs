@@ -1,17 +1,27 @@
 import * as _ from 'lodash';
 
 import BaseModel from '../models/BaseModel';
-import { ICache, ICacheData } from './types';
+import { IBaseData } from './types';
 
-export default class Cache extends BaseModel<ICache, ICacheData> {
+export interface CacheData extends IBaseData {
+  files_id?: string;
+  expiresAt?: Date;
+  dateCreated?: Date;
+}
+
+class Cache extends BaseModel<Cache, CacheData> {
   
-  collectionName = 'caches';
-  schema = {
+  static collectionName = 'caches';
+  static schema = {
     files_id: { type: 'string' },
     expiresAt: { type: 'date' },
     dateCreated: { type: 'date' },
   };
-  validators = {
+  static validators = {
   };
 
 }
+
+interface Cache extends CacheData {}
+
+export default Cache

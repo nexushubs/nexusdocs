@@ -3,20 +3,55 @@ import { Writable } from 'stream';
 import * as archiver from 'archiver';
 import { ZlibOptions } from 'zlib';
 import getNewFilename from 'new-filename';
-import { PassThrough } from 'stream';
 import * as qs from 'qs';
+import { ObjectId } from 'mongodb';
 
-import BaseModel from '../models/BaseModel';
-import { bucketName, isObjectId } from '../lib/schema';
+import BaseModel from './BaseModel';
+import { isObjectId } from '../lib/schema';
 import { ValidationError, buildValidationError } from '../lib/errors';
 import { ApiError } from '../lib/errors';
-import { INamespace, INamespaceData, IFile, IGetUrlOptions, INamespaceStats, ISimilarDocQuery, IFileData, IFileStoreData } from './types';
 import { IUploadStreamOptions, IStoreBucket, IUrlOptions } from '../services/Store/types';
+import { IBaseData } from './types';
+import { FileData } from './File';
+import { File } from '.';
+import Archive from './Archive';
 
-export default class Namespace extends BaseModel<INamespace, INamespaceData> {
+export interface IFileStats {
+  totalSize: number;
+  avgSize: number;
+  count: number;
+}
 
-  collectionName = 'namespaces';
-  schema = {
+export interface INamespaceStats {
+  files: IFileStats;
+  stores: IFileStats;
+}
+
+export interface GetUrlOptions {
+  processNative?: boolean;
+  download?: boolean;
+  serverUrl?: string;
+  filename?: string;
+}
+
+export interface SimilarDocQuery {
+  id?: string;
+  content?: string;
+}
+
+export interface NamespaceData extends IBaseData {
+  name?: string;
+  providers_id?: ObjectId;
+  bucket?: string;
+  isPublic?: boolean;
+  isSystem?: boolean;
+  description?: string;
+}
+
+class Namespace extends BaseModel<Namespace, NamespaceData> {
+
+  static collectionName = 'namespaces';
+  static schema = {
     name: { type: 'string' },
     providers_id: { $isObjectId: 1 },
     bucket: { type: 'string' },
@@ -24,7 +59,7 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     isSystem: { type: 'boolean', optional: true },
     description: { type: 'string', optional: true },
   };
-  validators = {
+  static validators = {
     isObjectId,
   };
 
@@ -56,7 +91,7 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     return this.ensureUnique({name: data.name});
   }
 
-  async getBucket(id: any = null) {
+  async getBucket(id: string = null) {
     id = this.prepareId(id);
     const { Store } = this.services;
     let instance = this._active ? this : await this.get(id);
@@ -178,14 +213,14 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     return downloadStream;
   }
 
-  async deleteFile(fileId: string|IFile) {
-    if (!this._active) {
-      throw new Error('could not delete file on none instance');
-    }
+  async deleteFile(fileId: string | FileData) {
+    this.forceActiveModel();
     const { File, FileStore } = this.models;
-    let file: IFile = _.isString(fileId) ? await File.get(fileId) : fileId;
-    if (!(file instanceof File.constructor)) {
-      file = File.getInstance(file);
+    let file: File;
+    if (_.isString(fileId)) {
+      file = await File.get(fileId);
+    } else if (_.isPlainObject(fileId)) {
+      file = File.getInstance(fileId);
     }
     const info = file.data();
     const store = await FileStore.get(file.store_id);
@@ -272,7 +307,7 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
       zlib: { level: 6 },
     });
     const filenames = [];
-    return new Promise(async (resolve, reject) => {
+    return new Promise<Archive>(async (resolve, reject) => {
       storeStream.on('error', reject);
       storeStream.on('upload', async info => {
         info.files = files;
@@ -333,7 +368,7 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     return FileConverter.convert(fileStream, file.filename, commands);
   }
 
-  async getOriginalUrl(file: IFile, options: IGetUrlOptions = {}) {
+  async getOriginalUrl(file: FileData, options: GetUrlOptions = {}) {
     const bucket = await this.getBucket();
     const { type } = bucket.provider.options;
     const { download, processNative } = options;
@@ -376,15 +411,15 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
         count: { $sum: 1 },
       }},
     ];
-    const fileStats = await File.collection.aggregate(aggregateOptions).toArray();
-    const storeStats = await FileStore.collection.aggregate(aggregateOptions).toArray();
+    const [fileStats] = await File.collection.aggregate(aggregateOptions).toArray() as any;
+    const [storeStats] = await FileStore.collection.aggregate(aggregateOptions).toArray() as any;
     return {
-      files: _.omit(fileStats[0], '_id'),
-      stores: _.omit(storeStats[0], '_id'),
+      files: fileStats,
+      stores: storeStats,
     };
   }
 
-  async searchSimilarDoc(query: ISimilarDocQuery = {}) {
+  async searchSimilarDoc(query: SimilarDocQuery = {}) {
     const { FileStore, File } = this.models;
     if (!this._active) {
       throw new ApiError(500, 'invalid_query', 'can not perform similar doc search on none active instance');
@@ -422,3 +457,7 @@ export default class Namespace extends BaseModel<INamespace, INamespaceData> {
     return result;
   }
 }
+
+interface Namespace extends NamespaceData {}
+
+export default Namespace;

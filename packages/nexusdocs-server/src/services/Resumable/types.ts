@@ -1,5 +1,4 @@
 import { Readable, Writable } from 'stream';
-import { IBaseService } from '../../services/types';
 
 export type TIdentifier = string;
 
@@ -35,7 +34,7 @@ export interface IResumableCache {
   cleanUp(identifier: TIdentifier);
 }
 
-export interface IResumableService extends IBaseService {
+export interface IResumableService {
   createWriteStream(params: ResumableParams): Promise<Writable>;
   createReadStream(params: ResumableParams): Promise<Readable>;
   checkStatus(params: ResumableParams): boolean;

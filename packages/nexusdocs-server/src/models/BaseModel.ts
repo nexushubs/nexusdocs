@@ -1,72 +1,79 @@
 import * as _ from 'lodash';
+import * as uuid from 'uuid';
+import * as config from 'config';
 import { Db, Collection, FindOneOptions, FilterQuery, ObjectId } from 'mongodb';
 
 import { ValidationError, buildValidationError } from '../lib/errors';
 import { buildValidator, Validator } from '../lib/validator';
 import Base from '../lib/Base';
-import { IBaseModel, IDocData, IGetOneQueryFilter } from './types';
 import EsIndex from './EsIndex';
+import { IBaseModelStatic, IBaseData } from './types';
+import getNewFilename from 'new-filename';
 
-const COLLECTION_PREFIX = 'docs';
+type ValueOf<T, K extends keyof T> = T[K];
 
-export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
+type InstanceIterator<T> = (instance: T) => Promise<void>;
+
+export default class BaseModel<TModel extends BaseModel<TModel,TData>, TData extends IBaseData, TConfig = any> extends Base {
   
-  public defaultQueryOptions: FindOneOptions;
   public _active: boolean;
   public _deleted: boolean;
-  public _data: any;
-  public validator: Validator;
-  public validators: {[key: string]: any};
-  public schema: any;
-  public collectionName: string;
-  public collection: Collection;
-  public esSync: boolean;
-  private _es: EsIndex;
+  public _data: TData;
+  public _static?: IBaseModelStatic<TModel, TData, TConfig>;
   
-  constructor(data) {
-    super()
+  constructor(data: TData) {
+    super();
     this._active = !!data;
     this._deleted = false;
-    this._data = {};
-    this.validator = buildValidator(this.schema);
+    this._data = {} as TData;
+    this._static = this.constructor as IBaseModelStatic<TModel, TData, TConfig>;
     if (data && _.isPlainObject(data)) {
       this.data(data);
     }
   }
 
-  getInstance(data) {
+  getInstance(data: Partial<TData>): TModel {
     const instance = new (<any> this.constructor)(data);
     instance.init();
     return instance;
   }
 
-  get es(): EsIndex {
-    if (!this.esSync) {
+  get es(): EsIndex<TData> {
+    if (!this._static.esSync) {
       throw new Error('elasticsearch sync is not activated on this collection');
     }
-    if (this._active) {
-      return this.models[this.constructor.name].es;
-    } else {
-      if (!this._es) {
-        this._es = new EsIndex(`${COLLECTION_PREFIX}.${this.collectionName}`);
-      }
-      return this._es;
+    if (!this._static.es) {
+      this._static.es = new EsIndex(this._static.collectionName);
     }
+    return this._static.es;
+  }
+
+  get collection(): Collection<TData> {
+    return this._static.collection;
   }
 
   init() {
-    const collection = this.db.collection(`${COLLECTION_PREFIX}.${this.collectionName}`);
-    this.collection = collection;
+    if (!this._static.initialized) {
+      this._static.validator = buildValidator(this._static.schema);
+      this._static.collection = this.db.collection(this._static.collectionName);
+      const configKey = `models.${this._static.name}`;
+      this._static.config = config.has(configKey) ? config.get<TConfig>(configKey) : {} as any;
+      this._static.initialized = true;
+    }
     this.bindDataProperties();
     const aliases = ['find', 'findOne'];
     aliases.forEach(method => {
-      this[method] = collection[method].bind(this.collection);
+      this[method] = this.collection[method].bind(this.collection);
     });
   }
 
+  get config() {
+    return this._static.config;
+  }
+
   private bindDataProperties() {
-    const keys = Object.keys(this.schema);
-    keys.unshift('_id');
+    const keys = Object.keys(this._static.schema) as (keyof TData)[];
+    keys.unshift('_id' as keyof TData);
     keys.forEach(key => {
       Object.defineProperty(this, key, {
         configurable: false,
@@ -82,18 +89,18 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     });
   }
   
-  validate(data, options = {}) {
-    const result = this.validator.validate(data, {
+  validate(data: any, options = {}) {
+    const result = this._static.validator.validate(data, {
       ...options,
-      custom: this.validators,
+      custom: this._static.validatorPlugins,
     });
     if (!result.valid) {
       throw new ValidationError(result.error);
     }
   }
 
-  validateOne(key: string, value: any): void {
-    const result = this.validator.validate({
+  validateOne(key: keyof TData, value: any): void {
+    const result = this._static.validator.validate({
       [key]: value,
     }, key);
     if (!result.valid) {
@@ -101,17 +108,13 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     }
   }
 
-  generateId(): any {
-    return new ObjectId;
+  generateId(): string {
+    return uuid.v4();
   }
 
-  prepareId(id: any): ObjectId {
+  prepareId(id?: string): string {
     if (id) {
-      if (_.isString(id) && /^[0-9a-f]{24}$/i.test(id)) {
-        return new ObjectId(id);
-      } else {
-        return id;
-      }
+      return id;
     } else if (this._active) {
       return this._data._id;
     } else {
@@ -119,7 +122,7 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     }
   }
 
-  prepareData(data: S = null, validateOptions: any = {}) {
+  prepareData(data: TData = null, validateOptions: any = {}): TData {
     if (data) {
       this.validate(data, validateOptions);
       return data;
@@ -130,105 +133,118 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     }
   }
 
-  async beforeCreate(data: S) {
+  forceActiveModel() {
+    if (!this._active) {
+      throw new Error('cannot call this in none-active model');
+    }
   }
 
-  async create(data: any, skipHooks) {
+  async beforeCreate(data: Partial<TData>) {
+  }
+
+  async create(data: Partial<TData>, skipHooks = false): Promise<TModel> {
     if (!skipHooks) {
       await this.beforeCreate(data);
     }
-    try {
-      this.validate(data);
-    } catch(err) {
-      return Promise.reject(err);
-    }
+    this.validate(data);
     data._id = data._id || this.generateId();
-    await this.collection.insertOne(data);
+    await this.collection.insertOne(data as TData);
     const instance = this.getInstance(data);
-    if (this.esSync) {
+    if (this._static.esSync) {
       const { _id, ...rest } = data;
-      await this.es.create( _id, rest);
+      await this.es.create(_id, rest as TData);
     }
-    await this.afterCreate(data);
+    if (!skipHooks) {
+      await instance.afterCreate(data);
+    }
     return instance;
   }
 
-  async afterCreate(data: S) {
+  async afterCreate(data: Partial<TData>) {
   }
 
-  async beforeUpdate(query: FilterQuery<any>, data: S) {
+  async beforeUpdate(data: Partial<TData>) {
   }
-    
-  async update(query: FilterQuery<any>|S, data: S = null) {
-    let useInstance = false;
-    if (_.isNull(data) && this._active) {
-      useInstance = true;
-      data = query as S;
-      query = this.data('_id');
+  
+  async update(data: Partial<TData>, query?: FilterQuery<TData>): Promise<TModel | undefined> {
+    if (query) {
+      const instance = await this.get(query);
+      if (!instance) {
+        return undefined;
+      }
+      return instance.update(data);
     }
-    if (!_.isPlainObject(query)) {
-      query = {
-        _id: this.prepareId(query),
-      };
-    }
-    await this.beforeUpdate(query, data);
-    if (useInstance) {
-      this.data(data);
-    } else {
-      this.prepareData(data);
-    }
-    await this.collection.updateOne(query, { $set: this.data() });
-    if (this.esSync) {
+    await this.beforeUpdate(data);
+    delete data._id;
+    this.data(data);
+    await this.collection.updateOne({ _id: this.data('_id') }, { $set: this.data() });
+    if (this._static.esSync) {
       if (this._active) {
         data = this.data();
       } else {
         data = await this.collection.findOne(query);
       }
-      const { _id, ...rest } = data as any;
-      await this.es.update(_id, { doc: rest });
+      const { _id, ...rest } = data;
+      await this.es.update(_id, rest as Partial<TData>);
     }
-    return this;
+    await this.afterUpdate(data);
+    return this as any;
   }
  
-  getAll(query, options: FindOneOptions) {
-    return this.collection.find(query, options || this.defaultQueryOptions).toArray();
+  async afterUpdate(data: Partial<TData>) {
+  }
+  
+  async getAll(query: FilterQuery<TData> = {}, options?: FindOneOptions, iterator?: InstanceIterator<TModel>): Promise<TModel[]> {
+    const items = await this.collection.find(query, options || this._static.defaultQueryOptions).toArray();
+    const instances = items.map(item => this.getInstance(item));
+    if (iterator) {
+      for (const instance of instances) {
+        await iterator(instance);
+      }
+    }
+    return instances;
   }
 
-  async get(query: IGetOneQueryFilter, options: FindOneOptions = null) {
-    if (!_.isPlainObject(query)) {
+  async get(query: string | FilterQuery<TData>, options?: FindOneOptions): Promise<TModel | null> {
+    if (_.isString(query)) {
       query = {
         _id: this.prepareId(query),
       };
     }
-    const data = await this.collection.findOne(<FilterQuery<any>>query, options || this.defaultQueryOptions);
+    const data = await this.collection.findOne(query, options || this._static.defaultQueryOptions);
     if (!data) return null;
     const instance = this.getInstance(data);
     return instance;
   }
   
-  async beforeDelete(id: ObjectId): Promise<void> {
+  async beforeDelete(id: string): Promise<void> {
   }
 
-  async delete(id) {
+  async delete(id?: any) {
     const _id = this.prepareId(id);
     await this.beforeDelete(_id);
     await this.collection.deleteOne({ _id });
     if (!id) {
       this._deleted = true;
     }
-    if (this.esSync) {
+    if (this._static.esSync) {
       await this.es.delete(_id);
     }
-
     return this;
   }
 
-  async exists(query: FilterQuery<any>): Promise<boolean> {
+  async exists(query: FilterQuery<TData>): Promise<boolean> {
     const count = await this.collection.countDocuments(query);
     return count > 0;
   }
 
-  async ensureUnique(query: FilterQuery<any>) {
+  async getUniqueTitle<K extends keyof TData>(query: FilterQuery<TData>, field: K, value: string): Promise<string> {
+    const list = await this.collection.find(query, { projection: { [field]: 1 }}).toArray();
+    const names = _.map(list, field) as any;
+    return getNewFilename(names as string[], value);
+  }
+
+  async ensureUnique(query: FilterQuery<TData>) {
     const count = await this.collection.countDocuments(query);
     if (count > 0) {
       const fields = _.keys(query);
@@ -237,30 +253,32 @@ export default class BaseModel<T,S> extends Base implements IBaseModel<T,S> {
     }
   }
 
-  data(key: string|S = undefined, value: any = undefined): any|S|this {
-    if (!this._active) {
-      throw new Error('cannot access data for a none active model');
-    }
+  data(): TData;
+  data<K extends keyof TData>(key: K): ValueOf<TData, K>;
+  data<K extends keyof TData>(key: K, value: ValueOf<TData, K>): void;
+  data(data: Partial<TData>): void;
+  data<K extends keyof TData>(key?: K | Partial<TData>, value?: ValueOf<TData, K>): ValueOf<TData, K> | TData | undefined {
+    this.forceActiveModel();
     if (_.isUndefined(key)) {
       return this._data;
     } else if (_.isString(key)) {
       if (_.isUndefined(value)) {
-        return this._data[key];
+        return this._data[key as K];
       } else {
-        this.validateOne(key, value);
-        this._data[key] = value
+        this.validateOne(key as keyof TData, value);
+        this._data[key as keyof TData] = value;
       }
     } else if (_.isPlainObject(key)) {
-      const values = _.omitBy(key, _.isUndefined);
-      this.validate(values);
+      const values = _.omitBy(key as TData, _.isUndefined);
+      const keys = Object.keys(values);
+      this.validate(values, { fields: keys });
       _.extend(this._data, values);
-      return this;
     } else {
       throw new TypeError('invalid data key');
     }
   }
 
-  toObject() {
+  toJSON(): TData {
     return this.data();
   }
 

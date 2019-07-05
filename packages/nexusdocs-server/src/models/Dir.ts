@@ -1,13 +1,23 @@
 import BaseModel from '../models/BaseModel';
-import { IDirData, IDir } from './types';
+import { IBaseData } from './types';
 
-export default class Dir extends BaseModel<IDir, IDirData> {
+export interface DirData extends IBaseData {
+  namespace: string;
+  path: string;
+  name: string;
+}
 
-  collectionName = 'files';
-  schema = {
+class Dir extends BaseModel<Dir, DirData> {
+
+  static collectionName = 'files';
+  static schema = {
     namespace: { type: 'string' },
     path: { type: 'string' },
     name: { type: 'string' },
   };
 
 }
+
+interface Dir extends DirData {}
+
+export default Dir;

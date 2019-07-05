@@ -3,29 +3,36 @@ import * as crypto from 'crypto';
 import base32Encode = require('base32-encode');
 
 import BaseModel from '../models/BaseModel';
-import { IClient, IClientData } from './types';
 import request = require('request');
+import { IBaseData } from './types';
 
 const randomBytes = util.promisify(crypto.randomBytes);
 
-export default class Client extends BaseModel<IClient, IClientData> {
+export type ClientRole = 'user' | 'admin';
 
-  collectionName = 'clients';
-  schema = {
+export interface ClientData extends IBaseData {
+  name: string;
+  role: ClientRole;
+  description?: string;
+  clientKey: string;
+  clientSecret: string;
+}
+
+class Client extends BaseModel<Client, ClientData> {
+
+  static collectionName = 'clients';
+  static schema = {
     name: { type: 'string' },
     role: { type: 'string', pattern: /^user|admin$/ },
     description: { type: 'string', optional: true },
     clientKey: { type: 'string', optional: true },
     clientSecret: { type: 'string', optional: true },
   };
-  defaultQueryOptions = {
+  static defaultQueryOptions = {
     projection: {
       clientSecret: 0,
     }
   }
-
-  private clientKey: string;
-  private clientSecret: string;
 
   async generateClientKey() {
     const buffer = await randomBytes(18);
@@ -36,7 +43,7 @@ export default class Client extends BaseModel<IClient, IClientData> {
     return (await randomBytes(36)).toString('base64');
   }
   
-  async beforeCreate(data) {
+  async beforeCreate(data: Partial<ClientData>) {
     data.clientKey = await this.generateClientKey();
     data.clientSecret = await this.generateClientSecret();
     return this.ensureUnique({ name: data.name })
@@ -76,3 +83,7 @@ export default class Client extends BaseModel<IClient, IClientData> {
     return `${schema}://${clientKey}:${encodeURIComponent(clientSecret)}@${hostname}${portStr}/${entryStr}`;
   }
 }
+
+interface Client extends ClientData {}
+
+export default Client;

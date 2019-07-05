@@ -1,12 +1,16 @@
 import * as _ from 'lodash';
-import { ObjectId } from 'mongodb';
+import { ObjectId, FilterQuery } from 'mongodb';
 
+import { KeyValueMap } from '../../types/common';
 import BaseService from '../BaseService';
 import providers from './providers';
+import { IStoreProvider } from './types';
+
+export type ProviderQuery = string | ObjectId;
 
 export default class Store extends BaseService {
   
-  private providers: any;
+  private providers: KeyValueMap<IStoreProvider>;
 
   constructor(options: any) {
     super(options);
@@ -20,8 +24,8 @@ export default class Store extends BaseService {
     await Promise.all(_.map(this.providers, provider => provider.destroy()));
   }
 
-  async provider(providerQuery: any, forceReload = false) {
-    let strId;
+  async provider(providerQuery: ProviderQuery, forceReload = false) {
+    let strId: string;
     if (providerQuery instanceof ObjectId) {
       strId = providerQuery.toHexString();
     }
@@ -35,12 +39,12 @@ export default class Store extends BaseService {
     return this.providers[strId];
   }
 
-  async bucket(providerQuery: any, bucketName: string) {
+  async bucket(providerQuery: ProviderQuery, bucketName: string) {
     const provider = await this.provider(providerQuery);
     return provider.bucket(bucketName);
   }
 
-  async drop(id) {
+  async drop(id: string) {
     const instance = await this.provider(id);
     if (instance) {
       instance.destroy();
@@ -48,7 +52,7 @@ export default class Store extends BaseService {
     }
   }
 
-  hasType(type) {
+  hasType(type: string) {
     return _.has(providers, type);
   }
 

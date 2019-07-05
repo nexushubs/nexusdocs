@@ -79,7 +79,7 @@ program
   .action((options) => {
     run(async app => {
       const { Client } = app.models;
-      const list = await Client.getAll({}, {});
+      const list = await Client.collection.find({}).toArray();
       if (!options.quiet) {
         printList(list)
         console.log(`${list.length} items listed.`);

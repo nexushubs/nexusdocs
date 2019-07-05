@@ -38,7 +38,7 @@ export interface AuthOptions {
   needAuth?: NeedAuthChecker;
 }
 
-class Authorization extends Base {
+export class Authorization extends Base {
 
   public req: Request;
   public res: Response;

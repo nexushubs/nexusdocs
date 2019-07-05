@@ -1,20 +1,20 @@
-import * as EventEmitter from 'events';
 import Base from '../lib/Base';
-import { IBaseService } from './types';
 
-export default class BaseService extends Base implements IBaseService {
+class BaseService<TConfig = any> extends Base {
   
-  protected options: any;
+  protected options: TConfig;
   
-  constructor(options) {
+  constructor(options: TConfig) {
     super();
-    this.options = options || {};
+    this.options = options;
   }
 
-  async init(options: any) {
+  async init(options: TConfig) {
   }
 
   async stop() {
   }
 
 }
+
+export default BaseService;

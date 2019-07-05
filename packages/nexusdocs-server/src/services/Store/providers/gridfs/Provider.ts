@@ -14,10 +14,6 @@ export default class GridFSProvider extends BaseProvider {
     }
   }
 
-  constructor(options) {
-    super(options);
-  }
-
   async init() {
     const { params } = this.options;
     this._db = this.dbClient.db(params.database);

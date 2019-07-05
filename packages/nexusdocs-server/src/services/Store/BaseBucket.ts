@@ -6,21 +6,21 @@ import * as _ from 'lodash';
 import UploadStream from './UploadStream';
 import BaseProvider from './BaseProvider';
 import Base from '../../lib/Base';
-import { IUrlOptions, IBaseBucket, IConvertingOptions } from './types';
+import { IUrlOptions, IConvertingOptions, IUploadStreamOptions, IStoreBucket } from './types';
 
-export default class BaseBucket extends Base implements IBaseBucket {
+export default class BaseBucket<TProvider extends BaseProvider, TBucket extends BaseBucket<TProvider, TBucket> & IStoreBucket> extends Base {
 
-  public provider: BaseProvider;
+  public provider: TProvider;
   public name: string;
   public supportedInputTypes: string[];
 
-  constructor(provider, bucketName) {
+  constructor(provider: TProvider, bucketName: string) {
     super();
     this.provider = provider;
     this.name = bucketName;
   }
 
-  isConvertingSupported(type, commands) {
+  isConvertingSupported(type: string, commands?: string) {
     const { supportedInputTypes } = this;
     if (type === 'jpeg') {
       type = 'jpg';
@@ -35,7 +35,7 @@ export default class BaseBucket extends Base implements IBaseBucket {
     return this.name === 'gridfs';
   }
 
-  async openUploadStream(options: any = {}) {
+  async openUploadStream(options: IUploadStreamOptions) {
     const { filename, contentType, fileId, md5, size, skip } = options;
     const id = uuid.v4();
     const uploadOptions = {
@@ -44,7 +44,7 @@ export default class BaseBucket extends Base implements IBaseBucket {
     };
     let providerUploadStream = null;
     if (!skip) {
-      providerUploadStream = await this._openUploadStream(id, { ...uploadOptions });
+      providerUploadStream = await (this as unknown as TBucket)._openUploadStream(id, uploadOptions);
     }
     const uploadStream = new UploadStream(id, providerUploadStream, {
       ...uploadOptions,
@@ -55,10 +55,10 @@ export default class BaseBucket extends Base implements IBaseBucket {
     return uploadStream;
   }
     
-  async openDownloadStream(id) {
+  async openDownloadStream(id: string) {
     let downloadStream;
     try {
-      downloadStream = await this._openDownloadStream(id);
+      downloadStream = await (this as unknown as TBucket)._openDownloadStream(id);
     } catch(e) {
       downloadStream = new Readable();
       downloadStream.emit('error', e);
@@ -66,28 +66,8 @@ export default class BaseBucket extends Base implements IBaseBucket {
     return downloadStream;
   }
 
-  _openUploadStream(fileId, options: any = {}) {
-    throw new Error('method openUploadStream() is not implemented');
-  }
-
-  _openDownloadStream(fileId, options: any = {}) {
-    throw new Error('method openDownloadStream() is not implemented');
-  }
-
-  async getUrl(fileId: string, options: IUrlOptions): Promise<string> {
-    throw new Error('method _getUrl() is not implemented');
-  }
-
-  async getDownloadUrl(fileId: string, filename): Promise<string> {
-    return this.getUrl(fileId, { filename });
-  }
-
-  async getConvertedUrl(id: string, options: IConvertingOptions = {}): Promise<string> {
-    throw new Error('method getConvertedUrl() is not implemented');
-  }
-
-  delete(id) {
-    throw new Error('method delete() is not implemented');
+  async getDownloadUrl(fileId: string, filename: string): Promise<string> {
+    return (this as unknown as TBucket).getUrl(fileId, { filename });
   }
   
 }

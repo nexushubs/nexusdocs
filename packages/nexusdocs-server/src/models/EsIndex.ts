@@ -1,12 +1,14 @@
 import * as _ from 'lodash';
 import Base from '../lib/Base';
+import { IBaseData } from './types';
+import { UpdateDocumentParams, GetParams, CreateDocumentParams, DeleteDocumentParams, SearchParams } from 'elasticsearch';
 
 export interface EsContext {
   index: string,
   type: string,
 }
 
-export default class EsIndex extends Base {
+export default class EsIndex<T extends IBaseData> extends Base {
 
   public context: EsContext;
 
@@ -22,14 +24,14 @@ export default class EsIndex extends Base {
     return this.services.Elasticsearch;
   }
 
-  prepareQuery(query) {
+  prepareQuery(query: any) {
     return {
       ...this.context,
       ...query,
     }
   }
 
-  createMany(data) {
+  createMany(data: T[]) {
     const body = _.flatten(data.map(fields => {
       const { _id, ...restFields } = fields;
       return [
@@ -46,24 +48,24 @@ export default class EsIndex extends Base {
     return this.raw.bulk({ body });
   }
 
-  create(id, body, options = {}) {
+  create(id: string, body: T, options: Partial<CreateDocumentParams> = {}) {
     return this.raw.create(this.prepareQuery({ id, body, ...options }))
   }
 
-  get(id, options = {}) {
-    return this.raw.get(this.prepareQuery({ id, ...options }))
+  get(id: string, options: Partial<GetParams> = {}) {
+    return this.raw.get<T>(this.prepareQuery({ id, ...options }))
   }
 
-  update(id, body, options = {}) {
+  update(id: string, body: any, options: Partial<UpdateDocumentParams> = {}) {
     return this.raw.update(this.prepareQuery({ id, body, ...options }))
   }
 
-  delete(id, options = {}) {
+  delete(id: string, options: Partial<DeleteDocumentParams> = {}) {
     return this.raw.delete(this.prepareQuery({ id, ...options }))
   }
 
-  search(body, options = {}) {
-    return this.raw.search(this.prepareQuery({ body, ...options }))
+  search(body: any, options: Partial<SearchParams> = {}) {
+    return this.raw.search<T>(this.prepareQuery({ body, ...options }))
   }
 
 }

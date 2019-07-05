@@ -1,10 +1,18 @@
-import * as express from 'express';
+import { Request, Response } from 'express';
 import Application from '../lib/Application';
 
-export interface IRequestContext {
-  app: Application;
+export interface IRequest extends Request {
+  context?: Application;
 }
 
-export interface Request extends express.Request {
-  context: IRequestContext;
+export interface IResponse extends Response {
+  
+}
+
+export interface AttachedResponse<T extends ILocals> extends IResponse {
+  locals: T;
+} 
+
+export interface ILocals {
+  serverUrl?: string;
 }

@@ -8,9 +8,5 @@ export default class AliOSSProvider extends BaseProvider {
     region: { type: 'string', pattern: /^[a-z]+[a-z\-\d]+$/ },
     secure: { type: 'boolean', optional: true },
   }
- 
-  constructor(options) {
-    super(options);
-  }
 
 }

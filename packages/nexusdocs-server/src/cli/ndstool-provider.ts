@@ -64,7 +64,7 @@ program
     }
     run(async app => {
       const { Provider } = app.models;
-      const list = await Provider.getAll(query);
+      const list = await Provider.collection.find({}).toArray();
       if (!options.quiet) {
         printList(list)
         console.log(`${list.length} items listed.`);

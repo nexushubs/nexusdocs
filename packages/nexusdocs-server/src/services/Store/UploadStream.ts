@@ -21,7 +21,7 @@ export default class UploadStream extends Transform {
   private hash: crypto.Hash;
   private metadata: any;
 
-  constructor(id, uploadStream, options: IUploadStreamOptions = {}) {
+  constructor(id: string, uploadStream?: Writable, options: IUploadStreamOptions = {}) {
     super();
     const { filename, contentType, md5, size } = options;
     this.dateStarted = new Date;
@@ -42,7 +42,7 @@ export default class UploadStream extends Transform {
     }
   }
 
-  _transform(data, encoding, callback) {
+  _transform(data: Buffer, encoding: string, callback: () => void) {
     this.hash.update(data);
     this.length += Buffer.byteLength(data);
     this.push(data);
