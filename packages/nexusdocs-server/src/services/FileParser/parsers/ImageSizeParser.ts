@@ -1,7 +1,10 @@
 import * as imageSize from 'image-size';
-import BaseParser from '../BaseParser';
-import { IFileParser } from '../types';
 
+import { staticImplements } from '../../../types/common';
+import { IFileParser, IFileParserStatic } from '../types';
+import BaseParser from '../BaseParser';
+
+@staticImplements<IFileParserStatic>()
 export default class ImageSizeParser extends BaseParser implements IFileParser {
 
   static key = 'image';

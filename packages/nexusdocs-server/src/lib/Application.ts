@@ -2,8 +2,8 @@ import * as path from 'path';
 import * as _ from 'lodash';
 import * as express from 'express';
 import * as config from 'config';
-
 import { Server } from 'http';
+
 import { connect } from '../lib/database';
 import * as models from '../models';
 import * as services from '../services';
@@ -13,8 +13,9 @@ import { ApplicationOptions } from '../types';
 
 const packageJson = require('../../package.json');
 
+
 export function basePath () {
-  return path.normalize(__dirname + '/..')
+  return path.resolve(__dirname, '../');
 };
 
 let instance: Application = null;
@@ -30,7 +31,7 @@ export default class Application extends Base {
   
   public options: ApplicationOptions = null;
   public api: express.Application = null;
-  public server: Server;
+  public server: Server = null;
   public startTime: number = null;
   public started: boolean = false;
   public readonly version: string = (<any> packageJson).version;
@@ -54,7 +55,7 @@ export default class Application extends Base {
       debug: {
         request: true,
       }
-    }, config.get('Application'), options)
+    }, config.get('Application'), options);
     instance = this;
   }
 
@@ -126,13 +127,15 @@ export default class Application extends Base {
     await this.load('services', services);
   }
 
-  load(holderName, classes) {
+  load(holderName: 'models' | 'services', classes: any) {
     const holder = this[holderName];
     const initials = _.map(classes, (Class, name) => {
       let options = undefined;
-      const key = `${holderName}.${Class.name}`;
-      if (config.has(key)) {
-        options = config.get(key);
+      if (holderName === 'services') {
+        const key = `${holderName}.${Class.name}`;
+        if (config.has(key)) {
+          options = config.get(key);
+        }
       }
       const instance = new Class(options);
       holder[Class.name] = instance;

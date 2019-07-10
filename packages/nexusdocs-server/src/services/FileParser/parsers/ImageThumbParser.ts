@@ -1,9 +1,12 @@
 import * as _ from 'lodash';
 import * as gm from 'gm';
 import dataurl from 'dataurl';
-import BaseParser from '../BaseParser';
-import { IFileParser } from '../types';
 
+import { staticImplements } from '../../../types/common';
+import { IFileParser, IFileParserStatic } from '../types';
+import BaseParser from '../BaseParser';
+
+@staticImplements<IFileParserStatic>()
 export default class ImageThumbParser extends BaseParser implements IFileParser {
 
   static key = 'image';
@@ -14,18 +17,19 @@ export default class ImageThumbParser extends BaseParser implements IFileParser 
     'png',
   ];
   static needBuffer = false;
-  protected options: any;
+  
+  protected config: any;
 
   init(options) {
-    this.options = _.defaults(options, {
+    this.config = _.defaults(options, {
       thumbSize: 48,
     });
   }
 
   parse() {
-    const { stream, filename } = this;
+    const { stream, filename } = this.input;
     return new Promise((resolve, reject) => {
-      const { thumbSize } = this.options;
+      const { thumbSize } = this.config;
       gm(stream, filename)
       .resize(thumbSize, thumbSize)
       .toBuffer('JPEG', (err, buffer) => {

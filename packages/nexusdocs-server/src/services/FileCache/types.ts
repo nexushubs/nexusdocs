@@ -1,17 +1,13 @@
 import { Readable } from 'stream'
-import BaseService from '../BaseService';
+import { IFileContent } from '../../types/file';
 import { Cache } from '../../models';
-
-export interface ICacheObject {
-  contentType: string;
-  stream: Readable;
-}
+import BaseService from '../BaseService';
 
 export interface ICacheOptions {
   ttl?: number;
 }
 
-export type TCacheBuilder = () => Promise<ICacheObject>;
+export type TCacheBuilder = () => Promise<IFileContent>;
 
 export interface IFileCacheService extends BaseService {
   initCache(): Promise<void>;
@@ -22,7 +18,7 @@ export interface IFileCacheService extends BaseService {
   clear(): Promise<any>;
   has(key: string): Promise<boolean>;
   isExpired(cache: Cache): Promise<boolean>;
-  get(key: string, cacheBuilder?: TCacheBuilder, options?: ICacheOptions): Promise<ICacheObject>;
+  get(key: string, cacheBuilder?: TCacheBuilder, options?: ICacheOptions): Promise<IFileContent>;
   unset(key: string): Promise<any>;
-  set(key: string, cacheObject: ICacheObject, options?: ICacheOptions): Promise<void>;
+  set(key: string, cacheObject: IFileContent, options?: ICacheOptions): Promise<void>;
 }

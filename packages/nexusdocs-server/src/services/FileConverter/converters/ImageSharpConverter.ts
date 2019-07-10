@@ -1,18 +1,20 @@
 import * as _ from 'lodash';
 import * as sharp from 'sharp';
 
+import { staticImplements } from '../../../types/common';
 import { ApiError } from '../../../lib/errors';
+import { IFileConverter, TConvertingCommand, IFileConverterStatic } from '../types';
 import BaseConverter from '../BaseConverter';
-import { IFileConverter, TConvertingOption } from '../types';
 
 // Resize command pattern
 // http://www.graphicsmagick.org/GraphicsMagick.html#details-resize
 // format: <width>x<height>{%}{@}{!}{^}{<}{>}
 const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/;
 
-export default class ImageSharpConverter extends BaseConverter implements IFileConverter {
+@staticImplements<IFileConverterStatic>()
+export default class ImageSharpConverter extends BaseConverter {
 
-  static extensions = [
+  static readonly inputFormats = [
     'gif',
     'jpeg',
     'jpg',
@@ -22,25 +24,25 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
     'webp',
   ];
 
-  static formats = [
+  static readonly outputFormats = [
     'jpeg',
     'png',
     'webp',
     'tiff',
   ];
 
-  static formatMap = {
+  static readonly formatMap = {
     jpg: 'jpeg',
   };
 
   private quality: number;
-  private commands: any[][] = [];
+  private commandList: any[][] = [];
 
   addCommand(name: string = '', ...args: any[]) {
-    this.commands.push([name, ...args])
+    this.commandList.push([name, ...args])
   }
 
-  prepare(command: string, options: TConvertingOption) {
+  prepare(command: string, options: TConvertingCommand) {
     const method = `_${command}`;
     if (!this[method]) {
       throw new ApiError(400, null, 'ImageConverter: invalid command');
@@ -54,24 +56,27 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
       throw new ApiError(400, null, 'ImageConverter.resize: invalid command option');
     }
     const [, width, height, method] = params;
-    this.addCommand('resize', parseInt(width), parseInt(height));
+    const opt: sharp.ResizeOptions = {};
     switch (method) {
       case '!':
-        this.addCommand('ignoreAspectRatio');
+        opt.fit = 'fill';
         break;
       case '>':
-        this.addCommand('withoutEnlargement');
+        opt.withoutEnlargement = true;
         break;
       case '^':
-        this.addCommand('min');
+        opt.fit = 'outside';
         break;
       case '%':
       case '@':
       case '<':
         throw new ApiError(400, null, 'ImageConverter.resize: geometry qualifiers is not supported')
       default:
-        this.addCommand('max');
     }
+    if (!opt.fit) {
+      opt.fit = 'inside';
+    }
+    this.addCommand('resize', parseInt(width), parseInt(height), opt);
   }
 
   _quality(quality: string) {
@@ -83,10 +88,10 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
   }
 
   _format(format: string) {
-    if (!ImageSharpConverter.formats.includes(format)) {
+    if (!ImageSharpConverter.outputFormats.includes(format)) {
       throw new ApiError(400, null, 'ImageConverter: unsupported format');
     }
-    this.format = format;
+    this.output.format = format;
     this.addCommand('toFormat', format);
   }
 
@@ -104,8 +109,8 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
   }
 
   runCommands(handler: sharp.Sharp) {
-    const { commands } = this;
-    return commands.reduce((result, command) => {
+    const { commandList } = this;
+    return commandList.reduce((result, command) => {
       if (_.isString(command)) {
         return result[command]();
       } else {
@@ -116,12 +121,12 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
   }
 
   preExec() {
-    let formatCommand = _.find(this.commands, c => c[0] === 'toFormat');
+    let formatCommand = _.find(this.commandList, c => c[0] === 'toFormat');
     if (!formatCommand) {
-      this.addCommand('toFormat', this.format);
+      this.addCommand('toFormat', this.output.format);
     }
     if (this.quality) {
-      if (!['jpeg', 'tiff', 'webp'].includes(this.format)) {
+      if (!['jpeg', 'tiff', 'webp'].includes(this.output.format)) {
         throw new ApiError(400, null, 'ImageConverter: image format does not support quality');
       }
       const options = {
@@ -129,17 +134,13 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
       }
       formatCommand.push(options);
     }
-    let enlargeCommand = _.find(this.commands, c => c[0] === 'withoutEnlargement');
-    if (!enlargeCommand) {
-      this.addCommand('withoutEnlargement');
-    }
   }
 
   async exec() {
     this.preExec();
-    const handler = sharp()
+    const handler = sharp();
     this.runCommands(handler);
-    return this.stream.pipe(handler)
+    return this.input.stream.pipe(handler);
   }
   
 }

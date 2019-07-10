@@ -232,35 +232,24 @@ api.get('/:namespace/files/:files_id/info', checkAuth({ needAuth }), wrap<Req, R
 }));
 
 api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth }), wrap<Req, Res>(async (req, res, next) => {
-  const { FileCache } = app().services;
   const { namespace, file } = res.locals;
   const { commands } = req.params;
   const download = boolean(req.query.download);
   const origin = boolean(req.query.origin);
   const bucket = await namespace.getBucket();
   const ext = getExtension(file.filename);
-  if (origin && !bucket.isNative() && bucket.isConvertingSupported(ext)) {
+  if (origin && !bucket.isNative && bucket.isConvertingSupported(ext)) {
     const url = await bucket.getConvertedUrl(file.store_id, { inputType: ext, commands });
     res.redirect(url);
   } else {
-    const cacheBuilder = () => namespace.convert(file, commands);
-    const cacheKey = `convert:${namespace.name}:${file.store_id}:${commands}`;
-    FileCache.get(cacheKey, cacheBuilder)
-    .then((cacheObject) => {
-      if (!cacheObject) {
-        throw new ApiError(500, null, 'Converting failed');
-      }
-      const { contentType, stream } = cacheObject;
-      res.set('Content-Type', contentType);
-      const headers = parseQueryStringHeaders(req);
-      if (download) {
-        const filename = `${getBasename(file.filename)}.${mime.extension(contentType)}`;
-        headers['Content-Disposition'] = contentDisposition(filename);
-      }
-      res.set(headers);
-      stream.pipe(res);
-    })
-    .catch(next);
+    const { stream, contentType, filename } = await namespace.convert(file, commands);
+    res.set('Content-Type', contentType);
+    const headers = parseQueryStringHeaders(req);
+    if (download) {
+      headers['Content-Disposition'] = contentDisposition(filename);
+    }
+    res.set(headers);
+    stream.pipe(res);
   }
 }));
 

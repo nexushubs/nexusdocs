@@ -3,7 +3,7 @@ export class BucketStorage {
   async _handleFile(req, file, callback) {
     try {
       const md5 = req.body.md5 || req.query.md5;
-      const { namespace } = req.locals;
+      const { namespace } = req.res.locals;
       if (!namespace) {
         throw new Error('namespace not initialized');
       }

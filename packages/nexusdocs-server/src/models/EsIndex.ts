@@ -49,23 +49,28 @@ export default class EsIndex<T extends IBaseData> extends Base {
   }
 
   create(id: string, body: T, options: Partial<CreateDocumentParams> = {}) {
-    return this.raw.create(this.prepareQuery({ id, body, ...options }))
+    const query = this.prepareQuery({ id, body, ...options });
+    return this.raw.create(query);
   }
 
   get(id: string, options: Partial<GetParams> = {}) {
-    return this.raw.get<T>(this.prepareQuery({ id, ...options }))
+    const query = this.prepareQuery({ id, ...options });
+    return this.raw.get<T>(query);
   }
 
   update(id: string, body: any, options: Partial<UpdateDocumentParams> = {}) {
-    return this.raw.update(this.prepareQuery({ id, body, ...options }))
+    const query = this.prepareQuery({ id, body, ...options });
+    return this.raw.update(query);
   }
 
   delete(id: string, options: Partial<DeleteDocumentParams> = {}) {
-    return this.raw.delete(this.prepareQuery({ id, ...options }))
+    const query = this.prepareQuery({ id, ...options });
+    return this.raw.delete(query);
   }
 
   search(body: any, options: Partial<SearchParams> = {}) {
-    return this.raw.search<T>(this.prepareQuery({ body, ...options }))
+    const query = this.prepareQuery({ body, ...options });
+    return this.raw.search<T>(query);
   }
 
 }

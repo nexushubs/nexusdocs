@@ -185,7 +185,7 @@ export default class BaseModel<TModel extends BaseModel<TModel,TData>, TData ext
         data = await this.collection.findOne(query);
       }
       const { _id, ...rest } = data;
-      await this.es.update(_id, rest as Partial<TData>);
+      await this.es.update(_id, { doc: rest, doc_as_upsert: true });
     }
     await this.afterUpdate(data);
     return this as any;

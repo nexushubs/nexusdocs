@@ -7,13 +7,12 @@ import * as qs from 'qs';
 import { ObjectId } from 'mongodb';
 
 import BaseModel from './BaseModel';
+import { IFileContent } from '../types/file';
 import { isObjectId } from '../lib/schema';
-import { ValidationError, buildValidationError } from '../lib/errors';
-import { ApiError } from '../lib/errors';
-import { IUploadStreamOptions, IStoreBucket, IUrlOptions } from '../services/Store/types';
+import { ApiError, ValidationError, buildValidationError } from '../lib/errors';
+import { IUploadStreamOptions, IStoreBucket, IFileUploadInfo } from '../services/Store/types';
 import { IBaseData } from './types';
-import { FileData } from './File';
-import { File } from '.';
+import File, { FileData } from './File';
 import Archive from './Archive';
 
 export interface IFileStats {
@@ -125,7 +124,7 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
       }
     }
     uploadStream = await bucket.openUploadStream(options);
-    uploadStream.on('upload', async info => {
+    uploadStream.on('upload', async (info: IFileUploadInfo) => {
       // if there is a file with the same md5 hash,
       // delete uploaded one from provider and point the file to the original one
       try {
@@ -139,7 +138,7 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
     return uploadStream;
   }
 
-  async addStore(bucket: IStoreBucket, info) {
+  async addStore(bucket: IStoreBucket, info: IFileUploadInfo) {
     const { File, FileStore } = this.models;
     if (!info.files_id) {
       info.files_id = File.generateId();
@@ -185,7 +184,7 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
     await this.addFile(info);
   }
 
-  async addFile(info) {
+  async addFile(info: IFileUploadInfo) {
     const { File } = this.models;
     await File.create({
       _id: info.files_id,
@@ -358,14 +357,19 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
    * @param file - File to be converted
    * @param commands - converting commands
    */
-  async convert(file, commands: string) {
+  async convert(file: File, commands: string): Promise<IFileContent> {
     const { File, FileStore } = this.models;
     const { FileConverter } = this.services;
     if (!(file instanceof File.constructor)) {
       file = await File.get(file);
     }
-    const fileStream = await this.openDownloadStream(file.store_id);
-    return FileConverter.convert(fileStream, file.filename, commands);
+    return FileConverter.convert({
+      getStream: () => this.openDownloadStream(file.store_id),
+      contentType: file.contentType,
+      filename: file.filename,
+    }, commands, {
+      key: file.store_id,
+    });
   }
 
   async getOriginalUrl(file: FileData, options: GetUrlOptions = {}) {

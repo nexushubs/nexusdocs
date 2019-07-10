@@ -7,17 +7,19 @@ import * as JSONStringify from 'json-stable-stringify';
 
 import { basePath } from '../lib/Application';
 import { Readable } from 'stream';
+import { Request } from 'express';
+import { KeyValueMap } from '../types/common';
 
 export const uuidRegexPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export function loadClass(file) {
-  file = basePath() + '/' + file;
+export function loadClass(file: string) {
+  file = basePath() + file;
   return require(file).default;
 }
 
 export function loadClasses(dir) {
   const classes = {};
-  dir = basePath() + '/' + dir;
+  dir = basePath() + dir;
   const files = fs.readdirSync(dir).forEach(name => {
     // only auto load js file and directory
     if (!/^([a-z0-9\-]+$|\.js$)/.test(name)) return;
@@ -77,8 +79,8 @@ export const safeCustomResponseHeaders = [
   'content-encoding',
 ];
 
-export function parseQueryStringHeaders(req) {
-  const headers = {};
+export function parseQueryStringHeaders(req: Request) {
+  const headers: KeyValueMap<string> = {};
   const pattern = /response\-/;
   _.each(req.query, (value, key) => {
     if (pattern.test(key)) {

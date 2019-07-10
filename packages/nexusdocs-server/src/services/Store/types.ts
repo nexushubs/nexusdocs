@@ -8,8 +8,10 @@ export interface IFileUploadInfo {
   filename?: string;
   contentType?: string;
   files_id?: string;
+  store_id?: string;
   size?: number;
   md5?: string;
+  path?: string;
   status?: 'ok'|'pending'|'skip'|'skipped';
   dateStarted?: Date;
   dateUploaded?: Date;

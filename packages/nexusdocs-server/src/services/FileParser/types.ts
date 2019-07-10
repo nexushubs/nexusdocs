@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import { IFileContent } from '../../types/file';
 
 export interface ImageSizeInfo {
   width?: number;
@@ -39,4 +40,11 @@ export interface IFileParserService {
 
 export interface IFileParser {
   parse(): Promise<any>;
+}
+
+export interface IFileParserStatic {
+  new (input: IFileContent, config: any);
+  key: string;
+  extensions: string[];
+  needBuffer?: boolean;
 }

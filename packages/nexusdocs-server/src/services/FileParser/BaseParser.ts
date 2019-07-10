@@ -1,19 +1,16 @@
-import { Readable } from 'stream';
 import Base from '../../lib/Base';
+import { IFileContent } from '../../types/file';
 
 export default class BaseParser extends Base {
 
-  public filename: string;
-  public stream: Readable;
+  public input: IFileContent;
   public buffer: Buffer;
-  protected options: any;
+  protected config: any;
 
-  constructor(filename: string, stream: Readable = null, buffer: Buffer = null, options: any = null) {
+  constructor(input: IFileContent, config: any = null) {
     super();
-    this.filename = filename;
-    this.stream = stream;
-    this.buffer = buffer;
-    this.options = options;
+    this.input = input;
+    this.config = config;
   }
 
 }

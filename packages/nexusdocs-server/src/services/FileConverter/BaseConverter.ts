@@ -1,34 +1,50 @@
-import { getExtension } from '../../lib/util';
 import { Readable } from 'stream';
+import { IFileContent } from '../../types/file';
+import { getExtension } from '../../lib/util';
+import Base from '../../lib/Base';
+import { IConvertingCommands, IConvertingOptions, IFileConverterStatic } from './types';
+import { getCacheKey } from './utils';
+import { KeyValueMap } from '../../types/common';
+import { FileContent } from '../../lib/FileContent';
 
-export default class BaseConverter {
+export default class BaseConverter<TConfig = any> extends Base {
   
   filePath = null;
   public extensions: string[] = [];
-  public formatMap: {[key: string]: string} = {};
-  public stream: Readable;
-  public filename: string;
-  public format: string;
-  public buffer: Buffer;
-  public options: any;
+  public formatMap: KeyValueMap<string> = {};
   public needBuffer = false;
   public needFile = false;
+  public config: TConfig;
+  public input: IFileContent;
+  public output: IFileContent;
+  public commands: IConvertingCommands;
+  public options: IConvertingOptions;
   
-  constructor(stream: Readable, filename: string, buffer: Buffer, options: any = {}) {
-    this.stream = stream;
-    this.filename = filename;
-    this.buffer = buffer;
-    let format = getExtension(filename);
+  constructor(input: IFileContent, commands: IConvertingCommands, options: IConvertingOptions) {
+    super();
+    this.input = input;
+    this.commands = commands;
+    let format = getExtension(input.filename);
     const { formatMap } = this;
     if (formatMap && formatMap[format]) {
       format = formatMap[format];
     }
-    this.format = format;
+    this.input.format = format;
     this.options = options;
+    this.output = new FileContent();
+  }
+
+  get _static() {
+    return this.constructor as IFileConverterStatic;
   }
 
   getFormat() {
-    return this.format;
+    return this.output.format;
+  }
+
+  getCacheKey() {
+    const { commands, options: { key } } = this;
+    return getCacheKey(key, commands);
   }
 
 }

@@ -2,43 +2,49 @@ import * as _ from 'lodash';
 import * as config from 'config';
 import * as getStream from 'get-stream';
 import * as mime from 'mime-types';
+import { Readable } from 'stream';
+import * as path from 'path';
 
+import { KeyValueMap } from '../../types/common';
+import { IFileContent } from '../../types/file';
 import { getExtension } from '../../lib/util';
 import { ApiError } from '../../lib/errors';
+import { TCacheBuilder } from '../FileCache/types';
 import BaseService from '../BaseService';
+import { IFileConverterService, TConvertingOptionPair, IConvertingCommands, IConvertingOptions, IFileConverterStatic } from './types';
 import * as converterClasses from './converters';
-import { ConverterClassType, IFileConverterService, TConvertingOptionPair, IFileContent } from './types';
-import { Readable } from 'stream';
-import { IConvertingOptions } from '../Store/types';
+import { Commands, getCacheKey } from './utils';
+import { FileContent } from '../../lib/FileContent';
 
 export default class FileConverter extends BaseService implements IFileConverterService {
 
-  private converters: {[key: string]: ConverterClassType}
+  converters: KeyValueMap<IFileConverterStatic>;
+  jobs: Map<string, Promise<Readable>> ;
 
   async init() {
     this.initConverters();
   }
 
-  private initConverters() {
+  initConverters() {
     this.converters = {};
-    _.each(converterClasses, Converter => {
-      const options = this.getConverterOptions(Converter.name);
+    _.each(converterClasses, (Converter, name) => {
+      const options = this.getConverterOptions(name);
       if (options.disabled) {
         return;
       }
-      _.each(Converter.extensions, ext => {
-        this.converters[ext] = Converter;
+      _.each(Converter.inputFormats, ext => {
+        this.converters[ext] = Converter as any as IFileConverterStatic;
       });
     });
   }
 
-  private getConverterOptionsByExt(ext) {
+  getConverterOptionsByExt(ext: string) {
     return this.converters[ext] || null;
   }
 
-  private getConverterOptions(name: string): any {
+  getConverterOptions(name: string): any {
     const key = `services.FileConverter.converters.${name}`;
-    let options;
+    let options :any;
     try {
       options = config.get(key);
     } catch(error) {
@@ -47,31 +53,43 @@ export default class FileConverter extends BaseService implements IFileConverter
     return options;
   }
 
-  async convert(inputStream: Readable, filename: string, commands: string | IConvertingOptions): Promise<IFileContent> {
-    const ext = getExtension(filename).toLowerCase();
-    try {
-      const Converter = this.getConverterOptionsByExt(ext);
-      if (!Converter) {
-        throw new ApiError(400, null, 'FileConverter: invalid converter');
+  convert(input: IFileContent, commands: string | IConvertingCommands, options: IConvertingOptions = {}): Promise<IFileContent> {
+    const { FileCache } = this.services;
+    input = FileContent.from(input);
+    const { stream: _stream, contentType, filename } = input;
+    const { key } = options;
+    const ext = filename ? getExtension(filename) : mime.extension(contentType) || 'bin';
+    const Converter = this.getConverterOptionsByExt(ext);
+    const cmd: IConvertingCommands = _.isString(commands) ? Commands.parse(commands) : commands;
+    if (!Converter) {
+      throw new ApiError(400, null, 'FileConverter: invalid converter');
+    }
+    const convert: TCacheBuilder = async () => {
+      const stream: Readable = _stream || (input.getStream && await input.getStream());
+      if (!stream) {
+        throw new TypeError('invalid input stream');
       }
       const options = this.getConverterOptions(Converter.name);
-      let buffer = null;
-      if (Converter.prototype.needBuffer) {
-        buffer = await getStream.buffer(inputStream);
+      if (Converter.needBuffer && (!input.buffer || Buffer.isBuffer(input.buffer))) {
+        input.buffer = await getStream.buffer(stream);
       }
-      const converter = new Converter(inputStream, filename, buffer, options);
-      const commandParts = (_.isString(commands) ? _.chunk(commands.split('/'), 2) : _.toPairs(commands)) as TConvertingOptionPair[];
-      commandParts.forEach(([command, options]) => {
-        converter.prepare(command, options);
-      });
-      const format = converter.getFormat();
+      const converter = new Converter(input, cmd, options);
+      _.each(cmd, (value, key) => {
+        converter.prepare(key, value);
+      })
+      const { format } = converter.output;
       const outputSteam = await converter.exec();
       return {
         contentType: mime.contentType(format) || 'application/octet-stream',
         stream: outputSteam,
+        filename: `${path.basename(filename)}.${format}`,
       };
-    } catch (error) {
-      throw error;
+    }
+    if (key) {
+      const cacheKey = getCacheKey(key, cmd);
+      return FileCache.get(cacheKey, convert);
+    } else {
+      return convert();
     }
   }
   

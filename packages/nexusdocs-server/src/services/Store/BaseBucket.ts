@@ -31,7 +31,7 @@ export default class BaseBucket<TProvider extends BaseProvider, TBucket extends 
     return true;
   }
 
-  isNative() {
+  get isNative() {
     return this.name === 'gridfs';
   }
 
@@ -44,7 +44,7 @@ export default class BaseBucket<TProvider extends BaseProvider, TBucket extends 
     };
     let providerUploadStream = null;
     if (!skip) {
-      providerUploadStream = await (this as unknown as TBucket)._openUploadStream(id, uploadOptions);
+      providerUploadStream = await (this as unknown as TBucket)._openUploadStream(id, { ...uploadOptions });
     }
     const uploadStream = new UploadStream(id, providerUploadStream, {
       ...uploadOptions,
@@ -56,7 +56,7 @@ export default class BaseBucket<TProvider extends BaseProvider, TBucket extends 
   }
     
   async openDownloadStream(id: string) {
-    let downloadStream;
+    let downloadStream: Readable;
     try {
       downloadStream = await (this as unknown as TBucket)._openDownloadStream(id);
     } catch(e) {

@@ -6,11 +6,13 @@ import { PassThrough } from 'stream';
 
 import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
-import { IFileConverter, TConvertingOption } from '../types';
+import { IFileConverter, TConvertingCommand, IFileConverterStatic } from '../types';
+import { staticImplements } from '../../../types/common';
 
-export default class DocumentConverter extends BaseConverter implements IFileConverter {
+@staticImplements<IFileConverterStatic>()
+export default class DocumentConverter extends BaseConverter {
 
-  static readonly extensions = [
+  static readonly inputFormats = [
     'doc',
     'docx',
     'xls',
@@ -19,7 +21,7 @@ export default class DocumentConverter extends BaseConverter implements IFileCon
     'pptx',
   ];
 
-  static readonly formats = [
+  static readonly outputFormats = [
     'pdf',
     'txt',
   ];
@@ -27,24 +29,24 @@ export default class DocumentConverter extends BaseConverter implements IFileCon
   static readonly formatMap = {
   };
 
-  private commands = [];
+  private commandList = [];
   
-  prepare(command: string, options: TConvertingOption) {
+  prepare(command: string, options: TConvertingCommand) {
     const method = `_${command}`;
     if (!this[method]) {
       throw new ApiError(400, null, 'DocumentConverter: invalid command');
     }
     const params = this[method](options);
     if (params) {
-      this.commands.push(params);
+      this.commandList.push(params);
     }
   }
 
-  _format(format) {
-    if (!DocumentConverter.formats.includes(format)) {
+  _format(format: string) {
+    if (!DocumentConverter.outputFormats.includes(format)) {
       throw new ApiError(400, null, 'DocumentConverter: unsupported format');
     }
-    this.format = format;
+    this.output.format = format;
     return ['format', format];
   }
 
@@ -52,17 +54,17 @@ export default class DocumentConverter extends BaseConverter implements IFileCon
   }
 
   runCommands() {
-    const { stream, filename, commands } = this;
-    const command = _.flatten(commands).join('/');
-    const url = `${this.options.unoconvServerURL}/convert/${command}`;
+    const { input, output, commandList, config } = this;
+    const command = _.flatten(commandList).join('/');
+    const url = `${config.unoconvServerURL}/convert/${command}`;
     const r = request({
       method: 'POST',
       url: url,
       headers: {
-        'Content-Type': mime.contentType(this.filename),
-        'Content-Disposition': contentDisposition(filename),
+        'Content-Type': mime.contentType(input.filename),
+        'Content-Disposition': contentDisposition(output.filename),
       },
-      body: stream,
+      body: input.stream,
     });
     return r;
   }

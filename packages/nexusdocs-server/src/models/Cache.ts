@@ -4,7 +4,8 @@ import BaseModel from '../models/BaseModel';
 import { IBaseData } from './types';
 
 export interface CacheData extends IBaseData {
-  files_id?: string;
+  key: string;
+  value: string;
   expiresAt?: Date;
   dateCreated?: Date;
 }
@@ -13,7 +14,7 @@ class Cache extends BaseModel<Cache, CacheData> {
   
   static collectionName = 'caches';
   static schema = {
-    files_id: { type: 'string' },
+    value: { type: 'string' },
     expiresAt: { type: 'date' },
     dateCreated: { type: 'date' },
   };

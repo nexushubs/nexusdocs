@@ -1,18 +1,20 @@
 import * as _ from 'lodash';
 import * as gm from 'gm';
 
+import { staticImplements } from '../../../types/common';
 import { ApiError } from '../../../lib/errors';
+import { IFileConverter, TConvertingCommand, IFileConverterStatic } from '../types';
 import BaseConverter from '../BaseConverter';
-import { IFileConverter, TConvertingOption } from '../types';
 
 // Resize command pattern
 // http://www.graphicsmagick.org/GraphicsMagick.html#details-resize
 // format: <width>x<height>{%}{@}{!}{^}{<}{>}
 const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/
 
-export default class ImageGMConverter extends BaseConverter implements IFileConverter {
+@staticImplements<IFileConverterStatic>()
+export default class ImageGMConverter extends BaseConverter {
 
-  static extensions = [
+  static readonly inputFormats = [
     'bmp',
     'cur',
     'gif',
@@ -27,27 +29,27 @@ export default class ImageGMConverter extends BaseConverter implements IFileConv
     'dds',
   ];
 
-  static formats = [
+  static readonly outputFormats = [
     'jpeg',
     'gif',
     'png',
   ];
 
-  static formatMap = {
+  static readonly formatMap = {
     jpg: 'jpeg',
   };
 
-  static needBuffer = true;
+  static readonly needBuffer = true;
 
-  private commands = [];
+  private commandList = [];
 
-  prepare(command: string, options: TConvertingOption) {
+  prepare(command: string, options: TConvertingCommand) {
     const method = `_${command}`;
     if (!this[method]) {
       throw new ApiError(400, null, 'ImageConverter: invalid command');
     }
     const params = this[method](options);
-    this.commands.push(params);
+    this.commandList.push(params);
   }
 
   _resize(options: string) {
@@ -68,23 +70,24 @@ export default class ImageGMConverter extends BaseConverter implements IFileConv
   }
 
   _format(format: string) {
-    if (!ImageGMConverter.formats.includes(format)) {
+    if (!ImageGMConverter.outputFormats.includes(format)) {
       throw new ApiError(400, null, 'ImageConverter: unsupported format');
     }
-    this.format = format;
+    this.output.format = format;
     return ['setFormat', format];
   }
 
   runCommands(handler) {
-    const { commands } = this;
-    return commands.reduce((result, command) => {
+    const { commandList } = this;
+    return commandList.reduce((result, command) => {
       const [ method, ...params ] = command;
       return result[method](...params);
     }, handler);
   }
 
   async exec() {
-    const handler = gm(this.stream, this.filename);
+    const { stream, filename } = this.input;
+    const handler = gm(stream, filename);
     const result = this.runCommands(handler);
     return result.stream();
   }

@@ -32,6 +32,10 @@ module.exports = {
         DocumentConverter: {
           unoconvServerURL: 'UNOCONV_SERVER_URL',
         },
+        Pdf2ImageConverter: {
+          url: 'PDF2IMAGE_URL',
+          mqtt: 'PDF2IMAGE_MQTT',
+        },
       }
     }
   },

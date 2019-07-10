@@ -27,7 +27,7 @@ class File extends BaseModel<File, FileData> {
     store_id: { type: 'string' },
     size: { type: 'integer' },
     md5: { type: 'string' },
-    path: { type: 'string', optional: true },
+    path: { type: ['string', null], optional: true },
     contentType: { type: 'string' },
     aliases: { type: 'array', items: { type: 'string' } },
     metadata: { type: 'object' },
