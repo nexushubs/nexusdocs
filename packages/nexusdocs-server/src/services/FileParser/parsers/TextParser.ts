@@ -5,7 +5,7 @@ import { IFileParser, IFileParserStatic } from '../types';
 import BaseParser from '../BaseParser';
 
 @staticImplements<IFileParserStatic>()
-export default class TextParser extends BaseParser implements IFileParser {
+export default class TextParser extends BaseParser implements IFileParser<'text'> {
 
   static key = 'text';
   static extensions = [

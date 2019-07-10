@@ -1,7 +1,7 @@
 import { ImageSharpConverter, ImageGMConverter, DocumentConverter } from './converters';
-import { Readable } from 'stream';
 import { KeyValueMap } from '../../types/common';
 import { IFileContent } from '../../types/file';
+import { FileContent } from '../../lib/FileContent';
 
 export type ConverterClassType = typeof ImageSharpConverter | typeof ImageGMConverter | typeof DocumentConverter;
 
@@ -9,16 +9,16 @@ export type TConvertingCommand = string | number;
 
 export interface IFileConverter<TConfig = any> {
   config: TConfig;
-  input: IFileContent;
-  output: IFileContent;
+  input: FileContent;
+  output: FileContent;
   commands: IConvertingCommands;
   options: IConvertingOptions;
   prepare(command: string, options: TConvertingCommand): void;
-  exec(): Promise<Readable>;
+  exec(): Promise<void>;
 }
 
 export interface IFileConverterStatic {
-  new (input: IFileContent, commands: IConvertingCommands, options: IConvertingOptions): IFileConverter;
+  new (input: FileContent, commands: IConvertingCommands, options: IConvertingOptions): IFileConverter;
   readonly inputFormats: string[];
   readonly outputFormats: string[];
   readonly formatMap?: KeyValueMap<string>;

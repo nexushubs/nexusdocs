@@ -28,18 +28,23 @@ export interface TextInfo {
   content: string;
 }
 
+export interface PdfInfo {
+  numPages: number;
+}
+
 export interface FileMetaData {
   image?: ImageInfo;
   zip?: ZipInfo;
   text?: TextInfo;
+  pdf?: PdfInfo;
 }
 
 export interface IFileParserService {
-  parse(filename: string, stream: Readable): Promise<FileMetaData>;
+  parse(input: IFileContent): Promise<FileMetaData>;
 }
 
-export interface IFileParser {
-  parse(): Promise<any>;
+export interface IFileParser<T extends keyof FileMetaData> {
+  parse(): Promise<FileMetaData[T]>;
 }
 
 export interface IFileParserStatic {

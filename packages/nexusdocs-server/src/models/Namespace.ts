@@ -10,7 +10,7 @@ import BaseModel from './BaseModel';
 import { IFileContent } from '../types/file';
 import { isObjectId } from '../lib/schema';
 import { ApiError, ValidationError, buildValidationError } from '../lib/errors';
-import { IUploadStreamOptions, IStoreBucket, IFileUploadInfo } from '../services/Store/types';
+import { IUploadStreamOptions, IFileUploadInfo, IBucket } from '../services/Store/types';
 import { IBaseData } from './types';
 import File, { FileData } from './File';
 import Archive from './Archive';
@@ -40,7 +40,7 @@ export interface SimilarDocQuery {
 
 export interface NamespaceData extends IBaseData {
   name?: string;
-  providers_id?: ObjectId;
+  providers_id?: string;
   bucket?: string;
   isPublic?: boolean;
   isSystem?: boolean;
@@ -52,7 +52,7 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
   static collectionName = 'namespaces';
   static schema = {
     name: { type: 'string' },
-    providers_id: { $isObjectId: 1 },
+    providers_id: { type: 'string' },
     bucket: { type: 'string' },
     isPublic: { type: 'boolean', optional: true },
     isSystem: { type: 'boolean', optional: true },
@@ -138,7 +138,7 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
     return uploadStream;
   }
 
-  async addStore(bucket: IStoreBucket, info: IFileUploadInfo) {
+  async addStore(bucket: IBucket, info: IFileUploadInfo) {
     const { File, FileStore } = this.models;
     if (!info.files_id) {
       info.files_id = File.generateId();
@@ -358,13 +358,13 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
    * @param commands - converting commands
    */
   async convert(file: File, commands: string): Promise<IFileContent> {
-    const { File, FileStore } = this.models;
+    const { File } = this.models;
     const { FileConverter } = this.services;
     if (!(file instanceof File.constructor)) {
       file = await File.get(file);
     }
     return FileConverter.convert({
-      getStream: () => this.openDownloadStream(file.store_id),
+      getStream: async () => this.openDownloadStream(file.store_id),
       contentType: file.contentType,
       filename: file.filename,
     }, commands, {

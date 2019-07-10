@@ -6,8 +6,6 @@ import BaseService from '../BaseService';
 import providers from './providers';
 import { IStoreProvider } from './types';
 
-export type ProviderQuery = string | ObjectId;
-
 export default class Store extends BaseService {
   
   private providers: KeyValueMap<IStoreProvider>;
@@ -24,23 +22,19 @@ export default class Store extends BaseService {
     await Promise.all(_.map(this.providers, provider => provider.destroy()));
   }
 
-  async provider(providerQuery: ProviderQuery, forceReload = false) {
-    let strId: string;
-    if (providerQuery instanceof ObjectId) {
-      strId = providerQuery.toHexString();
-    }
-    if (!strId || !this.providers[strId] || forceReload) {
+  async provider(id: string, forceReload = false) {
+    if (!id || !this.providers[id] || forceReload) {
       const { Provider } = this.models;
-      const provider = await Provider.get(providerQuery);
+      const provider = await Provider.get(id);
       const data = provider.data();
-      strId = data._id.toString();
-      this.providers[strId] = await this.loadProvider(data);
+      id = data._id.toString();
+      this.providers[id] = await this.loadProvider(data);
     }
-    return this.providers[strId];
+    return this.providers[id];
   }
 
-  async bucket(providerQuery: ProviderQuery, bucketName: string) {
-    const provider = await this.provider(providerQuery);
+  async bucket(providerId: string, bucketName: string) {
+    const provider = await this.provider(providerId);
     return provider.bucket(bucketName);
   }
 

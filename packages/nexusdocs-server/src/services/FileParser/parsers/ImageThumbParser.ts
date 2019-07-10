@@ -7,7 +7,7 @@ import { IFileParser, IFileParserStatic } from '../types';
 import BaseParser from '../BaseParser';
 
 @staticImplements<IFileParserStatic>()
-export default class ImageThumbParser extends BaseParser implements IFileParser {
+export default class ImageThumbParser extends BaseParser implements IFileParser<'image'> {
 
   static key = 'image';
   static extensions = [

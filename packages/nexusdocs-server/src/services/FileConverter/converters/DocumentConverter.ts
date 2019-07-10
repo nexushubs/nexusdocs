@@ -6,11 +6,11 @@ import { PassThrough } from 'stream';
 
 import { ApiError } from '../../../lib/errors';
 import BaseConverter from '../BaseConverter';
-import { IFileConverter, TConvertingCommand, IFileConverterStatic } from '../types';
+import { IFileConverterStatic, IFileConverter, TConvertingCommand } from '../types';
 import { staticImplements } from '../../../types/common';
 
 @staticImplements<IFileConverterStatic>()
-export default class DocumentConverter extends BaseConverter {
+export default class DocumentConverter extends BaseConverter implements IFileConverter {
 
   static readonly inputFormats = [
     'doc',
@@ -72,10 +72,9 @@ export default class DocumentConverter extends BaseConverter {
   async exec() {
     await this.preExec();
     const r = this.runCommands();
-    // pipe to skip original HTTP header
-    const output = new PassThrough;
-    r.pipe(output);
-    return output;
+    const outputStream = new PassThrough;
+    r.pipe(outputStream);
+    this.output.stream = outputStream;
   }
   
 }

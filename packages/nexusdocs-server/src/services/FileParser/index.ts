@@ -1,19 +1,17 @@
 import * as _ from 'lodash';
 import * as path from 'path';
 import * as config from 'config';
-import { Readable } from 'stream';
-import * as getStream from 'get-stream';
 
 import { KeyValueMap } from '../../types/common';
 import BaseService from '../BaseService';
 import * as parserClasses from './parsers';
-import { IFileParserStatic } from './types';
+import { IFileParserStatic, IFileParserService } from './types';
 import { IFileContent } from '../../types/file';
 import { FileContent } from '../../lib/FileContent';
 
 const NEED_BUFFER_PROP = 'needBuffer';
 
-export default class FileParser extends BaseService {
+export default class FileParser extends BaseService implements IFileParserService {
 
   private parsers: KeyValueMap<IFileParserStatic[]>;
 
@@ -53,27 +51,20 @@ export default class FileParser extends BaseService {
     return options;
   }
 
-  async parse(input: IFileContent) {
-    input = FileContent.from(input);
+  async parse(_input: IFileContent) {
+    const input = FileContent.from(_input);
     const { filename, stream } = input;
     const parsers = this.getParserByFilename(filename);
-    let bufferPromise = null;
     if (_.some(parsers, NEED_BUFFER_PROP)) {
-      bufferPromise = getStream.buffer(stream);
+      await input.readToBuffer();
     };
     const promises = _.map(parsers, async Parser => {
-      let p = Promise.resolve();
-      if (Parser[NEED_BUFFER_PROP]) {
-        p = bufferPromise;
+      const options = this.getParserOptions(Parser.name);
+      const parser = new Parser(input, options);
+      if (parser.init) {
+        parser.init(options);
       }
-      return p.then(buffer => {
-        const options = this.getParserOptions(Parser.name);
-        const parser = new Parser(input, options);
-        if (parser.init) {
-          parser.init(options);
-        }
-        return parser.parse();
-      });
+      return parser.parse();
     });
     return Promise.all(promises)
       .then(dataList => {

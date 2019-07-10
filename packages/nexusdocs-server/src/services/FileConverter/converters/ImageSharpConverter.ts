@@ -3,8 +3,9 @@ import * as sharp from 'sharp';
 
 import { staticImplements } from '../../../types/common';
 import { ApiError } from '../../../lib/errors';
-import { IFileConverter, TConvertingCommand, IFileConverterStatic } from '../types';
+import { IFileConverterStatic, IFileConverter, TConvertingCommand } from '../types';
 import BaseConverter from '../BaseConverter';
+import getStream = require('get-stream');
 
 // Resize command pattern
 // http://www.graphicsmagick.org/GraphicsMagick.html#details-resize
@@ -12,7 +13,7 @@ import BaseConverter from '../BaseConverter';
 const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/;
 
 @staticImplements<IFileConverterStatic>()
-export default class ImageSharpConverter extends BaseConverter {
+export default class ImageSharpConverter extends BaseConverter implements IFileConverter {
 
   static readonly inputFormats = [
     'gif',
@@ -123,7 +124,7 @@ export default class ImageSharpConverter extends BaseConverter {
   preExec() {
     let formatCommand = _.find(this.commandList, c => c[0] === 'toFormat');
     if (!formatCommand) {
-      this.addCommand('toFormat', this.output.format);
+      this.addCommand('toFormat', this.input.format);
     }
     if (this.quality) {
       if (!['jpeg', 'tiff', 'webp'].includes(this.output.format)) {
@@ -137,10 +138,12 @@ export default class ImageSharpConverter extends BaseConverter {
   }
 
   async exec() {
+    const { input, output } = this;
     this.preExec();
     const handler = sharp();
     this.runCommands(handler);
-    return this.input.stream.pipe(handler);
+    input.stream.pipe(handler);
+    output.stream = handler;
   }
   
 }

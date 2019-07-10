@@ -53,10 +53,10 @@ export default class FileConverter extends BaseService implements IFileConverter
     return options;
   }
 
-  convert(input: IFileContent, commands: string | IConvertingCommands, options: IConvertingOptions = {}): Promise<IFileContent> {
+  convert(_input: IFileContent, commands: string | IConvertingCommands, options: IConvertingOptions = {}): Promise<IFileContent> {
     const { FileCache } = this.services;
-    input = FileContent.from(input);
-    const { stream: _stream, contentType, filename } = input;
+    const input = FileContent.from(_input);
+    const { contentType, filename } = input;
     const { key } = options;
     const ext = filename ? getExtension(filename) : mime.extension(contentType) || 'bin';
     const Converter = this.getConverterOptionsByExt(ext);
@@ -65,27 +65,22 @@ export default class FileConverter extends BaseService implements IFileConverter
       throw new ApiError(400, null, 'FileConverter: invalid converter');
     }
     const convert: TCacheBuilder = async () => {
-      const stream: Readable = _stream || (input.getStream && await input.getStream());
-      if (!stream) {
+      await input.loadStream();
+      if (!input.stream) {
         throw new TypeError('invalid input stream');
       }
       const options = this.getConverterOptions(Converter.name);
       if (Converter.needBuffer && (!input.buffer || Buffer.isBuffer(input.buffer))) {
-        input.buffer = await getStream.buffer(stream);
+        await input.readToBuffer();
       }
       const converter = new Converter(input, cmd, options);
       _.each(cmd, (value, key) => {
         converter.prepare(key, value);
       })
-      const { format } = converter.output;
-      const outputSteam = await converter.exec();
-      return {
-        contentType: mime.contentType(format) || 'application/octet-stream',
-        stream: outputSteam,
-        filename: `${path.basename(filename)}.${format}`,
-      };
+      await converter.exec();
+      return converter.output;
     }
-    if (key) {
+    if (key && false) {
       const cacheKey = getCacheKey(key, cmd);
       return FileCache.get(cacheKey, convert);
     } else {

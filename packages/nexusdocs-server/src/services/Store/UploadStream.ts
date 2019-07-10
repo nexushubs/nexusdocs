@@ -60,7 +60,10 @@ export default class UploadStream extends Transform {
 
   initStream() {
     const { FileParser } = app().services;
-    FileParser.parse(this.filename, this)
+    FileParser.parse({
+      filename: this.filename,
+      stream: this,
+    })
     .catch(error => this.emit('error', error));
     this.uploadStream.on('error', (error) => {
       this.emit('error', error);
@@ -90,8 +93,9 @@ export default class UploadStream extends Transform {
       dateStarted: this.dateStarted,
     })
     this.on('readable', () => {
-      let chunk;
+      let chunk: any;
       while (null !== (chunk = this.read())) {
+        console.log(chunk);
       }
     });
     this.emit('upload', {

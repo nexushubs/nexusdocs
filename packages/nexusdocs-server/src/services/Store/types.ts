@@ -28,8 +28,8 @@ export interface IUploadStreamOptions {
 }
 
 export interface IStoreProvider {
-  validOptions(options: any);
-  bucket(bucketName: string): Promise<IStoreBucket>;
+  validOptions(options: any): void;
+  bucket(bucketName: string): Promise<IBucket>;
 }
 
 export interface IBucketUploadOptions {
@@ -64,7 +64,7 @@ export interface IProviderOptions {
   type?: string;
   buckets: string[];
   params: any;
-  Bucket: { new(provider: IStoreProvider, options: IBucketOptions): IStoreBucket };
+  Bucket: { new(provider: IProvider, options: IBucketOptions): IBucket };
 }
 
 export interface ITruncateResult {

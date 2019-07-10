@@ -1,11 +1,11 @@
 import zipStreamParser from 'zip-stream-parser';
 
 import { staticImplements } from '../../../types/common';
-import { IFileParser, IFileParserStatic } from '../types';
+import { IFileParser, IFileParserStatic, ZipInfo } from '../types';
 import BaseParser from '../BaseParser';
 
 @staticImplements<IFileParserStatic>()
-export default class ZipParser extends BaseParser implements IFileParser {
+export default class ZipParser extends BaseParser implements IFileParser<'zip'> {
 
   static key = 'zip';
   static extensions = [
@@ -15,7 +15,7 @@ export default class ZipParser extends BaseParser implements IFileParser {
 
   parse() {
     const { stream } = this.input;
-    return new Promise((resolve, reject) => {
+    return new Promise<ZipInfo>((resolve, reject) => {
       stream
         .pipe(zipStreamParser.Parse())
         .on('entry', entry => {
@@ -32,6 +32,7 @@ export default class ZipParser extends BaseParser implements IFileParser {
         })
         .on('error', error => {
           console.error('ZipParser error:', error);
+          reject(error);
           // resolve({});
         });
         // .on('error', reject);

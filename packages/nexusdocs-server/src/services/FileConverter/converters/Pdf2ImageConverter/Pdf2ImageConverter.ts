@@ -2,15 +2,16 @@ import * as _ from 'lodash';
 
 import { ApiError } from '../../../../lib/errors';
 import { staticImplements } from '../../../../types/common';
-import { TConvertingCommand, IFileConverterStatic } from '../../types';
+import { TConvertingCommand, IFileConverterStatic, IFileConverter } from '../../types';
 import { getCacheKey } from '../../utils';
 import BaseConverter from '../../BaseConverter';
 import Pdf2Image from './Pdf2Image';
+import { FileContent } from '../../../../lib/FileContent';
 
 let client: Pdf2Image | null = null;
 
 @staticImplements<IFileConverterStatic>()
-class Pdf2ImageConverter extends BaseConverter {
+export default class Pdf2ImageConverter extends BaseConverter implements IFileConverter {
 
   static readonly inputFormats = [
     'pdf',
@@ -64,10 +65,8 @@ class Pdf2ImageConverter extends BaseConverter {
       }
     }
     const cacheKey = getCacheKey(key, { ...this.commands, page: this.page });
-    const currentPage = await FileCache.get(cacheKey);
-    return currentPage.stream;
+    const fileContent = await FileCache.get(cacheKey);
+    this.output = FileContent.from(fileContent);
   }
   
 }
-
-export default Pdf2ImageConverter;

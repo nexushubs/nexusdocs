@@ -5,7 +5,7 @@ import { IFileParser, IFileParserStatic } from '../types';
 import BaseParser from '../BaseParser';
 
 @staticImplements<IFileParserStatic>()
-export default class ImageSizeParser extends BaseParser implements IFileParser {
+export default class ImageSizeParser extends BaseParser implements IFileParser<'image'> {
 
   static key = 'image';
   static extensions = [
@@ -25,7 +25,7 @@ export default class ImageSizeParser extends BaseParser implements IFileParser {
   static needBuffer = true;
 
   async parse() {
-    const { buffer } = this;
+    const { buffer } = this.input;
     return imageSize(buffer);
   }
   

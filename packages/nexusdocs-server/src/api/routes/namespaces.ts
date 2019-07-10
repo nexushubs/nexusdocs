@@ -188,6 +188,7 @@ wrap<Req, Res>(async (req, res, next) => {
   }
   const headers = parseQueryStringHeaders(req);
   res.set(headers);
+  res.flushHeaders();
   const fileStream = await namespace.openDownloadStream(store_id);
   fileStream.pipe(res);
 }));
@@ -249,6 +250,7 @@ api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth
       headers['Content-Disposition'] = contentDisposition(filename);
     }
     res.set(headers);
+    res.flushHeaders();
     stream.pipe(res);
   }
 }));
@@ -264,6 +266,7 @@ api.get('/:namespace/archive', checkAuth(), wrap<Req, Res>(async (req, res, next
   const contentType = mime.lookup(filename) || 'application/zip';
   res.set('Content-Type', contentType);
   res.set('Content-Disposition', contentDisposition(filename));
+  res.flushHeaders();
   archiveStream.pipe(res);
 }));
 

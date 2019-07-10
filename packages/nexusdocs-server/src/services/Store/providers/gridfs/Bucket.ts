@@ -13,7 +13,7 @@ export default class GridFSProviderBucket extends BaseBucket<Provider, GridFSPro
 
   constructor(provider: Provider, bucketName: string) {
     super(provider, bucketName);
-    this._db = (this.provider)._db;
+    this._db = this.provider._db;
     bucketName = `fs.${this.formatName(provider.name)}.${this.formatName(this.name)}`;
     this.bucketName = bucketName;
     this.bucket = new GridFSBucket(this._db, { bucketName });

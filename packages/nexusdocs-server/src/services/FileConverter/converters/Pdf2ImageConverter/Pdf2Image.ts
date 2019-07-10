@@ -3,7 +3,7 @@ import * as FormData from 'form-data';
 import * as request from 'request';
 import { MqttClient, connect } from 'mqtt';
 
-import HttpClient, { ContentTypes, HttpClientOptions } from '../../../../lib/HttpClient';
+import HttpClient from '../../../../lib/HttpClient';
 import { Readable, PassThrough } from 'stream';
 import Base from '../../../../lib/Base';
 

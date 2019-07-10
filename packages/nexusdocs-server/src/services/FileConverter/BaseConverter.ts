@@ -1,5 +1,3 @@
-import { Readable } from 'stream';
-import { IFileContent } from '../../types/file';
 import { getExtension } from '../../lib/util';
 import Base from '../../lib/Base';
 import { IConvertingCommands, IConvertingOptions, IFileConverterStatic } from './types';
@@ -15,12 +13,12 @@ export default class BaseConverter<TConfig = any> extends Base {
   public needBuffer = false;
   public needFile = false;
   public config: TConfig;
-  public input: IFileContent;
-  public output: IFileContent;
+  public input: FileContent;
+  public output: FileContent;
   public commands: IConvertingCommands;
   public options: IConvertingOptions;
   
-  constructor(input: IFileContent, commands: IConvertingCommands, options: IConvertingOptions) {
+  constructor(input: FileContent, commands: IConvertingCommands, options: IConvertingOptions) {
     super();
     this.input = input;
     this.commands = commands;

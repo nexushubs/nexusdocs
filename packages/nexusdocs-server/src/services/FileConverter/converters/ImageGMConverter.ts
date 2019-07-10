@@ -3,8 +3,9 @@ import * as gm from 'gm';
 
 import { staticImplements } from '../../../types/common';
 import { ApiError } from '../../../lib/errors';
-import { IFileConverter, TConvertingCommand, IFileConverterStatic } from '../types';
+import { IFileConverterStatic, IFileConverter, TConvertingCommand } from '../types';
 import BaseConverter from '../BaseConverter';
+import { PassThrough } from 'stream';
 
 // Resize command pattern
 // http://www.graphicsmagick.org/GraphicsMagick.html#details-resize
@@ -12,7 +13,7 @@ import BaseConverter from '../BaseConverter';
 const regexCommandThumbnail = /(\d+)?x(\d+)?([%@!^<>])?/
 
 @staticImplements<IFileConverterStatic>()
-export default class ImageGMConverter extends BaseConverter {
+export default class ImageGMConverter extends BaseConverter implements IFileConverter {
 
   static readonly inputFormats = [
     'bmp',
@@ -41,7 +42,7 @@ export default class ImageGMConverter extends BaseConverter {
 
   static readonly needBuffer = true;
 
-  private commandList = [];
+  private commandList: string[][] = [];
 
   prepare(command: string, options: TConvertingCommand) {
     const method = `_${command}`;
@@ -77,19 +78,18 @@ export default class ImageGMConverter extends BaseConverter {
     return ['setFormat', format];
   }
 
-  runCommands(handler) {
+  runCommands(handler: gm.State) {
     const { commandList } = this;
     return commandList.reduce((result, command) => {
       const [ method, ...params ] = command;
-      return result[method](...params);
+      return result[method](...params) as gm.State;
     }, handler);
   }
 
   async exec() {
     const { stream, filename } = this.input;
     const handler = gm(stream, filename);
-    const result = this.runCommands(handler);
-    return result.stream();
+    this.output.stream = this.runCommands(handler).stream();
   }
   
 }

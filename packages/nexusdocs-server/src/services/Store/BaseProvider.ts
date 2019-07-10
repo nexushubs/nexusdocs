@@ -1,12 +1,12 @@
 
 import Base from '../../lib/Base';
-import { IProviderOptions, IStoreBucket } from './types';
+import { IProviderOptions, IProvider, IBucket } from './types';
 
-export default class BaseProvider extends Base {
+export default abstract class BaseProvider extends Base {
 
   public options: IProviderOptions;
   public name: string;
-  public buckets: {[key: string]: IStoreBucket};
+  public buckets: {[key: string]: IBucket};
 
   constructor(options: IProviderOptions) {
     super();
@@ -26,7 +26,7 @@ export default class BaseProvider extends Base {
         throw new Error('invalid bucket name');
       }
       const { Bucket } = this.options;
-      const bucket = new Bucket(this, bucketName);
+      const bucket = new Bucket(this as any as IProvider, bucketName);
       this.buckets[bucketName] = bucket;
     }
     return this.buckets[bucketName];
