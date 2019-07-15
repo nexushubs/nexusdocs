@@ -1,5 +1,25 @@
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# testing
+lib-cov
+coverage
+
+# nodejs
 node_modules
+
+# build
+/lib
+
+# application
 database
+.vscode
+.env*
+
 .git
-lib
-npm-debug.log

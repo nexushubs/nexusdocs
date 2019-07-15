@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+if [[ $1 == docker ]]; then
+  if [[ $2 == --standalone ]]; then
+    docker-compose -f docker-compose.stand-alone.yml up -d
+  else
+    docker-compose up -d
+  fi
+else
+  yarn start
+fi

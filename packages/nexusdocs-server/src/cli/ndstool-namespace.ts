@@ -4,7 +4,7 @@ import * as boolean from 'boolean';
 
 import {
   ApiError,
-  run,
+  runInApp,
   printList,
   printDoc,
   mongoJSONStringify,
@@ -24,7 +24,7 @@ program
       description: options.desc,
       isPublic: _.isUndefined(options.public) ? undefined : boolean(options.public),
     };
-    run(async app => {
+    runInApp(async app => {
       const { Namespace } = app.models;
       const instance = await Namespace.createByProviderName(doc);
       printDoc(instance.data());
@@ -44,7 +44,7 @@ program
       isPublic: _.isUndefined(options.public) ? undefined : boolean(options.public),
       description: options.desc,
     };
-    run(async app => {
+    runInApp(async app => {
       const { Namespace } = app.models;
       const namespace = await Namespace.get({ name });
       if (!namespace) {
@@ -61,7 +61,7 @@ program
   .option('-t, --type <type>', 'namespace type')
   .option('-q, --quiet', 'only display names')
   .action((options) => {
-    run(async app => {
+    runInApp(async app => {
       const { Namespace } = app.models;
       const list = await Namespace.collection.find({}).toArray();
       if (!options.quiet) {
@@ -76,7 +76,7 @@ program
 program
   .command('info <name>')
   .action((name) => {
-    run(async app => {
+    runInApp(async app => {
       const { Namespace } = app.models;
       const namespace = await Namespace.get({ name });
       if (!namespace) {
@@ -91,7 +91,7 @@ program
 program
   .command('remove <name>')
   .action((name) => {
-    run(async app => {
+    runInApp(async app => {
       const { Namespace } = app.models;
       const namespace = await Namespace.get({ name });
       if (!namespace) {

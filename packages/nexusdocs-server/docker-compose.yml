@@ -1,7 +1,7 @@
 # Docker compose definition to run NexusDocs in production mode, so no mounted
 # code, no dev containers etc. Only this single file and some configuration files are required.
 
-version: '2.0'
+version: '3'
 
 services:
 

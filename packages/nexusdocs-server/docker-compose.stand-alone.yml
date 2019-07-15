@@ -1,0 +1,14 @@
+# Docker compose definition to run NexusDocs in production mode, so no mounted
+# code, no dev containers etc. Only this single file and some configuration files are required.
+
+version: '3'
+
+services:
+
+  nds:
+    container_name: nexusdocs-server
+    image: nexushubs/nexusdocs
+    env_file: .env
+    restart: always
+    ports:
+      - '127.0.0.1:4000:4000'

@@ -1,7 +1,7 @@
 import 'source-map-support/register';
 import * as _ from 'lodash';
-import * as Table from 'cli-table';
-import { ObjectId } from 'mongodb';
+import { ObjectId, Db } from 'mongodb';
+import Table = require('cli-table');
 
 import Application from '../lib/Application';
 import { ApiError, ValidationError } from '../lib/errors';
@@ -22,19 +22,38 @@ export async function getApp(): Promise<Application> {
   return app;
 }
 
-export async function run(fn: (app: Application) => void) {
-  const app = await getApp();
+export async function run(fn: () => void) {
+  let err: Error;
   try {
-    await fn(app);
+    fn();
   } catch(e) {
+    err = e;
     handleError(e);
   } finally {
-    console.log('# done!');
-    app.stop(true);
+    if (err) {
+      process.exit(1);
+    }
   }
 }
 
-export function makeObject(val) {
+export async function runInApp(fn: (app: Application) => void) {
+  const app = await getApp();
+  let err: Error;
+  try {
+    await fn(app);
+  } catch(e) {
+    err = e;
+    handleError(e);
+  } finally {
+    console.log('# done!');
+    await app.stop(true);
+    if (err) {
+      process.exit(1);
+    }
+  }
+}
+
+export function makeObject(val: string) {
   const params = {};
   val.split(',').forEach(arg => {
     const [key, value] = arg.split('=');
@@ -43,11 +62,15 @@ export function makeObject(val) {
   return params;
 }
 
-export function makeArray(val) {
+export function makeArray(val: string) {
   return val.split(',');
 }
 
-export function handleError(err) {
+export class CmdError extends Error {
+  
+}
+
+export function handleError(err: Error) {
   if (err instanceof ApiError) {
     console.error('Error:', err.message);
     return;
@@ -58,11 +81,14 @@ export function handleError(err) {
     });
     console.error(listToTable(err.errors));
     return;
-  }    
+  } else if (err instanceof CmdError) {
+    console.error(err.message);
+    return;
+  }
   console.error(err);
 }
 
-export function listToTable(list) {
+export function listToTable<T>(list: T) {
   if (!_.isArray(list) || !list.length) {
     return 'no record';
   }
@@ -94,12 +120,12 @@ export function listToTable(list) {
   return table.toString();
 }
 
-export function printList(list) {
-  const table = listToTable(list);
+export function printList<T>(list: T) {
+  const table = listToTable<T>(list);
   console.log(table);
 }
 
-export function mongoJSONReplacer(key, value) {
+export function mongoJSONReplacer(key: string, value: any) {
   if (value instanceof ObjectId || /^[0-9a-f]{24}$/i.test(value)) {
     return `ObjectId('${value.valueOf()}')`;
   } else if (value instanceof Date) {
@@ -108,7 +134,7 @@ export function mongoJSONReplacer(key, value) {
   return value;
 }
 
-export function mongoJSONStringify(doc, replacer = null, space = 2) {
+export function mongoJSONStringify(doc: any, replacer = null, space = 2) {
   if (!replacer) {
     replacer = mongoJSONReplacer;
   }
@@ -117,13 +143,13 @@ export function mongoJSONStringify(doc, replacer = null, space = 2) {
     .replace(/"ISODate\('([^)]+)'\)"/g, 'ISODate("$1")');
 }
 
-export function printDoc(doc) {
+export function printDoc(doc: any) {
   // const json = mongoJSONStringify(doc);
   // console.log(json);
   printList([doc]);
 }
 
-export async function printCollection(db, name) {
+export async function printCollection(db: Db, name: string) {
   const list = await db.collection(name).find({}).toArray();
   const table = listToTable(list);
   console.log(`collection '${name}' (${list.length} docs):`);

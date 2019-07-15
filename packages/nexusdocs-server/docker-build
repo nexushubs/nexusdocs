@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+REPO="nexushubs/nexusdocs"
+CURRENT_TAG="$REPO:$(./ndstool --version)"
+docker build -t "$CURRENT_TAG" .
+docker tag "$CURRENT_TAG" "$REPO:latest"

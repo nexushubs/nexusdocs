@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as program from 'commander';
 import {
   ApiError,
-  run,
+  runInApp,
   printList,
   printDoc,
 } from './util';
@@ -17,7 +17,7 @@ program
       role: options.role,
       description: options.desc,
     };
-    run(async app => {
+    runInApp(async app => {
       const { Client } = app.models;
       const instance = await Client.create(doc);
       printDoc(instance.data());
@@ -33,7 +33,7 @@ program
       role: options.role,
       description: options.desc,
     };
-    run(async app => {
+    runInApp(async app => {
       const { Client } = app.models;
       const client = await Client.get({ name });
       if (!client) {
@@ -47,7 +47,7 @@ program
 program
   .command('update-secret <name>')
   .action((name) => {
-    run(async app => {
+    runInApp(async app => {
       const { Client } = app.models;
       const client = await Client.get({ name });
       if (!client) {
@@ -61,7 +61,7 @@ program
 program
   .command('update-auth <name>')
   .action((name) => {
-    run(async app => {
+    runInApp(async app => {
       const { Client } = app.models;
       const client = await Client.get({ name });
       if (!client) {
@@ -77,7 +77,7 @@ program
   .alias('ls')
   .option('-q, --quiet', 'only display names')
   .action((options) => {
-    run(async app => {
+    runInApp(async app => {
       const { Client } = app.models;
       const list = await Client.collection.find({}).toArray();
       if (!options.quiet) {
@@ -92,7 +92,7 @@ program
 program
   .command('info <name>')
   .action((name, options) => {
-    run(async app => {
+    runInApp(async app => {
       const { Client } = app.models;
       const client = await Client.get({ name }, {});
       if (!client) {
@@ -109,7 +109,7 @@ program
   .option('-s, --schema [schema]', 'server schema', 'http')
   .option('-e, --entry [entry]', 'server entry', '/api')
   .action((name, options) => {
-    run(async app => {
+    runInApp(async app => {
       const { Client } = app.models;
       const client = await Client.get({ name }, {});
       if (!client) {
@@ -128,7 +128,7 @@ program
 program
   .command('remove <name>')
   .action((name, options) => {
-    run(async app => {
+    runInApp(async app => {
       const { Client } = app.models;
       const { result } = await Client.collection.deleteOne({ name });
       console.log(`${result.n} items removed.`);

@@ -4,7 +4,7 @@ import * as config from 'config';
 import * as program from 'commander';
 import { execFileSync } from 'child_process';
 import {
-  run,
+  runInApp,
   printCollection,
 } from './util';
 
@@ -13,7 +13,7 @@ program
   .option('-d, --database [url]', 'database base url [mongodb://127.0.0.1/]');
 
 function install() {
-  run(async app => {
+  runInApp(async app => {
     const { db } = app;
     const { Provider, Namespace, Client } = app.models;
     let database = program.database;

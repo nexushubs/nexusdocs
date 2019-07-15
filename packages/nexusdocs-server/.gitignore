@@ -20,5 +20,4 @@ node_modules
 # application
 database
 .vscode
-.env
-.envrc
+.env*

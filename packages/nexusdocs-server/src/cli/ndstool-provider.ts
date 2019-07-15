@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import * as program from 'commander';
 import {
-  run,
+  runInApp,
   makeObject,
   makeArray,
   printList,
@@ -23,7 +23,7 @@ program
       buckets: options.buckets,
       description: options.desc,
     };
-    run(async app => {
+    runInApp(async app => {
       const { Provider } = app.models;
       const instance = await Provider.create(doc);
       printDoc(instance.data());
@@ -41,7 +41,7 @@ program
       buckets: _.isEmpty(options.buckets) ? undefined : options.buckets,
       description: options.desc,
     };
-    run(async app => {
+    runInApp(async app => {
       const { Provider } = app.models;
       const provider = await Provider.get({ name });
       if (!provider) {
@@ -62,7 +62,7 @@ program
     if (options.type) {
       query.type = options.type;
     }
-    run(async app => {
+    runInApp(async app => {
       const { Provider } = app.models;
       const list = await Provider.collection.find({}).toArray();
       if (!options.quiet) {
@@ -77,7 +77,7 @@ program
 program
   .command('info <name>')
   .action((name, options) => {
-    run(async app => {
+    runInApp(async app => {
       const { Provider } = app.models;
       const provider = await Provider.get({ name });
       if (!provider) {
@@ -90,7 +90,7 @@ program
 program
   .command('remove <name>')
   .action((name) => {
-    run(async app => {
+    runInApp(async app => {
       const { Provider } = app.models;
       const { result } = await Provider.collection.deleteOne({ name });
       console.log(`${result.n} items removed.`);
