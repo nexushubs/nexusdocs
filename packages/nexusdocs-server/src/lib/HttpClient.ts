@@ -3,6 +3,8 @@ import * as qs from 'qs';
 import fetch, { Response, RequestInit, Headers } from 'node-fetch';
 import { EventEmitter } from 'events';
 import * as FormData from 'form-data';
+import * as contentType from 'content-type';
+
 import { ApiError } from './errors';
 import { KeyValueMap } from '../types/common';
 
@@ -38,10 +40,7 @@ class HttpClient extends EventEmitter {
     this.clientOptions = _.defaultsDeep(options, {
       headers: {
         default: {
-          'Accept': 'application/json',
-        },
-        post: {
-          'Content-Type': 'application/json'
+          // 'Accept': 'application/json',
         },
       },
     });
@@ -62,10 +61,14 @@ class HttpClient extends EventEmitter {
 
   async processResponse<T>(res: Response): Promise<T> {
     let result: any = null;
-    if (res.headers.get('content-type') === 'application/json') {
-      result = res.json();
+    let type = res.headers.get('content-type');
+    if (type.includes(';')) {
+      ({ type } = contentType.parse(type));
+    }
+    if (type === ContentTypes.JSON) {
+      result = await res.json();
     } else {
-      result = res.text();
+      result = await res.text();
     }
     if (res.status > 200) {
       throw new ApiError(res.status, 'HTTP_CLIENT_ERROR', result)
@@ -101,27 +104,26 @@ class HttpClient extends EventEmitter {
     });
     const requestOptions: RequestOptions = _.defaultsDeep(options, {
       method,
-      headers: {
-        ...this.clientOptions.headers.default,
-        ...this.clientOptions.headers.post,
-      },
     });
-    const headers = new Headers(requestOptions.headers);
-    // console.log(headers.get('content-type'));
+    const headers = new Headers({
+      ...this.clientOptions.headers.default,
+      ...options.headers,
+    });
     if (data) {
       if (headers.get('content-type') === ContentTypes.URLENCODED) {
         requestOptions.body = qs.stringify(data);
       } else if (_.isPlainObject(data)) {
+        headers.set('content-type', 'application/json; charset=utf8')
         requestOptions.body = JSON.stringify(data);
       } else if (data instanceof FormData) {
-        requestOptions.headers = {
-          ...requestOptions.headers,
-          ...data.getHeaders(),
-        },
+        const formDataHeaders = data.getHeaders();
+        for (const key in formDataHeaders) {
+          headers.set(key, formDataHeaders[key]);
+        }
         requestOptions.body = data;
       }
     }
-    // console.log({ uri, requestOptions });
+    requestOptions.headers = headers;
     const res = await fetch(uri, requestOptions);
     return this.processResponse<T>(res);
  }

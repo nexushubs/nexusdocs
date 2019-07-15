@@ -71,7 +71,7 @@ export class FileContent implements IFileContent {
   }
 
   private replaceExt(format: string) {
-    const basename = getBasename(format);
+    const basename = getBasename(this.filename || '');
     this._data.filename = `${basename}.${format}`;
   }
 
@@ -95,7 +95,7 @@ export class FileContent implements IFileContent {
 
   async readToBuffer() {
     const buffer = await getStream.buffer(this.stream);
-    this.buffer = buffer;
+    this._data.buffer = buffer;
     return buffer;
   }
 

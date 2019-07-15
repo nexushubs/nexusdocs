@@ -1,10 +1,11 @@
 import * as _ from 'lodash';
 import * as FormData from 'form-data';
-import * as request from 'request';
+import fetch from 'node-fetch';
 import { MqttClient, connect } from 'mqtt';
+import getStream = require('get-stream');
 
 import HttpClient from '../../../../lib/HttpClient';
-import { Readable, PassThrough } from 'stream';
+import { Readable } from 'stream';
 import Base from '../../../../lib/Base';
 
 export interface Pdf2ImageConvertingOptions extends FormData.AppendOptions {
@@ -32,18 +33,18 @@ export interface JobResult {
   }
 };
 
-interface ConstructorOptions {
+export interface ServerOptions {
   url?: string;
   mqtt?: string;
 }
 
 class Pdf2Image extends Base {
 
-  public options: ConstructorOptions;
+  public options: ServerOptions;
   private mqtt: MqttClient;
   private client: HttpClient;
 
-  constructor(options: ConstructorOptions = {}) {
+  constructor(options: ServerOptions = {}) {
     super();
     this.options = options;
   }
@@ -51,8 +52,11 @@ class Pdf2Image extends Base {
   async init() {
     const { url, mqtt } = this.options;
     this.client = new HttpClient(url);
+    console.log(`# initializing pdf2image client ${url}`);
+    console.log(`# mqtt = ${mqtt}`);
     return new Promise((resolve, reject) => {
       const mqttClient = connect(mqtt);
+      mqttClient.on('error', console.error);
       mqttClient.on('connect', () => {
         console.log(`# Pdf2Image: mqtt connected to ${this.options.mqtt}`);
         mqttClient.subscribe('converted', err => {
@@ -92,18 +96,19 @@ class Pdf2Image extends Base {
 
   async convert(file: Buffer | Readable, options: Pdf2ImageConvertingOptions = {}) {
     const form = new FormData;
-    form.append('files', file, options);
-    const result = await this.client.post<JobResult>('/pdf2image', form);
-    const [status] = result.result.files;
+    const buffer: Buffer = Buffer.isBuffer(file) ? file : await getStream.buffer(file as Readable);
+    form.append('files', buffer, options);
+    const result = await this.client.post<JobResult>('/api/v1/pdf2image', form);
+    const files = _.get(result, 'result.files');
+    const [status] = files;
     const newStatus = await this.getResult(status._id);
-    return newStatus;  
+    return newStatus;
   }
 
-  getPage(status: JobStatus, page: number): Readable {
-    const url = `${this.options.url}/converted/${status._id}/${page}.png`;
-    const stream = new PassThrough;
-    request(url).pipe(stream);
-    return stream;
+  async getPage(status: JobStatus, page: number): Promise<Readable> {
+    const url = `${this.options.url}${status.downloadUrl}/${page}.png`;
+    const res = await fetch(url);
+    return res.body as any;
   }
 
 }

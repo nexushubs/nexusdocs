@@ -7,7 +7,7 @@ import * as boolean from 'boolean';
 
 import { app } from '../../lib/Application';
 import { ApiError } from '../../lib/errors';
-import { getExtension, parseQueryStringHeaders, getBasename, diffTimestampFromNow } from '../../lib/util';
+import { getExtension, parseQueryStringHeaders, diffTimestampFromNow } from '../../lib/util';
 import { upload, checkAuth } from '../middleware';
 import { UserRole, AuthFrom, Authorization } from '../middleware/check-auth';
 import { IRequest, IResponse, ILocals, AttachedResponse } from '../types';

@@ -13,8 +13,8 @@ export class Commands {
 
 }
 
-export function getCacheKey(key: string, commands: IConvertingCommands) {
-  return `:${key}:${Commands.stringify(commands)}`;
+export function getCacheKey(id: string, commands: IConvertingCommands) {
+  return `${id}:/convert${Commands.stringify(commands)}`;
 }
 
 export function getContentType(ext: string) {

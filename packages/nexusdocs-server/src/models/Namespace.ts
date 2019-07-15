@@ -14,6 +14,7 @@ import { IUploadStreamOptions, IFileUploadInfo, IBucket } from '../services/Stor
 import { IBaseData } from './types';
 import File, { FileData } from './File';
 import Archive from './Archive';
+import UploadStream from '../services/Store/UploadStream';
 
 export interface IFileStats {
   totalSize: number;
@@ -101,13 +102,10 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
   /**
    * Open a stream for uploading file binary
    */
-  async openUploadStream(options: IUploadStreamOptions = {}): Promise<Writable> {
-    if (!this._active) {
-      throw new Error('could not open upload stream on none instance');
-    }
+  async openUploadStream(options: IUploadStreamOptions = {}): Promise<UploadStream> {
+    this.forceActiveModel();
     const { md5 } = options;
     const bucket = await this.getBucket();
-    let uploadStream = null;
     if (md5 && /[0-9a-f]{32}/i.test(md5)) {
       // if file md5 is provided and match, skip upload to provider
       const { FileStore } = this.models;
@@ -123,17 +121,17 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
         };
       }
     }
-    uploadStream = await bucket.openUploadStream(options);
+    const uploadStream = await bucket.openUploadStream(options);
     uploadStream.on('upload', async (info: IFileUploadInfo) => {
       // if there is a file with the same md5 hash,
       // delete uploaded one from provider and point the file to the original one
       try {
         await this.addStore(bucket, info);
+        uploadStream.emit('file', info);
       } catch(err) {
         console.error(err);
         uploadStream.emit('error', err);
       }
-      uploadStream.emit('file', info);
     });
     return uploadStream;
   }
@@ -204,9 +202,7 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
   }
 
   async openDownloadStream(storeId: string) {
-    if (!this._active) {
-      throw new Error('could not open upload stream on none instance');
-    }
+    this.forceActiveModel();
     const bucket = await this.getBucket();
     const downloadStream = await bucket.openDownloadStream(storeId);
     return downloadStream;
@@ -250,9 +246,7 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
    */
   async truncate() {
     // TODO move deleting operation to task queue
-    if (!this._active) {
-      throw new Error('could not truncate on none instance');
-    }
+    this.forceActiveModel();
     const { File } = this.models;
     const files = await File.collection.find({
       namespace: this._data.name,
@@ -363,13 +357,23 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
     if (!(file instanceof File.constructor)) {
       file = await File.get(file);
     }
-    return FileConverter.convert({
+    const commandsChain = commands.split('/convert/');
+    let output: IFileContent = {
       getStream: async () => this.openDownloadStream(file.store_id),
       contentType: file.contentType,
       filename: file.filename,
-    }, commands, {
-      key: file.store_id,
-    });
+    };
+    let cacheKey = file.store_id;
+    for (let i = 0; i < commandsChain.length; i++) {
+      const cmd = commandsChain[i];
+      cacheKey += `:/convert/${cmd}`;
+      output = await FileConverter.convert(output, cmd, {
+        id: i === 0 ? file.store_id : null,
+        key: cacheKey,
+      });
+      // console.log(file.store_id, cmd, output);
+    }
+    return output;
   }
 
   async getOriginalUrl(file: FileData, options: GetUrlOptions = {}) {
@@ -424,10 +428,8 @@ class Namespace extends BaseModel<Namespace, NamespaceData> {
   }
 
   async searchSimilarDoc(query: SimilarDocQuery = {}) {
-    const { FileStore, File } = this.models;
-    if (!this._active) {
-      throw new ApiError(500, 'invalid_query', 'can not perform similar doc search on none active instance');
-    }
+    this.forceActiveModel();
+    const { File } = this.models;
     const { id, content } = query;
     let result;
     if (id) {

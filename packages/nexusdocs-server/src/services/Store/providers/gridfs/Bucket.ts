@@ -25,8 +25,9 @@ export default class GridFSProviderBucket extends BaseBucket<Provider, GridFSPro
 
   async _openUploadStream(id: string, options?: IUploadStreamOptions) {
     const { filename } = options;
-    delete options.filename;
-    return this.bucket.openUploadStreamWithId(id, filename, options);
+    return this.bucket.openUploadStreamWithId(id, filename, {
+      contentType: options.contentType,
+    });
   }
 
   async _openDownloadStream(id: string, options?: IBucketDownloadOptions) {

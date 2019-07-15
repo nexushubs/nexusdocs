@@ -1,10 +1,9 @@
 import * as crypto from 'crypto';
-import * as mime from 'mime-types';
-import { Transform, Readable, Writable } from 'stream';
+import { Transform, Writable } from 'stream';
 
 import { promisifyEvent } from '../../lib/util';
 import { app } from '../../lib/Application';
-import { IUploadStreamOptions } from './types';
+import { IUploadStreamOptions, IFileUploadInfo } from './types';
 
 export default class UploadStream extends Transform {
 
@@ -60,20 +59,26 @@ export default class UploadStream extends Transform {
 
   initStream() {
     const { FileParser } = app().services;
-    FileParser.parse({
-      filename: this.filename,
-      stream: this,
-    })
-    .catch(error => this.emit('error', error));
     this.uploadStream.on('error', (error) => {
       this.emit('error', error);
     });
-    this.pipe(this.uploadStream);
-    promisifyEvent(this, ['metadata', 'finish'])
-    .then(([metadata]) => {
-      this.metadata = metadata;
+    Promise.all([
+      promisifyEvent(this, 'metadata')
+      .then((metadata) => {
+        this.metadata = metadata;
+      }),
+      promisifyEvent(this.uploadStream, ['finish']),
+    ]).then(() => {
       this.finish();
-    });
+    })
+    .catch(error => this.emit('error', error));
+    FileParser.parse({
+      stream: this,
+      filename: this.filename,
+      contentType: this.contentType,
+    })
+    .catch(error => this.emit('error', error));
+    this.pipe(this.uploadStream);
     setImmediate(() => {
       this.start();
     });
@@ -95,7 +100,6 @@ export default class UploadStream extends Transform {
     this.on('readable', () => {
       let chunk: any;
       while (null !== (chunk = this.read())) {
-        console.log(chunk);
       }
     });
     this.emit('upload', {
@@ -107,7 +111,6 @@ export default class UploadStream extends Transform {
       dateUploaded: this.dateUploaded,
     });
     this.on('finish', () => {
-      // console.log('!!! fake upload finished!');
     })
   }
 
@@ -124,7 +127,7 @@ export default class UploadStream extends Transform {
     this.dateUploaded = new Date;
     this.size = this.length;
     this.md5 = this.hash.digest('hex');
-    const info = {
+    const info: IFileUploadInfo = {
       ...this.getFileInfo(),
       size: this.size,
       md5: this.md5,
@@ -133,7 +136,6 @@ export default class UploadStream extends Transform {
       dateUploaded: this.dateUploaded,
       metadata: this.metadata,
     };
-    // console.log('UploadStream.upload(), info =', info);
     this.emit('upload', info);
   }
 }

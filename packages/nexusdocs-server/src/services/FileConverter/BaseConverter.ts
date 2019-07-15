@@ -18,7 +18,7 @@ export default class BaseConverter<TConfig = any> extends Base {
   public commands: IConvertingCommands;
   public options: IConvertingOptions;
   
-  constructor(input: FileContent, commands: IConvertingCommands, options: IConvertingOptions) {
+  constructor(input: FileContent, commands: IConvertingCommands, options: IConvertingOptions, config: TConfig) {
     super();
     this.input = input;
     this.commands = commands;
@@ -29,7 +29,10 @@ export default class BaseConverter<TConfig = any> extends Base {
     }
     this.input.format = format;
     this.options = options;
-    this.output = new FileContent();
+    this.config = config;
+    this.output = new FileContent({
+      filename: input.filename,
+    });
   }
 
   get _static() {

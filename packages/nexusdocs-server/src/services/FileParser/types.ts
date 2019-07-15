@@ -44,11 +44,12 @@ export interface IFileParserService {
 }
 
 export interface IFileParser<T extends keyof FileMetaData> {
-  parse(): Promise<FileMetaData[T]>;
+  init?: (options: any) => Promise<void>;
+  parse: () => Promise<FileMetaData[T]>;
 }
 
 export interface IFileParserStatic {
-  new (input: IFileContent, config: any);
+  new (input: IFileContent, config: any): IFileParser<any>;
   key: string;
   extensions: string[];
   needBuffer?: boolean;

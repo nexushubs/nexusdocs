@@ -2,16 +2,21 @@ import * as _ from 'lodash';
 
 import { ApiError } from '../../../../lib/errors';
 import { staticImplements } from '../../../../types/common';
-import { TConvertingCommand, IFileConverterStatic, IFileConverter } from '../../types';
+import { FileContent } from '../../../../lib/FileContent';
+import { TConvertingCommand, IFileConverterStatic, IFileConverter, BaseConverterConfig } from '../../types';
 import { getCacheKey } from '../../utils';
 import BaseConverter from '../../BaseConverter';
-import Pdf2Image from './Pdf2Image';
-import { FileContent } from '../../../../lib/FileContent';
+import Pdf2Image, { ServerOptions } from './Pdf2Image';
+import * as fs from 'fs';
+import getStream = require('get-stream');
 
 let client: Pdf2Image | null = null;
 
-@staticImplements<IFileConverterStatic>()
-export default class Pdf2ImageConverter extends BaseConverter implements IFileConverter {
+interface Config extends ServerOptions, BaseConverterConfig {
+}
+
+@staticImplements<IFileConverterStatic<Config>>()
+export default class Pdf2ImageConverter extends BaseConverter<Config> implements IFileConverter {
 
   static readonly inputFormats = [
     'pdf',
@@ -21,7 +26,7 @@ export default class Pdf2ImageConverter extends BaseConverter implements IFileCo
     'png',
   ];
 
-  static readonly selfCache = true;
+  static readonly needPreCache = true;
 
   private page: number = 0;
 
@@ -45,10 +50,10 @@ export default class Pdf2ImageConverter extends BaseConverter implements IFileCo
     }
     return client;
   }
-  
-  async exec() {
+
+  async preCache() {
     const { FileCache } = this.services;
-    const { input, output, config: { key } } = this;
+    const { input, output, options: { id, key } } = this;
     const client = await this.getClient();
     const status = await client.convert(input.stream, {
       filename: input.filename,
@@ -56,15 +61,20 @@ export default class Pdf2ImageConverter extends BaseConverter implements IFileCo
     });
     if (key) {
       for (let p = 1; p <= parseInt(status.pageCount); p++) {
-        const cacheKey = getCacheKey(key, { ...this.commands, page: p });
-        FileCache.set(cacheKey, {
-          stream: client.getPage(status, p),
-          filename: `${output.filename}-${p}.${output.format}`,
+        const cacheKey = getCacheKey(id, { ...this.commands, page: p });
+        await FileCache.set(cacheKey, {
+          stream: await client.getPage(status, p),
+          filename: `${input.filename}-${p}.${output.format}`,
           contentType: output.contentType,
         });
       }
     }
-    const cacheKey = getCacheKey(key, { ...this.commands, page: this.page });
+  }
+
+  async exec() {
+    const { FileCache } = this.services;
+    const { options: { id } } = this;
+    const cacheKey = getCacheKey(id, { ...this.commands, page: this.page });
     const fileContent = await FileCache.get(cacheKey);
     this.output = FileContent.from(fileContent);
   }

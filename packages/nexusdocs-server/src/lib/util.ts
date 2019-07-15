@@ -6,9 +6,10 @@ import * as isStream from 'is-stream';
 import * as JSONStringify from 'json-stable-stringify';
 
 import { basePath } from '../lib/Application';
-import { Readable } from 'stream';
+import { Readable, Stream } from 'stream';
 import { Request } from 'express';
 import { KeyValueMap } from '../types/common';
+import { EventEmitter } from 'events';
 
 export const uuidRegexPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -41,7 +42,7 @@ export function promisifyAll(object, methods) {
   return newObject;
 }
 
-export function promisifyEvent(emitter, event) {
+export function promisifyEvent(emitter: EventEmitter, event: string | string[]) {
   if (_.isArray(event)) {
     return Promise.all(event.map(name => {
       return promisifyEvent(emitter, name);
@@ -53,15 +54,12 @@ export function promisifyEvent(emitter, event) {
   });
 }
 
-export function promisifyStream(stream) {
-  return new Promise((resolve, reject) => {
-    if (!isStream(stream)) {
-      reject(new TypeError('promisifyStream: not a stream object!'));
-    }
-    const successEvent = isStream.writable(stream) ? 'finish' : 'end';
-    stream.on(successEvent, () => resolve());
-    stream.on('error', err => reject(err));
-  });
+export function promisifyStream(stream: Stream) {
+  if (!isStream(stream)) {
+    throw new TypeError('promisifyStream: not a stream object!');
+  }
+  const successEvent = isStream.writable(stream) ? 'finish' : 'end';
+  return promisifyEvent(stream, successEvent);
 }
 
 export function createErrorEvent(error) {

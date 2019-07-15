@@ -46,7 +46,7 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
   prepare(command: string, options: TConvertingCommand) {
     const method = `_${command}`;
     if (!this[method]) {
-      throw new ApiError(400, null, 'ImageConverter: invalid command');
+      throw new ApiError(400, null, `ImageConverter: invalid command [${command}](${JSON.stringify(options)})`);
     }
     this[method](options);
   }
@@ -124,7 +124,7 @@ export default class ImageSharpConverter extends BaseConverter implements IFileC
   preExec() {
     let formatCommand = _.find(this.commandList, c => c[0] === 'toFormat');
     if (!formatCommand) {
-      this.addCommand('toFormat', this.input.format);
+      this._format(this.input.format);
     }
     if (this.quality) {
       if (!['jpeg', 'tiff', 'webp'].includes(this.output.format)) {

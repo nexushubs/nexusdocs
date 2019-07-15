@@ -5,7 +5,7 @@ import * as config from 'config';
 import { KeyValueMap } from '../../types/common';
 import BaseService from '../BaseService';
 import * as parserClasses from './parsers';
-import { IFileParserStatic, IFileParserService } from './types';
+import { IFileParserStatic, IFileParserService, FileMetaData } from './types';
 import { IFileContent } from '../../types/file';
 import { FileContent } from '../../lib/FileContent';
 
@@ -58,27 +58,19 @@ export default class FileParser extends BaseService implements IFileParserServic
     if (_.some(parsers, NEED_BUFFER_PROP)) {
       await input.readToBuffer();
     };
-    const promises = _.map(parsers, async Parser => {
+    const metadata: FileMetaData = {};
+    for (const Parser of parsers) {
       const options = this.getParserOptions(Parser.name);
       const parser = new Parser(input, options);
       if (parser.init) {
         parser.init(options);
       }
-      return parser.parse();
-    });
-    return Promise.all(promises)
-      .then(dataList => {
-        const metadata = {};
-        _.each(dataList, (data, index) => {
-          const { key } = parsers[index];
-          metadata[key] = {
-            ...metadata[key],
-            ...data,
-          };
-        });
-        stream.emit('metadata', metadata);
-        return metadata;
-      });
+      const result = await parser.parse();
+      const { key } = Parser;
+      metadata[key] = { ...metadata[key], ...result };
+    }
+    stream.emit('metadata', metadata);
+    return metadata;
   }
 
 }

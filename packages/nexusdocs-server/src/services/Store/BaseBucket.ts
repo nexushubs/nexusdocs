@@ -1,12 +1,12 @@
 import * as uuid from 'uuid';
 import * as mime from 'mime-types';
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
 import * as _ from 'lodash';
 
 import UploadStream from './UploadStream';
 import BaseProvider from './BaseProvider';
 import Base from '../../lib/Base';
-import { IUrlOptions, IConvertingOptions, IUploadStreamOptions, IStoreBucket } from './types';
+import { IUploadStreamOptions, IStoreBucket } from './types';
 
 export default class BaseBucket<TProvider extends BaseProvider, TBucket extends BaseBucket<TProvider, TBucket> & IStoreBucket> extends Base {
 
@@ -42,7 +42,7 @@ export default class BaseBucket<TProvider extends BaseProvider, TBucket extends 
       filename: filename || id,
       contentType: contentType || mime.lookup(filename) || 'application/octet-stream',
     };
-    let providerUploadStream = null;
+    let providerUploadStream: Writable = null;
     if (!skip) {
       providerUploadStream = await (this as unknown as TBucket)._openUploadStream(id, { ...uploadOptions });
     }

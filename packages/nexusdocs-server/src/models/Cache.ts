@@ -15,7 +15,7 @@ class Cache extends BaseModel<Cache, CacheData> {
   static collectionName = 'caches';
   static schema = {
     value: { type: 'string' },
-    expiresAt: { type: 'date' },
+    expiresAt: { type: ['date', null] },
     dateCreated: { type: 'date' },
   };
   static validators = {

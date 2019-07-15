@@ -15,6 +15,7 @@ import { promisifyStream } from '../../lib/util';
 import { IFileUploadInfo } from '../Store/types';
 import BaseService from '../BaseService';
 import { ICacheOptions, IFileCacheService, TCacheBuilder } from './types';
+import getStream = require('get-stream');
 
 const mkdirp = util.promisify(_mkdirp);
 
@@ -25,9 +26,11 @@ const MEM_CACHE_EXPIRES = 60;
 // Mem cache updater interval in seconds
 const UPDATE_CACHE_INTERVAL = 10 * 60; // 10 minutes
 
+type MemCacheItem = Promise<IFileContent>;
+
 export default class FileCache extends BaseService implements IFileCacheService {
 
-  private memCaches: Map<string, { timestamp: number, promise: Promise<IFileContent>}> = new Map();
+  private memCaches: Map<string, MemCacheItem> = new Map();
   private memCacheTimer = null;
   private tempDir: string;
   private namespace: Namespace;
@@ -141,12 +144,12 @@ export default class FileCache extends BaseService implements IFileCacheService 
   async get(key: string, cacheBuilder: TCacheBuilder = null, options: ICacheOptions = {}) {
     const { namespace, memCaches } = this;
     const { Cache, File } = this.models;
-    key = this.getCacheKey(key);
     if (memCaches.has(key)) {
-      const { promise } = memCaches.get(key);
+      const promise = memCaches.get(key);
       return promise;
     }
-    const cache = await Cache.get(key);
+    const cacheKey = this.getCacheKey(key);
+    const cache = await Cache.get({ key: cacheKey });
     const expired = await this.isExpired(cache);
     if (!expired) {
       const file = await File.get(cache.value);
@@ -157,18 +160,15 @@ export default class FileCache extends BaseService implements IFileCacheService 
         filename: file.filename,
       };
     }
-    if (!_.isFunction(cacheBuilder)) {
-      return null;
+    if (_.isFunction(cacheBuilder)) {
+      const cachePromise = cacheBuilder();
+      this.memCaches.set(key, cachePromise);
+      const cacheObject = await cachePromise;
+      await this.set(key, cacheObject, options);
+      this.memCaches.delete(key);
+      return cacheObject;
     }
-    const cachePromise = cacheBuilder();
-    memCaches.set(key, {
-      timestamp: Date.now(),
-      promise: cachePromise,
-    });
-    const cacheObject = await cachePromise;
-    memCaches.delete(key);
-    this.set(key, cacheObject, options);
-    return cacheObject;
+    return null;
   }
 
   async unset(key: string | Cache) {
@@ -193,11 +193,11 @@ export default class FileCache extends BaseService implements IFileCacheService 
    * Set cache by stream
    */
   async set(key: string, cacheObject: IFileContent, options: ICacheOptions = { ttl: 0 }) {
-    const { namespace, memCaches } = this;
+    const { namespace } = this;
     const { Cache } = this.models;
     const { stream, contentType, filename } = cacheObject;
     const { ttl } = options;
-    key = this.getCacheKey(key);
+    const cacheKey = this.getCacheKey(key);
     const uploadStream = await namespace.openUploadStream({ contentType, filename });
     let expiresAt: Date = undefined;
     const now = new Date;
@@ -213,8 +213,7 @@ export default class FileCache extends BaseService implements IFileCacheService 
           expiresAt,
           timestamp: now,
         };
-        await Cache.collection.updateOne({ key }, { $set: data }, { upsert: true });
-        this.memCaches.delete(key);
+        await Cache.collection.updateOne({ key: cacheKey }, { $set: data }, { upsert: true });
         resolve();
       });
       uploadStream.on('error', err => {
@@ -222,11 +221,6 @@ export default class FileCache extends BaseService implements IFileCacheService 
         reject(err);
       });
     });
-    memCaches.set(key, {
-      timestamp: +new Date,
-      promise: promise.then(() => this.get(key)),
-    });
     await promise;
   }
-
 }

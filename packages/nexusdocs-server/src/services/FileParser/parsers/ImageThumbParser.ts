@@ -20,7 +20,7 @@ export default class ImageThumbParser extends BaseParser implements IFileParser<
   
   protected config: any;
 
-  init(options) {
+  async init(options) {
     this.config = _.defaults(options, {
       thumbSize: 48,
     });
