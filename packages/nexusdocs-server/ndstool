@@ -1,4 +1,10 @@
 #!/usr/bin/env sh
 
 cd "$(dirname "$(readlink -n $0)")"
-node ./lib/cli/ndstool.js "$@"
+
+if [[ $1 == docker ]]; then
+  shift
+  docker-compose exec nds ndstool "$@"
+else
+  node ./lib/cli/ndstool.js "$@"
+fi

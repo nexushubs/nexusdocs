@@ -131,25 +131,42 @@ The build-in [docker-compose.yml](./docker-compose.yml) starts 3 containers:
 
 ## Start Server
 
-```
+```bash
 $ docker-compose up -d
 Creating nexusdocsserver_unoconv_1 ... done
 Creating nexusdocsserver_mongo_1   ... done
 Creating nexusdocsserver_nds_1     ... done
 ```
 
+Or use build-in script
+
+```bash
+# start docker containers stack with full services
+$ ./start docker 
+# start docker main container, dependency services should set in .env
+$ ./start docker --standalone
+# start nodejs server, dependency services should pass by environment variables or config file
+$ ./start
+```
+
 ## Install the Default Data
 
 ```
-$ docker-compose exec nds /bin/sh
-/usr/src/app # ndstool install
+$ ./ndstool install
+```
+
+Call ndstool inside docker container:
+
+```
+$ ./ndstool docker install
 ```
 
 ## Checking Server Logs
+
 ```
 $ docker-compose logs --follow nds
 ```
 
 ## License
 
-> MIT
+> [MIT](./LICENSE)
