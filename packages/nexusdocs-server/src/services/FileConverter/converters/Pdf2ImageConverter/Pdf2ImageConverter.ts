@@ -6,7 +6,7 @@ import { FileContent } from '../../../../lib/FileContent';
 import { TConvertingCommand, IFileConverterStatic, IFileConverter, BaseConverterConfig } from '../../types';
 import { getCacheKey } from '../../utils';
 import BaseConverter from '../../BaseConverter';
-import Pdf2Image, { ServerOptions } from './Pdf2Image';
+import Pdf2Image, { ServerOptions, Pdf2ImageConvertingOptions, Pdf2ImagePngDevices } from './Pdf2Image';
 import * as fs from 'fs';
 import getStream = require('get-stream');
 
@@ -29,6 +29,7 @@ export default class Pdf2ImageConverter extends BaseConverter<Config> implements
   static readonly needPreCache = true;
 
   private page: number = 0;
+  private opt: Pdf2ImageConvertingOptions = {};
 
   prepare(command: string, options: TConvertingCommand) {
     switch (command) {
@@ -38,8 +39,29 @@ export default class Pdf2ImageConverter extends BaseConverter<Config> implements
       case 'format':
         this.output.format = options + '';
         break;
+      case 'device':
+        if (_.isString(options) && Pdf2ImagePngDevices.includes(options)) {
+          this.opt.device = options as any;
+          break;
+        }
+      case 'res':
+        this.opt.res = _.isString(options) ? parseInt(options) : options;
+        break;
+      case 'downScaleFactor':
+      case 'down-scale-factor':
+      case 'down':
+        this.opt.downScaleFactor = _.isString(options) ? parseInt(options) : options;
+        break;
+      case 'backgroundColor':
+      case 'background-color':
+      case 'bgColor':
+      case 'bg-color':
+        if (_.isString(options) && /^[a-f\d]{6}$/i.test(options)) {
+          this.opt.backgroundColor = options + '';
+          break;
+        }
       default:
-        throw new ApiError(400, null, `Pdf2ImageConverter: invalid command ${command}`);
+        throw new ApiError(400, null, `Pdf2ImageConverter: invalid command ${command}=${options}`);
     }
   }
 
@@ -55,10 +77,7 @@ export default class Pdf2ImageConverter extends BaseConverter<Config> implements
     const { FileCache } = this.services;
     const { input, output, options: { id, key } } = this;
     const client = await this.getClient();
-    const status = await client.convert(input.stream, {
-      filename: input.filename,
-      contentType: input.contentType,
-    });
+    const status = await client.convert(input, this.opt);
     if (key) {
       for (let p = 1; p <= parseInt(status.pageCount); p++) {
         const cacheKey = getCacheKey(id, { ...this.commands, page: p });

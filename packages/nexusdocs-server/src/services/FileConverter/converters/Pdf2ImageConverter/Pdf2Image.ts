@@ -1,15 +1,31 @@
 import * as _ from 'lodash';
+import * as qs from 'qs';
 import * as FormData from 'form-data';
 import fetch from 'node-fetch';
 import { MqttClient, connect } from 'mqtt';
-import getStream = require('get-stream');
 
 import HttpClient from '../../../../lib/HttpClient';
 import { Readable } from 'stream';
 import Base from '../../../../lib/Base';
+import { IFileContent } from '../../../../types/file';
+import { FileContent } from '../../../../lib/FileContent';
 
 export interface Pdf2ImageConvertingOptions extends FormData.AppendOptions {
+  device?: 'png16m' | 'pnggray' | 'png256' | 'png16' | 'pngmono' | 'pngmonod' | 'pngalpha';
+  res?: number;
+  downScaleFactor?: number;
+  backgroundColor?: string;
 }
+
+export const Pdf2ImagePngDevices = [
+  'png16m',
+  'pnggray',
+  'png256',
+  'png16',
+  'pngmono',
+  'pngmonod',
+  'pngalpha',
+]
 
 export interface JobStatus {
   createdAt: number;
@@ -94,11 +110,16 @@ class Pdf2Image extends Base {
     });
   }
 
-  async convert(file: Buffer | Readable, options: Pdf2ImageConvertingOptions = {}) {
+  async convert(_input: IFileContent, options: Pdf2ImageConvertingOptions = {}) {
+    const input = FileContent.from(_input);
+    const buffer = await input.readToBuffer();
     const form = new FormData;
-    const buffer: Buffer = Buffer.isBuffer(file) ? file : await getStream.buffer(file as Readable);
-    form.append('files', buffer, options);
-    const result = await this.client.post<JobResult>('/api/v1/pdf2image', form);
+    form.append('files', buffer, {
+      contentType: input.contentType,
+      filename: input.filename,
+    });
+    const uri = `/api/v1/pdf2image?${qs.stringify(options)}`;
+    const result = await this.client.post<JobResult>(uri, form);
     const files = _.get(result, 'result.files');
     const [status] = files;
     const newStatus = await this.getResult(status._id);
