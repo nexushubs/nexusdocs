@@ -11,7 +11,7 @@
     }
   },
   "mappings": {
-    "docs.files.store": {
+    "files.store": {
       "properties": {
         "namespace": {
           "type": "keyword"

@@ -1,6 +1,6 @@
 {
   "mappings": {
-    "docs.files": {
+    "files": {
       "properties": {
         "namespace": {
           "type": "keyword"
