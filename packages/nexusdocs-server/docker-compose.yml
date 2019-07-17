@@ -6,38 +6,39 @@ version: '3'
 services:
 
   elasticsearch:
-    container_name: nexusdocs-elasticsearch
-    image: nexushubs/elasticsearch-cn
+    container_name: nds-elasticsearch
+    image: nexushubs/elasticsearch-cn:latest
     restart: always
-    volumes:
-      - ./data/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./database/elasticsearch:/usr/share/elasticsearch/data:rw
 
   mongo:
-    container_name: nexusdocs-mongodb
+    container_name: nds-mongodb
     image: mongo:3.6
     restart: always
-    volumes:
-      - ./database:/data/db:rw
+
+  unoconv:
+    container_name: nds-unoconv
+    image: alphakevin/unoconv-server:latest
+    restart: always
+
+  pdf2image:
+    container_name: nds-pdf2image
+    image: nexushubs/pdf2image:latest
+    restart: always
 
   nds:
-    container_name: nexusdocs-server
-    image: nexushubs/nexusdocs
+    container_name: nds-main
+    image: nexushubs/nexusdocs:latest
     restart: always
     environment:
       NDS_DATABASE: mongodb://mongo/nexusdocs
       UNOCONV_SERVER_URL: http://unoconv:4000
       ELASTICSEARCH_HOST: elasticsearch
-      FILE_CACHE_CLEAR_ON_STARTUP: 0
+      PDF2IMAGE_URL: http://pdf2image:3000
+      PDF2IMAGE_MQTT: mqtt://pdf2image:1833
     ports:
       - '127.0.0.1:4000:4000'
     depends_on:
       - mongo
       - unoconv
-
-  unoconv:
-    container_name: nexusdocs-unoconv
-    image: alphakevin/unoconv-server
-    restart: always
-    ports:
-      - '127.0.0.1:5000:4000'
+      - elasticsearch
+      - pdf2image
