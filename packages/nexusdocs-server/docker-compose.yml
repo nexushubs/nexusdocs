@@ -36,7 +36,7 @@ services:
       PDF2IMAGE_URL: http://pdf2image:3000
       PDF2IMAGE_MQTT: mqtt://pdf2image:1833
     ports:
-      - '127.0.0.1:4000:4000'
+      - '4000:4000'
     depends_on:
       - mongo
       - unoconv
