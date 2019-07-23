@@ -10,9 +10,9 @@ services:
     image: nexushubs/elasticsearch-cn:latest
     restart: always
 
-  mongo:
+  mongodb:
     container_name: nds-mongodb
-    image: mongo:3.6
+    image: mongodb:3.6
     restart: always
 
   unoconv:
@@ -24,13 +24,15 @@ services:
     container_name: nds-pdf2image
     image: nexushubs/pdf2image:latest
     restart: always
+    environment:
+      MONGO_URL: mongodb://mongodb/pdf2image
 
   nds:
     container_name: nds-main
     image: nexushubs/nexusdocs:latest
     restart: always
     environment:
-      NDS_DATABASE: mongodb://mongo/nexusdocs
+      NDS_DATABASE: mongodb://mongodb/nexusdocs
       UNOCONV_SERVER_URL: http://unoconv:4000
       ELASTICSEARCH_HOST: elasticsearch
       PDF2IMAGE_URL: http://pdf2image:3000
@@ -38,7 +40,7 @@ services:
     ports:
       - '4000:4000'
     depends_on:
-      - mongo
+      - mongodb
       - unoconv
       - elasticsearch
       - pdf2image
