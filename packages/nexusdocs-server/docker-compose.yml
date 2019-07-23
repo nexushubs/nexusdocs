@@ -12,7 +12,7 @@ services:
 
   mongodb:
     container_name: nds-mongodb
-    image: mongodb:3.6
+    image: mongo:3.6
     restart: always
 
   unoconv:
