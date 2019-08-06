@@ -19,4 +19,4 @@ var sink = elasticsearch({
   // "parent_id": "elastic_parent" // defaults to "elastic_parent" parent identifier for Elasticsearch
 })
 
-t.Source("source", source, "/^docs\.files$/").Save("sink", sink, "/^docs\.files$/")
+t.Source("source", source, "/^files$/").Save("sink", sink, "/^files$/")

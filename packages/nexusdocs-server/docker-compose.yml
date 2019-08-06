@@ -9,11 +9,15 @@ services:
     container_name: nds-elasticsearch
     image: nexushubs/elasticsearch-cn:latest
     restart: always
+    volumes:
+      - elasticsearch-data
 
   mongodb:
     container_name: nds-mongodb
     image: mongo:3.6
     restart: always
+    volumes:
+      - mongodb-data
 
   unoconv:
     container_name: nds-unoconv
@@ -44,3 +48,7 @@ services:
       - unoconv
       - elasticsearch
       - pdf2image
+
+volumes:
+  elasticsearch-data:
+  mongodb-data:
