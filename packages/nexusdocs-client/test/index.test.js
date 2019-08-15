@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
@@ -144,15 +143,16 @@ describe('File uploading and downloading', () => {
     it('download file as stream', done => {
       const fileContent = fs.readFileSync(testFile, { encoding: 'utf8' });
       let content = '';
-      const downloadStream = namespace.openDownloadStream(fileId)
-      downloadStream.on('data', data => {
-        content += data;
-      })
-      downloadStream.on('end', () => {
-        expect(content).to.equal(fileContent.toString('utf8'));
-        done();
-      })
-      downloadStream.on('error', done);
+      namespace.openDownloadStream(fileId).then(downloadStream => {
+        downloadStream.on('data', data => {
+          content += data;
+        })
+        downloadStream.on('end', () => {
+          expect(content).to.equal(fileContent.toString('utf8'));
+          done();
+        })
+        downloadStream.on('error', done);
+      });
     });
     
   });

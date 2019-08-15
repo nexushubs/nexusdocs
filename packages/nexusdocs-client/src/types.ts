@@ -1,8 +1,17 @@
+// import { CoreOptions } from 'request';
 import { Readable } from 'stream';
-import { CoreOptions } from 'request';
+import { RequestInit } from 'node-fetch';
 
 export type FileId = string;
 export type Query = { [key: string]: string | number };
+
+export interface FileContent {
+  filename?: string;
+  contentType?: string;
+  contentLength?: number;
+  stream?: Readable;
+  buffer?: Buffer;
+}
 
 /**
  * Server options
@@ -26,7 +35,7 @@ export interface NamespaceOptions {
  * Request options for [request](https://github.com/request/request#requestoptions-callback),
  * some properties are added for additional use, see specified method
  */
-export interface RequestOptions extends CoreOptions {
+export interface RequestOptions extends RequestInit {
   // HTTP method of the request
   method?: string;
   // Path of the request, or full url
@@ -172,8 +181,5 @@ export interface FileInfo {
  * ```
  */
 export interface ConvertingOptions {
-  format?: string;
-  resize?: string;
-  rotate?: string | number;
-  quality?: number
+  [key: string]: string;
 }

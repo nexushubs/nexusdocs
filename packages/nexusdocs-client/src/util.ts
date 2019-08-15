@@ -1,8 +1,9 @@
 import * as qs from 'qs';
 import * as JSONStringify from 'json-stable-stringify';
 import * as isStream from 'is-stream';
+import { Readable, Writable } from 'stream';
 
-export function promisifyStream(stream) {
+export function promisifyStream(stream: Readable | Writable) {
   return new Promise((resolve, reject) => {
     if (!isStream(stream)) {
       reject(new TypeError('promisifyStream: not a stream object!'));

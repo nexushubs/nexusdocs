@@ -46,22 +46,10 @@ export default class Signer {
     return `NDS expires="${expires}",token="${token}"`;
   }
 
-  getFullUrl(options: RequestOptions) {
-    let { url, baseUrl } = options;
-    if (/^https?/.test(url)) {
-      return url;
-    }
-    url = `${baseUrl}${url}`;
-    const separator = /\?/.test(url) ? '&' : '?';
-    if (!_.isEmpty(options.qs)) {
-      url += separator + qs.stringify(options.qs);
-    }
-  }
-
   /**
    * Sign a URL for secured request
    */
-  signUrl(options) {
+  signUrl(options: RequestOptions) {
     let { method, url, expires } = options;
     if (!expires) {
       expires = this.options.defaultUrlExpires;

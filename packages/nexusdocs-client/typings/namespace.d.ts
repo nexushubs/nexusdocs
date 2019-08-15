@@ -1,5 +1,4 @@
 /// <reference types="node" />
-/// <reference types="request" />
 import { Readable } from 'stream';
 import Client from './client';
 import { NamespaceOptions, RequestOptions, FileId, DownloadOptions, ConvertingOptions, UploadUrlOptions, UploadOptions, UploadStreamOptions } from './types';
@@ -11,7 +10,6 @@ import { NamespaceOptions, RequestOptions, FileId, DownloadOptions, ConvertingOp
  * ```javascript
  * const namespace = client.getNamespace('a.name.space');
  * ```
- * @typicalname namespace
  */
 declare class Namespace {
     client: Client;
@@ -28,7 +26,7 @@ declare class Namespace {
     /**
      * Get URL for upload
      * @param options - Additional options
-     * @returns {string} URL for upload
+     * @returns URL for upload
      */
     getUploadUrl(options?: UploadUrlOptions): string;
     /**
@@ -52,7 +50,7 @@ declare class Namespace {
      * @param options - Additional options
      * @returns Promise of uploading request
      */
-    upload(data: Buffer | Readable, options: UploadOptions): Promise<{}>;
+    upload(data: Buffer | Readable, options: UploadOptions): Promise<any>;
     /**
      * Get upload stream
      * @param options - Additional options
@@ -65,14 +63,14 @@ declare class Namespace {
      * @param options - Upload options
      * @returns Promise of uploading request
      */
-    uploadFromLocal(filePath: string, options: UploadOptions): Promise<{}>;
+    uploadFromLocal(filePath: string, options: UploadOptions): Promise<any>;
     /**
      * Get a readable stream for download
      * @param fileId - The file needed to download later
      * @param options - Additional options
      * @returns the readable stream
      */
-    openDownloadStream(fileId: FileId, options?: RequestOptions): import("request").Request;
+    openDownloadStream(fileId: FileId, options?: RequestOptions): Promise<Readable>;
     /**
      * Download a file to local file-system
      * @param fileId - The file id
@@ -86,22 +84,22 @@ declare class Namespace {
      * @param fileId
      * @returns Promise of file info
      */
-    getFileInfo(fileId: FileId): Promise<{}>;
+    getFileInfo(fileId: FileId): Promise<any>;
     /**
      * Delete a file on the server
      * @param fileId - The file to be deleted
      * @returns Promise of deleting request
      */
-    delete(fileId: FileId): Promise<{}>;
+    delete(fileId: FileId): Promise<any>;
     /**
      * Delete all files in this namespace
      */
-    truncate(): Promise<{}>;
+    truncate(): Promise<any>;
     /**
      * Create an archive
      * @param files - file id array
      */
-    createArchive(files: FileId[]): Promise<{}>;
+    createArchive(files: FileId[]): Promise<any>;
     /**
      * Archive files then return download URL
      * @param files - file id array
@@ -112,6 +110,6 @@ declare class Namespace {
      * Search similar doc of specified file
      * @param fileId
      */
-    searchSimilarDoc(fileId: FileId): Promise<{}>;
+    searchSimilarDoc(fileId: FileId): Promise<any>;
 }
 export default Namespace;

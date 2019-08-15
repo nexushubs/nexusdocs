@@ -1,7 +1,9 @@
-import * as request from 'request';
+/// <reference types="node" />
+import { Response } from 'node-fetch';
 import Signer from './signer';
 import Namespace from './namespace';
-import { RequestOptions, ServerOptions, NamespaceOptions } from './types';
+import { RequestOptions, ServerOptions, NamespaceOptions, ConvertingOptions, FileContent } from './types';
+import { Readable } from 'stream';
 /**
  * Class presenting NexusDocs client instance
  */
@@ -22,20 +24,19 @@ declare class Client {
     getFullUrl(url: string): string;
     buildUrl(options: RequestOptions): string;
     getUrl(options: RequestOptions): string;
+    parseResponseError(response: Response): Promise<void>;
     /**
      * Request NDS server and return a stream like object
      * @protected
      * @param options
      */
-    requestAsStream(options: RequestOptions): request.Request;
+    requestAsStream(options: RequestOptions): Promise<Readable>;
     /**
      * Request NDS and return a Promise
-     * @protected
-     * @ignore
      * @param options - See [Namespace~RequestOptions](#Namespace..RequestOptions)
      * @returns Promise of request result
      */
-    request(options: RequestOptions): Promise<{}>;
+    request<T = any>(options: RequestOptions): Promise<T>;
     /**
      * Get namespace instance
      * @param name - The name
@@ -43,5 +44,7 @@ declare class Client {
      * @returns Namespace instance
      */
     getNamespace(name: string, options: NamespaceOptions): Namespace;
+    parseRawResponse(response: Response): FileContent;
+    convert(input: FileContent, options?: ConvertingOptions): Promise<FileContent>;
 }
 export default Client;

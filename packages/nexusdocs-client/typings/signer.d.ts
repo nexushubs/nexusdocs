@@ -8,11 +8,10 @@ export default class Signer {
     getToken(str: string): string;
     getSecuredUrl(url: string, signatureBody: any): string;
     getAuthorizationHeader(signature: any, expires: number): string;
-    getFullUrl(options: RequestOptions): string;
     /**
      * Sign a URL for secured request
      */
-    signUrl(options: any): any;
+    signUrl(options: RequestOptions): string;
     /**
      * Sign a request with body
      */

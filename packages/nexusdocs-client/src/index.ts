@@ -1,5 +1,5 @@
 // Only enable source-map in development
-// import 'source-map-support/register';
+import 'source-map-support/register';
 
 /**
  * @module nexusdocs-client
@@ -35,5 +35,3 @@ export { Client, Namespace };
 export default function createClient(options: ServerOptions) {
   return new Client(options);
 }
-
-module.exports = createClient;

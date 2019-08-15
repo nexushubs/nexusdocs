@@ -1,15 +1,18 @@
 import * as _ from 'lodash';
-import * as request from 'request';
 import * as qs from 'qs';
 import * as parse from 'url-parse';
+import fetch, { Response, Headers } from 'node-fetch';
+import * as contentTypeParser from 'content-type';
+import * as contentDispositionParser from 'content-disposition';
 
 import {
-  JSONParse,
+  JSONParse, sortedJSONStringify,
 } from './util';
 import { ApiError } from './errors'
 import Signer from './signer';
 import Namespace from './namespace';
-import { RequestOptions, ServerOptions, NamespaceOptions } from './types';
+import { RequestOptions, ServerOptions, NamespaceOptions, ConvertingOptions, FileContent } from './types';
+import { Readable, PassThrough } from 'stream';
 
 /**
  * Class presenting NexusDocs client instance
@@ -64,7 +67,7 @@ class Client {
     if (!url) {
       url = '';
     }
-    let portStr;
+    let portStr: string;
     if ((secure && port == 443) || (!secure && port == 80)) {
       portStr = '';
     } else {
@@ -78,7 +81,6 @@ class Client {
     if (/^https?/.test(url)) {
       return url;
     }
-    let signatureUrl = url;
     if (!_.isEmpty(options.qs)) {
       url += '?' + qs.stringify(options.qs);
     }
@@ -91,67 +93,79 @@ class Client {
     return options.url;
   }
 
+  async parseResponseError(response: Response) {
+    let result: any;
+    if (response.headers.get('content-type').indexOf('application/json') === 0) {
+      result = await response.json();
+      if (result && result.status && result.message && result.errors) {
+        throw new ApiError(result.status, result.message, result.errors);
+      }
+    }
+    if (_.isUndefined(result)) {
+      result = await response.text();
+      throw new ApiError(response.status, 'api_error', result);
+    }
+  }
+
   /**
    * Request NDS server and return a stream like object
    * @protected
    * @param options 
    */
-  requestAsStream(options: RequestOptions) {
+  async requestAsStream(options: RequestOptions): Promise<Readable> {
     this.buildUrl(options);
     this.signer.signRequest(options);
-    return request(options as any);
+    const response = await fetch(options.url, options);
+    if (response.status >= 400) {
+      this.parseResponseError(response);
+    }
+    const stream = new PassThrough();
+    response.body.pipe(stream);
+    return stream;
   }
 
   /**
    * Request NDS and return a Promise
-   * @protected
-   * @ignore
    * @param options - See [Namespace~RequestOptions](#Namespace..RequestOptions)
    * @returns Promise of request result
    */
-  request(options: RequestOptions) {
+  async request<T = any>(options: RequestOptions): Promise<T> {
     this.buildUrl(options);
     this.signer.signRequest(options);
-    return new Promise((resolve, reject) => {
-      request(options as any, (error, response, body) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        let errorMessage: string;
-        const contentType = response.headers['content-type'];
-        if (!contentType || contentType.indexOf('application/json') !== 0) {
-          errorMessage = `Invalid Response`;
-        } else if (!_.isObject(body)) {
-          const jsonErrorMessage = 'Invalid JSON format';
-          try {
-            body = JSONParse(body);
-          } catch (error) {
-            errorMessage = jsonErrorMessage;
-          } finally {
-            if (!_.isObject(body)) {
-              errorMessage = jsonErrorMessage;
-            }
-          }
-        }
-        if (response.statusCode >= 400 || errorMessage) {
-          if (_.isPlainObject(body)) {
-            if (body.message) {
-              errorMessage = body.message;
-            }
-            if (body.errors) {
-              body = body.errors;
-            }
-          }
-          error = new ApiError(response.statusCode, errorMessage, body);
-        }
-        if (error) {
-          reject(error);
-        } else {
-          resolve(body);
-        }
-      });
-    });
+    options.headers = new Headers(options.headers);
+    if (options.json) {
+      options.headers.set('content-type', contentTypeParser.format({
+        type: 'application/json',
+        parameters: {
+          charset: 'utf-8',
+        },
+      }));
+    }
+    const response = await fetch(options.url, options);
+    if (response.status >= 400) {
+      this.parseResponseError(response);
+    }
+    const rawContentType = response.headers.get('content-type');
+    const contentType = contentTypeParser.parse(rawContentType).type;
+    if (!contentType || contentType !== 'application/json') {
+      throw new ApiError(400, 'invalid_response', 'expected JSON format');
+    }
+    const bodyContent = await response.text();
+    let body: any;
+    let jsonError = false;
+    try {
+      body = JSONParse(bodyContent);
+    } catch (error) {
+      jsonError = true;
+    } finally {
+      if (!_.isObject(body)) {
+        jsonError = true;
+      }
+    }
+    if (jsonError) {
+      throw new ApiError(400, 'json_parse_error', 'Invalid JSON format');
+    }
+    return body;
   }
 
   /**
@@ -162,6 +176,54 @@ class Client {
    */
   getNamespace(name: string, options: NamespaceOptions) {
     return new Namespace(this, name, options);
+  }
+
+  parseRawResponse(response: Response): FileContent {
+    if (response.status >= 400) {
+      this.parseResponseError(response);
+    }
+    let filename: string | undefined = undefined;
+    const contentLength = parseInt(response.headers.get('content-length')) || undefined;
+    const rawContentType = response.headers.get('content-type');
+    const contentType = contentTypeParser.parse(rawContentType).type;
+    const rawContentDisposition = response.headers.get('content-disposition');
+    if (rawContentDisposition) {
+      const parsedCD = contentDispositionParser.parse(rawContentDisposition);
+      if (parsedCD && parsedCD.parameters) {
+        filename = parsedCD.parameters.filename;
+      }
+    }
+    const stream = new PassThrough();
+    response.body.pipe(stream);
+    return {
+      stream,
+      contentType,
+      contentLength,
+      filename,
+    }
+  }
+
+  async convert(input: FileContent, options: ConvertingOptions = {}): Promise<FileContent> {
+    if (!input.stream && !input.buffer) {
+      throw new TypeError('invalid file input, missing stream or buffer');
+    }
+    if (!input.contentType) {
+      throw new TypeError('invalid file input, missing contentType');
+    }
+    const commands = _.flatten(_.entries(options)).join('/')
+    const requestOptions: RequestOptions = {
+      url: `/convert/${commands}`,
+      method: 'POST',
+      headers: {
+        'Content-Type': input.contentType,
+      },
+      body: input.stream || input.buffer,
+      expires: 5,
+    }
+    this.buildUrl(requestOptions);
+    this.signer.signRequest(requestOptions);
+    const response = await fetch(requestOptions.url, requestOptions);
+    return this.parseRawResponse(response);
   }
 
 }

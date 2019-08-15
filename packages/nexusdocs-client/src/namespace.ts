@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mime from 'mime-types';
-import * as contentDisposition from 'content-disposition';
+import * as contentDispositionParser from 'content-disposition';
 import { PassThrough, Readable } from 'stream';
 import decamelize = require('decamelize');
 
@@ -30,7 +30,6 @@ const defaultMimeType = 'application/octet-stream';
  * ```javascript
  * const namespace = client.getNamespace('a.name.space');
  * ```
- * @typicalname namespace
  */
 class Namespace {
   
@@ -55,7 +54,7 @@ class Namespace {
   /**
    * Get URL for upload
    * @param options - Additional options
-   * @returns {string} URL for upload
+   * @returns URL for upload
    */
   getUploadUrl(options: UploadUrlOptions = {}) {
     const url = `/namespaces/${this.name}/upload`;
@@ -87,7 +86,7 @@ class Namespace {
     const query: Query = {};
     if (filename) {
       response.contentType = mime.contentType(filename) || undefined;
-      response.contentDisposition = contentDisposition(filename);
+      response.contentDisposition = contentDispositionParser(filename);
     }
     if (download) {
       query.download = 1;
@@ -129,7 +128,7 @@ class Namespace {
    * @param options - Additional options
    * @returns Promise of uploading request
    */
-  upload(data: Buffer| Readable, options: UploadOptions) {
+  upload(data: Buffer | Readable, options: UploadOptions) {
     let {
       fileId,
       filename,
@@ -236,9 +235,9 @@ class Namespace {
    * @param options - Additional options
    * @returns Promise of downloading request
    */
-  downloadToLocal(fileId: FileId, filePath: string, options: DownloadOptions = {}) {
+  async downloadToLocal(fileId: FileId, filePath: string, options: DownloadOptions = {}) {
     const fileStream = fs.createWriteStream(filePath);
-    const stream = this.openDownloadStream(fileId, options);
+    const stream = await this.openDownloadStream(fileId, options);
     stream.pipe(fileStream);
     return promisifyStream(fileStream);
   }
