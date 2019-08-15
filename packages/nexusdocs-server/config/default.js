@@ -42,8 +42,11 @@ module.exports = {
         ImageGMConverter: {
           disabled: true,
         },
-        DocumentConverter: {
-          unoconvServerURL: 'http://127.0.0.1:5000',
+        UnoconvConverter: {
+          unoconvServerUrl: 'http://127.0.0.1:5000',
+        },
+        PandocConverter: {
+          pandocApiUrl: 'http://127.0.0.1:6000',
         },
         Pdf2ImageConverter: {
           url: '',

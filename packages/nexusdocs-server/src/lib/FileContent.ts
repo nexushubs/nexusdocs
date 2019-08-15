@@ -59,6 +59,14 @@ export class FileContent implements IFileContent {
     this._data.contentType = contentType;
   }
 
+  get contentLength() {
+    return this._data.contentLength;
+  }
+
+  set contentLength(length: number) {
+    this._data.contentLength = length;
+  }
+
   get filename() {
     return this._data.filename;
   }

@@ -1,10 +1,7 @@
-import { ImageSharpConverter, ImageGMConverter, DocumentConverter } from './converters';
 import { KeyValueMap } from '../../types/common';
 import { IFileContent } from '../../types/file';
 import { FileContent } from '../../lib/FileContent';
 import { BaseConfig } from '../types';
-
-export type ConverterClassType = typeof ImageSharpConverter | typeof ImageGMConverter | typeof DocumentConverter;
 
 export type TConvertingCommand = string | number;
 

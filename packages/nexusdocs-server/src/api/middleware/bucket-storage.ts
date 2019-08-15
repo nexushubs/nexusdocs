@@ -1,6 +1,26 @@
-export class BucketStorage {
+import { Readable } from 'stream';
+import { StorageEngine } from 'multer';
+import { IRequest, AttachedResponse, ILocals } from '../types';
+import { Namespace } from '../../models';
 
-  async _handleFile(req, file, callback) {
+export interface File extends Express.Multer.File {
+  stream: Readable;
+}
+
+interface Req extends IRequest {
+  res: Res;
+}
+
+interface Locals extends ILocals {
+  namespace: Namespace;
+}
+
+interface Res extends AttachedResponse<Locals> {
+}
+
+export class BucketStorage implements StorageEngine {
+
+  async _handleFile(req: Req, file: File, callback: (error?: any, file?: Partial<File>) => void) {
     try {
       const md5 = req.body.md5 || req.query.md5;
       const { namespace } = req.res.locals;
@@ -22,9 +42,13 @@ export class BucketStorage {
     }
   }
 
+  _removeFile() {
+
+  }
+
 }
 
-let instance = null;
+let instance: BucketStorage = null;
 
 export default function createBucketStorage() {
   if (!instance) {

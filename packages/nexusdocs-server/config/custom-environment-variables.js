@@ -29,8 +29,11 @@ module.exports = {
     },
     FileConverter: {
       converters: {
-        DocumentConverter: {
-          unoconvServerURL: 'UNOCONV_SERVER_URL',
+        UnoconvConverter: {
+          unoconvServerUrl: 'UNOCONV_SERVER_URL',
+        },
+        PandocConverter: {
+          pandocApiUrl: 'PANDOC_API_URL',
         },
         Pdf2ImageConverter: {
           url: 'PDF2IMAGE_URL',

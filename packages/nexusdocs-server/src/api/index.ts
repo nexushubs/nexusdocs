@@ -1,17 +1,20 @@
+import * as _ from 'lodash';
 import * as express from 'express';
 import { wrap } from 'async-middleware';
 import * as cors from 'cors';
 
-import routes from './routes';
+import * as routes from './routes';
+import { IRequest } from './types';
 import { errorHandler } from './middleware';
+import Application from '../lib/Application';
 
-export default function createRestApi(app) {
+export default function createRestApi(app: Application) {
   const api = express();
 
   api.set('trust proxy', app.options.restful.trustedProxy);
 
   // bind app handlers
-  api.use((req, res, next) => {
+  api.use((req: IRequest, res, next) => {
     res.set('X-Powered-By', 'nexusdocs-server');
     res.locals = {};
     const originalUrl = req.get('X-Original-URI') || req.get('X-Original-URL') || req.originalUrl;
@@ -24,6 +27,7 @@ export default function createRestApi(app) {
     req.res = res;
     req.next = next;
     res.req = req;
+    req.context = app;
     next();
   });
 
@@ -37,8 +41,20 @@ export default function createRestApi(app) {
     res.redirect('/api');
   });
 
+  api.get('/api', (req, res, next) => {
+    const packageJson = require('../../package.json');
+    res.send({
+      server: packageJson.name,
+      version: packageJson.version,
+      url: res.locals.fullUrl,
+      serverTime: new Date,
+    });
+  });
+  
   // load routes
-  api.use('/api', routes);
+  _.each(routes, (router, key) => {
+    api.use(`/api/${key}`, router);
+  });
 
   // error handling
   api.use(errorHandler);

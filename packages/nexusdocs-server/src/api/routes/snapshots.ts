@@ -1,29 +1,40 @@
 import { Router } from 'express';
 import { wrap } from 'async-middleware';
 
+const api = Router();
+
 import { ApiError } from '../../lib/errors';
 import { checkAuth } from '../middleware';
 import { UserRole } from '../middleware/check-auth';
+import { IRequest, ILocals, AttachedResponse } from '../types';
 
-const api = Router();
+// TODO
+
+interface Req extends IRequest {
+}
+
+interface Locals extends ILocals {
+}
+
+interface Res extends AttachedResponse<Locals> {}
 
 api.use(checkAuth({
   role: UserRole.Admin,
 }));
 
-api.get('/', wrap(async (req, res, next) => {
+api.get('/', wrap<Req, Res>(async (req, res, next) => {
   
 }));
 
-api.get('/:namespaces_id', wrap(async (req, res, next) => {
+api.get('/:snapshot_id', wrap<Req, Res>(async (req, res, next) => {
   
 }));
 
-api.put('/:namespaces_id', wrap(async (req, res, next) => {
+api.put('/:snapshot_id', wrap<Req, Res>(async (req, res, next) => {
   
 }));
 
-api.delete('/:namespaces_id', wrap(async (req, res, next) => {
+api.delete('/:snapshot_id', wrap<Req, Res>(async (req, res, next) => {
   
 }));
 

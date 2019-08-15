@@ -59,10 +59,18 @@ export default class FileConverter extends BaseService implements IFileConverter
     const { id, key } = options;
 
     const ext = filename ? getExtension(filename) : mime.extension(contentType) || 'bin';
-    const Converter = this.getConverterOptionsByExt(ext);
     const cmd: IConvertingCommands = _.isString(commands) ? Commands.parse(commands) : commands;
+    let Converter: IFileConverterStatic | null = null;
+    if (cmd.converter) {
+      Converter = converterClasses[`${cmd.Converter}Converter`];
+      if (!Converter) {
+        throw new ApiError(400, 'invalid_converter_name', 'FileConverter: the converter specified does not exist');
+      }
+    } else {
+      Converter = this.getConverterOptionsByExt(ext);
+    }
     if (!Converter) {
-      throw new ApiError(400, null, 'FileConverter: invalid converter');
+      throw new ApiError(400, 'invalid_converter', 'FileConverter: could not found converter for the format');
     }
 
     const convert = async (opt: { preCache?: boolean, noCache?: boolean } = {}) => {

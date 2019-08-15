@@ -4,12 +4,13 @@ import * as _ from 'lodash';
 import { promisify } from 'es6-promisify';
 import * as isStream from 'is-stream';
 import * as JSONStringify from 'json-stable-stringify';
+import { EventEmitter } from 'events';
+import { Headers } from 'node-fetch';
 
 import { basePath } from '../lib/Application';
 import { Readable, Stream } from 'stream';
 import { Request } from 'express';
 import { KeyValueMap } from '../types/common';
-import { EventEmitter } from 'events';
 
 export const uuidRegexPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -78,13 +79,13 @@ export const safeCustomResponseHeaders = [
 ];
 
 export function parseQueryStringHeaders(req: Request) {
-  const headers: KeyValueMap<string> = {};
+  const headers = new Headers();
   const pattern = /response\-/;
   _.each(req.query, (value, key) => {
     if (pattern.test(key)) {
       const name = key.replace(pattern, '').toLowerCase();
       if (safeCustomResponseHeaders.includes(name)) {
-        headers[name] = value;
+        headers.set(name, value);
       }
     }
   });

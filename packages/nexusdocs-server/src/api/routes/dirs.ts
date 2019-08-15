@@ -2,10 +2,13 @@ import * as _ from 'lodash';
 import { Router } from 'express';
 import { wrap } from 'async-middleware';
 
-import { app } from '../../lib/Application';
 import { ApiError } from '../../lib/errors';
 import { checkAuth } from '../middleware';
 import { UserRole } from '../middleware/check-auth';
+import { IRequest, IResponse } from '../types';
+
+type Req = IRequest;
+type Res = IResponse
 
 const api = Router();
 
@@ -13,8 +16,8 @@ api.use(checkAuth({
   role: UserRole.Admin,
 }));
 
-api.param('namespaces_id', wrap(async (req, res, next) => {
-  const { Namespace } = app().models;
+api.param('namespaces_id', wrap<Req, Res>(async (req, res, next) => {
+  const { Namespace } = req.context.models;
   const { namespaces_id } = req.params;
   const doc = await Namespace.get(namespaces_id);
   if (!doc) {
@@ -24,8 +27,8 @@ api.param('namespaces_id', wrap(async (req, res, next) => {
   next();
 }));
 
-api.param('path', wrap(async (req, res, next) => {
-  const { Dir } = app().models;
+api.param('path', wrap<Req, Res>(async (req, res, next) => {
+  const { Dir } = req.context.models;
   const { path } = req.params;
   const doc = await Dir.get(path);
   if (!doc) {
@@ -35,33 +38,33 @@ api.param('path', wrap(async (req, res, next) => {
   next();
 }));
 
-api.get('/:namespaces_id', wrap(async (req, res, next) => {
-  const { Dir } = app().models;
+api.get('/:namespaces_id', wrap<Req, Res>(async (req, res, next) => {
+  const { Dir } = req.context.models;
   const list = await Dir.getAll();
   res.send(list);
 }));
 
-api.post('/:namespaces_id', wrap(async (req, res, next) => {
-  const { Dir } = app().models;
+api.post('/:namespaces_id', wrap<Req, Res>(async (req, res, next) => {
+  const { Dir } = req.context.models;
   const data = req.body;
   await Dir.create(data);
   res.send({});
 }));
 
-api.get('/:namespaces_id/:path', wrap(async (req, res, next) => {
+api.get('/:namespaces_id/:path', wrap<Req, Res>(async (req, res, next) => {
   res.send(res.locals.doc);
 }));
 
-api.put('/:namespaces_id/:path', wrap(async (req, res, next) => {
-  const { Dir } = app().models;
+api.put('/:namespaces_id/:path', wrap<Req, Res>(async (req, res, next) => {
+  const { Dir } = req.context.models;
   const { path } = req.params;
   const data = req.body;
   await Dir.update(path, data);
   res.send({});
 }));
 
-api.delete('/:namespaces_id/:path', wrap(async (req, res, next) => {
-  const { Dir } = app().models;
+api.delete('/:namespaces_id/:path', wrap<Req, Res>(async (req, res, next) => {
+  const { Dir } = req.context.models;
   const { path } = req.params;
   await Dir.delete(path);
   res.send({});

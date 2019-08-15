@@ -5,13 +5,13 @@ import * as contentDisposition from 'content-disposition';
 import * as mime from 'mime-types';
 import * as boolean from 'boolean';
 
-import { app } from '../../lib/Application';
 import { ApiError } from '../../lib/errors';
 import { getExtension, parseQueryStringHeaders, diffTimestampFromNow } from '../../lib/util';
 import { upload, checkAuth } from '../middleware';
 import { UserRole, AuthFrom, Authorization } from '../middleware/check-auth';
 import { IRequest, IResponse, ILocals, AttachedResponse } from '../types';
 import { Namespace, Archive, File } from '../../models';
+import { writeFileContent } from '../utils';
 
 interface Req extends IRequest {
 }
@@ -28,7 +28,7 @@ const api = Router();
 
 api.param('namespace', wrap<Req, Res>(async (req, res, next) => {
   const { namespace } = req.params;
-  const { Namespace } = app().models;
+  const { Namespace } = req.context.models;
   const namespaceObj = await Namespace.get({ name: namespace });
   if (!namespaceObj) {
     throw new ApiError(404, null, 'Namespace not Found');
@@ -45,13 +45,13 @@ const needAuth = (auth: Authorization) => {
 };
 
 api.get('/', checkAuth({ role: UserRole.Admin }), wrap<Req, Res>(async (req, res, next) => {
-  const { Namespace } = app().models;
+  const { Namespace } = req.context.models;
   const list = await Namespace.getAll();
   res.send(list);
 }));
 
 api.post('/', checkAuth({ role: UserRole.Admin }), wrap<Req, Res>(async (req, res, next) => {
-  const { Namespace } = app().models;
+  const { Namespace } = req.context.models;
   const data = req.body;
   await Namespace.create(data);
   res.send({});
@@ -76,7 +76,7 @@ api.delete('/:namespace', checkAuth({ role: UserRole.Admin }), wrap<Req, Res>(as
 }));
 
 api.post('/:namespace/urls', checkAuth(), wrap<Req, Res>(async (req, res, next) => {
-  const { File } = app().models;
+  const { File } = req.context.models;
   const { namespace } = res.locals;
   const { e } = req.query;
   const { download, origin, expires: _expires, files: _files } = req.body;
@@ -114,7 +114,7 @@ api.get('/:namespace/upload', checkAuth(), wrap<Req, Res>(async (req, res, next)
   if (type !== 'resumable') {
     throw new ApiError(400, null, 'GET method only for resumable upload');
   } else {
-    const { Resumable } = app().services;
+    const { Resumable } = req.context.services;
     const status = await Resumable.checkStatus(req.query);
     res.status(status ? 200 : 404).send({ resumable: status });
   }
@@ -143,14 +143,14 @@ api.post('/:namespace/upload', checkAuth({ from: AuthFrom.Auto }), upload(), wra
 }));
 
 api.get('/:namespace/files', checkAuth({ role: UserRole.Admin }), wrap<Req, Res>(async (req, res, next) => {
-  const { File } = app().models;
+  const { File } = req.context.models;
   const { namespace } = req.params;
   const list = await File.getAll({namespace: namespace});
   res.send(list);
 }));
 
 api.param('files_id', wrap<Req, Res>(async (req, res, next) => {
-  const { File } = app().models;
+  const { File } = req.context.models;
   const { files_id } = req.params;
   const fileObj = await File.get(files_id);
   if (!fileObj) {
@@ -187,7 +187,7 @@ wrap<Req, Res>(async (req, res, next) => {
     res.set('Content-Disposition', contentDisposition(filename));
   }
   const headers = parseQueryStringHeaders(req);
-  res.set(headers);
+  res.set(headers.raw());
   res.flushHeaders();
   const fileStream = await namespace.openDownloadStream(store_id);
   fileStream.pipe(res);
@@ -243,15 +243,8 @@ api.get('/:namespace/files/:files_id/convert/:commands(*)', checkAuth({ needAuth
     const url = await bucket.getConvertedUrl(file.store_id, { inputType: ext, commands });
     res.redirect(url);
   } else {
-    const { stream, contentType, filename } = await namespace.convert(file, commands);
-    res.set('Content-Type', contentType);
-    const headers = parseQueryStringHeaders(req);
-    if (download) {
-      headers['Content-Disposition'] = contentDisposition(filename);
-    }
-    res.set(headers);
-    res.flushHeaders();
-    stream.pipe(res);
+    const result = await namespace.convert(file, commands);
+    writeFileContent(req, res, result, { download });
   }
 }));
 
@@ -278,7 +271,7 @@ api.post('/:namespace/archives', checkAuth(), wrap<Req, Res>(async (req, res, ne
 }));
 
 api.param('archive_id', wrap<Req, Res>(async (req, res, next) => {
-  const { Archive } = app().models;
+  const { Archive } = req.context.models;
   const { archive_id } = req.params;
   const archive = await Archive.get(archive_id);
   if (!archive) {

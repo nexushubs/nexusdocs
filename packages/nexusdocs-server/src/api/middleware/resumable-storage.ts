@@ -1,15 +1,24 @@
-import { app } from '../../lib/Application';
+import { Readable } from 'stream';
+import { StorageEngine } from 'multer';
 
-export class ResumableStorage {
+import { ResumableParams } from '../../services/Resumable/types';
+import { IRequest } from '../types';
+
+interface ResumableFile extends Express.Multer.File {
+  resumable?: ResumableParams;
+  stream: Readable;
+}
+
+export class ResumableStorage implements StorageEngine {
   
   constructor(options = null) {
     
   }
   
-  async _handleFile(req, file, callback) {
+  async _handleFile(req: IRequest, file: ResumableFile, callback: (error?: any, file?: Partial<ResumableFile>) => void) {
     try {
       const md5 = req.body.md5 || req.query.md5;
-      const { Resumable } = app().services;
+      const { Resumable } = req.context.services;
       const resumableWriteStream = await Resumable.createWriteStream(req.body);
       file.stream.pipe(resumableWriteStream);
       resumableWriteStream.on('error', callback);
@@ -46,9 +55,13 @@ export class ResumableStorage {
     }
   }
 
+  _removeFile() {
+
+  }
+
 }
 
-let instance = null;
+let instance: ResumableStorage = null;
   
 export default function createResumableStorage() {
   if (!instance) {
