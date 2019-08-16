@@ -3385,10 +3385,10 @@ netmask@^1.0.6:
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-1.0.6.tgz#20297e89d86f6f6400f250d9f4f6b4c1945fcd35"
   integrity sha1-ICl+idhvb2QA8lDZ9Pa0wZRfzTU=
 
-new-filename@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/new-filename/-/new-filename-1.0.1.tgz#dee46beafbabaf018f36483baf310790782aa6da"
-  integrity sha512-AYSCzMgM6r7G003ghKF1M9q0UT7c1l62Ftr0ve4avi4OzmZ+bkHU91BN3MnnDK3b2aehjqE86hGUUjpPqwohCg==
+new-filename@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/new-filename/-/new-filename-2.0.1.tgz#dfce67c480b62c68a2489acbeb992a991b3fd387"
+  integrity sha512-Ro5oClTeJC0Bs3Ot18K+/tUj1KvbpbMW9KfAhxUbzzZQZWs3irZLGHJ9dzQwxQA5FmY6wx7GTgAjkVhZxofbSw==
 
 next-tick@^1.0.0:
   version "1.0.0"
