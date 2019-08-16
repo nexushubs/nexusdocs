@@ -9,15 +9,17 @@ RUN apk add vips-dev fftw-dev build-base --update-cache \
       # --repository https://alpine.global.ssl.fastly.net/alpine/edge/community/ \
       # --repository https://alpine.global.ssl.fastly.net/alpine/edge/main
 
-COPY package.json yarn.lock ./
-
+COPY . .
 RUN yarn && \
+    yarn build && \
+    yarn --production && \
     yarn cache clean
 
-COPY . .
-
-RUN yarn build
-    # && apk del .build-deps
+## Cached yarn for development
+# COPY package.json yarn.lock ./
+# RUN yarn
+# COPY . .
+# RUN yarn build
 
 RUN ln -s -f /app/ndstool /usr/bin/ndstool
 
