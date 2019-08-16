@@ -6,7 +6,7 @@ import * as mime from 'mime-types';
 import * as boolean from 'boolean';
 
 import { ApiError } from '../../lib/errors';
-import { getExtension, parseQueryStringHeaders, diffTimestampFromNow } from '../../lib/util';
+import { getExtension, parseQueryStringHeaders, diffTimestampFromNow, normalizeHeaders } from '../../lib/util';
 import { upload, checkAuth } from '../middleware';
 import { UserRole, AuthFrom, Authorization } from '../middleware/check-auth';
 import { IRequest, IResponse, ILocals, AttachedResponse } from '../types';
@@ -187,7 +187,7 @@ wrap<Req, Res>(async (req, res, next) => {
     res.set('Content-Disposition', contentDisposition(filename));
   }
   const headers = parseQueryStringHeaders(req);
-  res.set(headers.raw());
+  res.set(normalizeHeaders(headers));
   res.flushHeaders();
   const fileStream = await namespace.openDownloadStream(store_id);
   fileStream.pipe(res);

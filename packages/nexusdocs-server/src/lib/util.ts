@@ -92,6 +92,16 @@ export function parseQueryStringHeaders(req: Request) {
   return headers;
 }
 
+export function normalizeHeaders(headers: Headers) {
+  return _.mapValues(headers.raw(), (value, key) => {
+    if (key === 'content-type') {
+      return value[0];
+    } else {
+      return value;
+    }
+  });
+}
+
 export function urlSafeBase64Encode(str: string): string {
   return str
     .replace(/\+/g, '-')
