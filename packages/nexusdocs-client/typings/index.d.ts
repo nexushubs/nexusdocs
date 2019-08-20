@@ -5,16 +5,15 @@ import 'source-map-support/register';
 import Client from './client';
 import Namespace from './namespace';
 import { ServerOptions } from './types';
-export { Client, Namespace };
 /**
  * Create a NexusDocs client instance
- * @example Create a client
+ * @example Create a client (es module)
  *
  * ```javascript
-   const createClient = require('nexusdocs-client');
+   import { Client } from 'nexusdocs-client';
    
    // Object style server options:
-   const client = createClient({
+   const client = new Client({
      hostname: '192.168.1.6',
      port: 4001,
      apiKey: 'MY_API_KEY',
@@ -22,9 +21,11 @@ export { Client, Namespace };
    });
    
    // URL style server options:
-   const client = createClient('http://MY_API_KEY:MY_API_SECRET@192.168.1.6:4001/api');
+   const client = new Client('http://MY_API_KEY:MY_API_SECRET@192.168.1.6:4001/api');
    ```
  *
  * @see [new Client()](#new_Client_new)
  */
-export default function createClient(options: ServerOptions): Client;
+declare function createClient(options: ServerOptions): Client;
+export { Client, Namespace, createClient };
+export default createClient;

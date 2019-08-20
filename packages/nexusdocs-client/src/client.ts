@@ -1,9 +1,9 @@
-import * as _ from 'lodash';
-import * as qs from 'qs';
-import * as parse from 'url-parse';
+import _ from 'lodash';
+import qs from 'qs';
+import parse from 'url-parse';
 import fetch, { Response, Headers } from 'node-fetch';
-import * as contentTypeParser from 'content-type';
-import * as contentDispositionParser from 'content-disposition';
+import contentTypeParser from 'content-type';
+import contentDispositionParser from 'content-disposition';
 
 import {
   JSONParse, sortedJSONStringify,

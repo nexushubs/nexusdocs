@@ -78,7 +78,7 @@ declare class Namespace {
      * @param options - Additional options
      * @returns Promise of downloading request
      */
-    downloadToLocal(fileId: FileId, filePath: string, options?: DownloadOptions): Promise<{}>;
+    downloadToLocal(fileId: FileId, filePath: string, options?: DownloadOptions): Promise<unknown>;
     /**
      * Get file information
      * @param fileId

@@ -9,7 +9,7 @@ const contentDisposition = require('content-disposition');
 const { expect } = chai;
 chai.use(chaiAsPromised);
 const { encodeRFC5987ValueChars } = require('./util');
-const createClient = require('../lib');
+const { createClient } = require('..');
 
 function normalizeUrl(url) {
   return url.replace(/(&|\?)(e=\d+|token=[\.\w\-_]+)/g, '');

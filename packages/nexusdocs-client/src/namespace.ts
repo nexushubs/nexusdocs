@@ -1,10 +1,10 @@
-import * as _ from 'lodash';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as mime from 'mime-types';
-import * as contentDispositionParser from 'content-disposition';
+import _ from 'lodash';
+import fs from 'fs';
+import path from 'path';
+import mime from 'mime-types';
+import contentDispositionParser from 'content-disposition';
 import { PassThrough, Readable } from 'stream';
-import decamelize = require('decamelize');
+import decamelize from 'decamelize';
 
 import Client from './client';
 import { promisifyStream } from './util';

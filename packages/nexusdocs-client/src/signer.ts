@@ -1,7 +1,7 @@
-import * as _ from 'lodash';
-import * as qs from 'qs';
-import hmacSHA1 = require('crypto-js/hmac-sha1');
-import Base64 = require('crypto-js/enc-base64');
+import _ from 'lodash';
+import qs from 'qs';
+import hmacSHA1 from 'crypto-js/hmac-sha1';
+import Base64 from 'crypto-js/enc-base64';
 
 import {
   urlSafeBase64Encode,
