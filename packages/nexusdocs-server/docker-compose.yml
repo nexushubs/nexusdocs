@@ -26,7 +26,7 @@ services:
 
   pandoc:
     container_name: nds-pandoc-api
-    image: alphakevin/unoconv-server:latest
+    image: alphakevin/pandoc-api:latest
     restart: always
 
   pdf2image:
