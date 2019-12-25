@@ -1,6 +1,6 @@
 {
   "name": "nexusdocs-client",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Client SDK for nexusdocs-server",
   "main": "lib/index.js",
   "scripts": {
@@ -19,33 +19,32 @@
   "author": "alphakevin",
   "license": "MIT",
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.46",
-    "@babel/core": "^7.0.0-beta.46",
-    "@babel/plugin-transform-runtime": "^7.0.0-beta.46",
-    "@babel/preset-env": "^7.0.0-beta.46",
-    "@babel/preset-stage-3": "^7.0.0-beta.46",
-    "babel-eslint": "^8.2.3",
-    "chai": "^4.1.2",
+    "@babel/cli": "^7.7.7",
+    "@babel/core": "^7.7.7",
+    "@babel/plugin-transform-runtime": "^7.7.6",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/preset-stage-3": "^7.0.0",
+    "babel-eslint": "^8.2.6",
+    "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "eslint": "^4.19.1",
     "jsdoc-to-markdown": "^3.0.4",
     "mocha": "^4.1.0",
-    "nock": "^9.2.5",
-    "source-map-support": "^0.5.6",
-    "uuid": "^3.2.1"
+    "nock": "^9.6.1",
+    "uuid": "^3.3.3"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.46",
-    "content-disposition": "^0.5.2",
+    "@babel/runtime": "^7.7.7",
+    "content-disposition": "^0.5.3",
     "crypto-js": "^3.1.9-1",
     "decamelize": "^1.2.0",
     "is-stream": "^1.1.0",
     "json-stable-stringify": "^1.0.1",
-    "lodash": "^4.17.10",
-    "mime-types": "^2.1.18",
-    "qs": "^6.5.2",
-    "request": "^2.87.0",
-    "type-is": "^1.6.16",
-    "url-parse": "^1.4.0"
+    "lodash": "^4.17.15",
+    "mime-types": "^2.1.25",
+    "qs": "^6.9.1",
+    "request": "^2.88.0",
+    "type-is": "^1.6.18",
+    "url-parse": "^1.4.7"
   }
 }
