@@ -13,7 +13,7 @@ export interface AclData extends IBaseData {
 
 class Acl extends BaseModel<Acl, AclData> {
 
-  static collectionName = 'clients';
+  static collectionName = 'docs.acl';
   static schema = {
     clients_id: { type: 'string' },
     target: { type: 'string' },

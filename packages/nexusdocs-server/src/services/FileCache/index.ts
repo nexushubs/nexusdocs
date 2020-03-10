@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as util from 'util';
-import * as boolean from 'boolean';
+import { boolean } from 'boolean';
 import * as mime from 'mime-types';
 import * as _mkdirp from 'mkdirp';
 import * as uuid from 'uuid';
@@ -81,13 +81,13 @@ export default class FileCache extends BaseService implements IFileCacheService 
     const query = {
       expiresAt: { $lt: now },
     };
-    console.log('# FileCache: cleaning up expired cache...');
+    console.log('[INFO][FileCache] cleaning up expired cache...');
     const expiredCaches = await Cache.collection.find(query, { projection: { value: 1 } }).toArray();
     for (const cache of expiredCaches) {
       await namespace.deleteFile(cache.value);
     }
     await Cache.collection.deleteMany(query),
-    console.log(`# FileCache: ${expiredCaches.length} removed`);
+    console.log(`[INFO][FileCache] ${expiredCaches.length} removed`);
   }
 
   async writeStreamToFile(inputStream: Readable, contentType: string) {
@@ -108,7 +108,7 @@ export default class FileCache extends BaseService implements IFileCacheService 
       FileStore.collection.deleteMany({ namespace: CACHE_NAMESPACE }),
       bucket.truncate(),
     ]).then(() => {
-      console.log(`# FileCache: cache cleared!`);
+      console.log(`[INFO][FileCache] cache cleared!`);
     });
   }
 

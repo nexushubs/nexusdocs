@@ -12,7 +12,7 @@ export interface CacheData extends IBaseData {
 
 class Cache extends BaseModel<Cache, CacheData> {
   
-  static collectionName = 'caches';
+  static collectionName = 'docs.caches';
   static schema = {
     value: { type: 'string' },
     expiresAt: { type: ['date', null] },

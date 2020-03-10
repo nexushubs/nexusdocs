@@ -13,7 +13,7 @@ export interface FileStoreData extends IBaseData {
 
 class FileStore extends BaseModel<FileStore, FileStoreData> {
 
-  static collectionName = 'files.store';
+  static collectionName = 'docs.files.store';
   static schema = {
     namespace: { type: 'string' },
     files_id: { type: 'array', items: { type: 'string', optional: true } },

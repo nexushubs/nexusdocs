@@ -68,19 +68,19 @@ class Pdf2Image extends Base {
   async init() {
     const { url, mqtt } = this.options;
     this.client = new HttpClient(url);
-    console.log(`# initializing pdf2image client ${url}`);
-    console.log(`# mqtt = ${mqtt}`);
+    console.log(`[INFO][Pdf2Image] initializing client ${url}`);
+    console.log(`[INFO][Pdf2Image] mqtt = ${mqtt}`);
     return new Promise((resolve, reject) => {
       const mqttClient = connect(mqtt);
       mqttClient.on('error', console.error);
       mqttClient.on('connect', () => {
-        console.log(`# Pdf2Image: mqtt connected to ${this.options.mqtt}`);
+        console.log(`[INFO][Pdf2Image] mqtt connected to ${this.options.mqtt}`);
         mqttClient.subscribe('converted', err => {
           if (err) {
-            console.error(`# Pdf2Image: error subscribing converting status`);
+            console.error(`[ERROR][Pdf2Image] error subscribing converting status`);
             reject(err);
           } else {
-            console.log(`# Pdf2Image: successfully subscribed topic 'converted'`);
+            console.log(`[INFO][Pdf2Image] successfully subscribed topic 'converted'`);
             resolve();
           }
         });

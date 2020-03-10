@@ -59,7 +59,7 @@ api.put('/:namespaces_id/:path', wrap<Req, Res>(async (req, res, next) => {
   const { Dir } = req.context.models;
   const { path } = req.params;
   const data = req.body;
-  await Dir.update(path, data);
+  await Dir.update(data, { path });
   res.send({});
 }));
 

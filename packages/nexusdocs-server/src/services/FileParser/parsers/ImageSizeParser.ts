@@ -1,4 +1,4 @@
-import * as imageSize from 'image-size';
+import { imageSize } from 'image-size';
 
 import { staticImplements } from '../../../types/common';
 import { IFileParser, IFileParserStatic } from '../types';

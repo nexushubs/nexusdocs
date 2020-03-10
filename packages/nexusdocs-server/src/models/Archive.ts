@@ -16,7 +16,7 @@ export interface ArchiveData extends IBaseData {
 
 class Archive extends BaseModel<Archive, ArchiveData> {
 
-  static collectionName = 'archives';
+  static collectionName = 'docs.archives';
   static schema = {
     filename: { type: 'string' },
     namespace: { type: 'string' },

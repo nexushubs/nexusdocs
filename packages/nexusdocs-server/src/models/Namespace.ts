@@ -50,7 +50,7 @@ export interface NamespaceData extends IBaseData {
 
 class Namespace extends BaseModel<Namespace, NamespaceData> {
 
-  static collectionName = 'namespaces';
+  static collectionName = 'docs.namespaces';
   static schema = {
     name: { type: 'string' },
     providers_id: { type: 'string' },

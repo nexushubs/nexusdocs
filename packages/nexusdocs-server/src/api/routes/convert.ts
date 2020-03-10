@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { Router } from 'express';
 import { wrap } from 'async-middleware';
 import * as contentDisposition from 'content-disposition';
-import * as boolean from 'boolean';
+import { boolean } from 'boolean';
 import { createReadStream } from 'fs';
 
 import { IFileContent } from '../../types/file';

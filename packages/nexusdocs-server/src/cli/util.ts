@@ -15,8 +15,8 @@ export async function getApp(): Promise<Application> {
   if (!app) {
     app = new Application({ restful: { enabled: false }});
     app.on('error', err => console.error);
-    app.on('start', err => console.log('# NexusDocs server tool started'));
-    app.on('stop', err => console.log(`# NexusDocs server tool finished in ${app.time()}s`));
+    app.on('start', err => console.log('[INFO][CLI] NexusDocs server tool started'));
+    app.on('stop', err => console.log(`[INFO][CLI] NexusDocs server tool finished in ${app.time()}s`));
     await app.start();
   }
   return app;
@@ -45,7 +45,7 @@ export async function runInApp(fn: (app: Application) => void) {
     err = e;
     handleError(e);
   } finally {
-    console.log('# done!');
+    console.log('[INFO] done!');
     await app.stop(true);
     if (err) {
       process.exit(1);

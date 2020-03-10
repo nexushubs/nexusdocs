@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import * as qs from 'qs';
 import * as express from 'express';
 import { wrap } from 'async-middleware';
 import * as cors from 'cors';
@@ -21,8 +22,8 @@ export default function createRestApi(app: Application) {
     const protocol = req.get('X-Forwarded-Proto') || req.protocol;
     res.locals.fullUrl = `${protocol}://${req.get('host')}${originalUrl}`;
     res.locals.serverUrl = res.locals.fullUrl.replace(req.url.replace(/^\/api/, ''), '');
-    if (app.options.debug.request) {
-      console.log(`${req.method} ${req.url}`);
+    if (app.options.debug.request && !(req.method === 'HEAD' && req.url === '/')) {
+      console.log(`[REQUEST] ${req.method} ${req.url}${!_.isEmpty(req.query) ? `?${qs.stringify(req.query)}` : ''}`)
     }
     req.res = res;
     req.next = next;

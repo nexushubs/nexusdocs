@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import * as uuid from 'uuid';
 import * as config from 'config';
+import { boolean } from 'boolean';
 import { Db, Collection, FindOneOptions, FilterQuery, ObjectId } from 'mongodb';
 
 import { ValidationError, buildValidationError } from '../lib/errors';
@@ -9,6 +10,8 @@ import Base from '../lib/Base';
 import EsIndex from './EsIndex';
 import { IBaseModelStatic, IBaseData } from './types';
 import getNewFilename from 'new-filename';
+
+const ES_ENABLED = boolean(config.get('services.Elasticsearch.enabled'));
 
 type ValueOf<T, K extends keyof T> = T[K];
 
@@ -39,13 +42,17 @@ export default class BaseModel<TModel extends BaseModel<TModel,TData>, TData ext
   }
 
   get es(): EsIndex<TData> {
-    if (!this._static.esSync) {
+    if (!this.isEsEnabled) {
       throw new Error('elasticsearch sync is not activated on this collection');
     }
     if (!this._static.es) {
       this._static.es = new EsIndex(this._static.collectionName);
     }
     return this._static.es;
+  }
+
+  get isEsEnabled(): boolean {
+    return ES_ENABLED && this._static.esSync;
   }
 
   get collection(): Collection<TData> {
@@ -148,9 +155,9 @@ export default class BaseModel<TModel extends BaseModel<TModel,TData>, TData ext
     }
     this.validate(data);
     data._id = data._id || this.generateId();
-    await this.collection.insertOne(data as TData);
+    await this.collection.insertOne(data as any);
     const instance = this.getInstance(data);
-    if (this._static.esSync) {
+    if (this.isEsEnabled) {
       const { _id, ...rest } = data;
       await this.es.create(_id, rest as TData);
     }
@@ -177,8 +184,8 @@ export default class BaseModel<TModel extends BaseModel<TModel,TData>, TData ext
     await this.beforeUpdate(data);
     delete data._id;
     this.data(data);
-    await this.collection.updateOne({ _id: this.data('_id') }, { $set: this.data() });
-    if (this._static.esSync) {
+    await this.collection.updateOne({ _id: this.data('_id') as any }, { $set: this.data() });
+    if (this.isEsEnabled) {
       if (this._active) {
         data = this.data();
       } else {
@@ -209,7 +216,7 @@ export default class BaseModel<TModel extends BaseModel<TModel,TData>, TData ext
     if (_.isString(query)) {
       query = {
         _id: this.prepareId(query),
-      };
+      } as FilterQuery<TData>;
     }
     const data = await this.collection.findOne(query, options || this._static.defaultQueryOptions);
     if (!data) return null;
@@ -223,11 +230,11 @@ export default class BaseModel<TModel extends BaseModel<TModel,TData>, TData ext
   async delete(id?: any) {
     const _id = this.prepareId(id);
     await this.beforeDelete(_id);
-    await this.collection.deleteOne({ _id });
+    await this.collection.deleteOne({ _id } as any);
     if (!id) {
       this._deleted = true;
     }
-    if (this._static.esSync) {
+    if (this.isEsEnabled) {
       await this.es.delete(_id);
     }
     return this;

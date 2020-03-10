@@ -18,10 +18,10 @@ import {
 } from '.';
 
 export interface IBaseData {
-  _id?: string;
+  _id: string;
 }
 
-export interface IBaseModelStatic<T extends BaseModel<T, S, C>, S, C> {
+export interface IBaseModelStatic<T extends BaseModel<T, S, C>, S extends IBaseData, C> {
   new(): BaseModel<T, S, C>;
   initialized?: boolean;
   config: C;

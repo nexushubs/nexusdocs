@@ -7,7 +7,7 @@ export interface SnapshotData extends IBaseData {
 
 class Snapshot extends BaseModel<Snapshot, SnapshotData> {
 
-  static collectionName = 'snapshots';
+  static collectionName = 'docs.snapshots';
   static schema = {
     namespace: { type: 'string' },
   };

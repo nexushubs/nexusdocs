@@ -14,13 +14,16 @@ module.exports = {
   },
   services: {
     Elasticsearch: {
+      enabled: true,
       host: '127.0.0.1',
       port: '9200',
     },
     FileCache: {
+      enabled: true,
       clearOnStartup: true,
     },
     FileParser: {
+      enabled: true,
       parsers: {
         ImageThumbParser: {
           disabled: true,
@@ -38,6 +41,7 @@ module.exports = {
       },
     },
     FileConverter: {
+      enabled: true,
       converters: {
         ImageGMConverter: {
           disabled: true,

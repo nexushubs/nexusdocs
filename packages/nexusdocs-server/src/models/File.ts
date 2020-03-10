@@ -20,7 +20,7 @@ export interface FileData extends IBaseData {
 
 class File extends BaseModel<File, FileData> {
 
-  static collectionName = 'files';
+  static collectionName = 'docs.files';
   static schema = {
     namespace: { type: 'string' },
     filename: { type: 'string' },

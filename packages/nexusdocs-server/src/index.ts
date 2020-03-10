@@ -13,30 +13,30 @@ const argv = [...process.argv];
 if (require.main === module && argv.pop() === 'start') {
   const app = createServer();
   app.on('starting', () => {
-    console.log(`# ${packageJson.name}@${packageJson.version}`);
-    console.log(`# ${packageJson.description}`);
-    console.log(`# MIT license, source code: https://github.com/nexushubs/nexusdocs`);
-    console.log('# starting NexusDocs server...');
+    console.log(`[INFO] ${packageJson.name}@${packageJson.version}`);
+    console.log(`[INFO] ${packageJson.description}`);
+    console.log(`[INFO] MIT license, source code: https://github.com/nexushubs/nexusdocs`);
+    console.log('[INFO] starting NexusDocs server...');
   })
   app.on('dbconnected', (url) => {
-    console.log(`# db connected to ${url.replace(/(?:mongodb(\+srv)?:\/\/)[\w\.]+:[\w%]+@/, '')}`);
+    console.log(`[INFO] db connected to ${url.replace(/(?:mongodb(\+srv)?:\/\/)[\w\.]+:[\w%]+@/, '')}`);
   })
   app.on('start', () => {
     const { restful: { hostname, port, serverUrl } } = config.get('Application');
     const seconds = app.time();
-    console.log(`# server started successfully in ${seconds}s`);
-    console.log(`# api binds to http://${hostname}:${port}/api/`);
-    console.log(`# server url is ${serverUrl || 'auto-detect'}`);
+    console.log(`[INFO] server started successfully in ${seconds}s`);
+    console.log(`[INFO] api binds to http://${hostname}:${port}/api/`);
+    console.log(`[INFO] server url is ${serverUrl || 'auto-detect'}`);
   })
   app.on('starting service', () => {
-    console.log('# starting sub services ...');
+    console.log('[INFO] starting sub services ...');
   });
   app.on('stopping', () => {
-    console.log('# stopping sub services ...');
+    console.log('[INFO] stopping sub services ...');
   });
   app.on('stop', () => {
     const seconds = app.time();
-    console.log('# NexusDocs stopped')
+    console.log(`[INFO] NexusDocs server stopped, lasted ${seconds} seconds`);
   })
   app.on('error', e => {
     console.error(e);

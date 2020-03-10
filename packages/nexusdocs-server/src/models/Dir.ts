@@ -9,7 +9,7 @@ export interface DirData extends IBaseData {
 
 class Dir extends BaseModel<Dir, DirData> {
 
-  static collectionName = 'files';
+  static collectionName = 'docs.dirs';
   static schema = {
     namespace: { type: 'string' },
     path: { type: 'string' },

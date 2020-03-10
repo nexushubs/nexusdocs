@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import * as program from 'commander';
-import * as boolean from 'boolean';
+import { boolean } from 'boolean';
 
 import {
   ApiError,

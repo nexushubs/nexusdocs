@@ -7,7 +7,7 @@ export default class Elasticsearch extends elasticsearch.Client {
     super({
       host: `${host}:${port}`
     })
-    console.log(`# Elasticsearch connected to ${host}:${port}`);
+    console.log(`[INFO][Elasticsearch] connected to ${host}:${port}`);
   }
 
 }

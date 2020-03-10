@@ -14,13 +14,16 @@ module.exports = {
   },
   services: {
     Elasticsearch: {
+      enabled: 'ELASTICSEARCH_ENABLED',
       host: 'ELASTICSEARCH_HOST',
       port: 'ELASTICSEARCH_PORT',
     },
     FileCache: {
+      enabled: 'FILE_CACHE_ENABLED',
       clearOnStartup: 'FILE_CACHE_CLEAR_ON_STARTUP',
     },
     FileParser: {
+      enabled: 'FILE_PARSER_ENABLED',
       parsers: {
         ImageThumbParser: {
           thumbSize: 'IMAGE_THUMB_SIZE',
@@ -28,6 +31,7 @@ module.exports = {
       },
     },
     FileConverter: {
+      enabled: 'FILE_CONVERTER_ENABLED',
       converters: {
         UnoconvConverter: {
           unoconvServerUrl: 'UNOCONV_SERVER_URL',

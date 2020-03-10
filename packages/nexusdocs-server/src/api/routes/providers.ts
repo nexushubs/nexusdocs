@@ -48,7 +48,7 @@ api.put('/:providers_id', wrap<Req, Res>(async (req, res, next) => {
   const { Provider } = req.context.models;
   const { providers_id } = req.params;
   const data = req.body;
-  await Provider.update(providers_id, data);
+  await Provider.update(data, { _id: providers_id });
   res.send({});
 }));
 

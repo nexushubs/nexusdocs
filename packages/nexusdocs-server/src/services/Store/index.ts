@@ -52,10 +52,10 @@ export default class Store extends BaseService {
 
   async loadProvider(options) {
     const { name, type } = options;
-    console.log(`# loading provider '${name}' of type ${type}`);
+    console.log(`[INFO][Store] provider '${name}' of type ${type}`);
     const providerClasses = providers[type];
     if (!providerClasses) {
-      throw new Error(`invalid provider type: ${type}`);
+      throw new Error(`[ERROR][Store] invalid provider type: ${type}`);
     }
     const { Provider, Bucket } = providerClasses;
     options = {

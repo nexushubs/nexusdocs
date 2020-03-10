@@ -13,7 +13,7 @@ export interface ProviderData extends IBaseData {
 
 class Provider extends BaseModel<Provider, ProviderData> {
 
-  static collectionName = 'providers';
+  static collectionName = 'docs.providers';
   static schema = {
     type: { type: 'string', $providerType: 1 },
     name: { type: 'string', pattern: 'alphaNumeric' },

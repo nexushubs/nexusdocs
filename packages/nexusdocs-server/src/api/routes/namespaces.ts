@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { wrap } from 'async-middleware';
 import * as contentDisposition from 'content-disposition';
 import * as mime from 'mime-types';
-import * as boolean from 'boolean';
+import { boolean } from 'boolean';
 
 import { ApiError } from '../../lib/errors';
 import { getExtension, parseQueryStringHeaders, diffTimestampFromNow, normalizeHeaders } from '../../lib/util';
@@ -80,8 +80,8 @@ api.post('/:namespace/urls', checkAuth(), wrap<Req, Res>(async (req, res, next) 
   const { namespace } = res.locals;
   const { e } = req.query;
   const { download, origin, expires: _expires, files: _files } = req.body;
-  const fileIds = _.uniq(_files);
-  const fileList = await File.getAll({_id: {$in: fileIds}});
+  const fileIds: string[] = _.uniq(_files);
+  const fileList = await File.getAll({ _id: { $in: fileIds } });
   const expires = diffTimestampFromNow(_expires || e);
   const data = await Promise.all(fileList.map(async file => {
     const { _id, contentType, filename, store_id } = file;

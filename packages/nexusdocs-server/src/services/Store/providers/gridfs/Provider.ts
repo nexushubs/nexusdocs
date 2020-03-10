@@ -7,7 +7,7 @@ export default class GridFSProvider extends BaseProvider {
   public _client: MongoClient;
   public _db: Db;
 
-  validOptions(options) {
+  validOptions(options: any) {
     const { params } = options;
     if (!params || !params.database) {
       throw new TypeError('invalid options');

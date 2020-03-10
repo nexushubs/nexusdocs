@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as _ from 'lodash';
+import { boolean } from 'boolean';
 import * as express from 'express';
 import * as config from 'config';
 import { Server } from 'http';
@@ -136,6 +137,10 @@ export default class Application extends Base {
         if (config.has(key)) {
           options = config.get(key);
         }
+      }
+      if (options && !boolean(options.enabled)) {
+        console.log(`[INFO][${name}] service is disabled`);
+        return;
       }
       const instance = new Class(options);
       holder[Class.name] = instance;

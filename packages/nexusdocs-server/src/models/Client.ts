@@ -20,7 +20,7 @@ export interface ClientData extends IBaseData {
 
 class Client extends BaseModel<Client, ClientData> {
 
-  static collectionName = 'clients';
+  static collectionName = 'docs.clients';
   static schema = {
     name: { type: 'string' },
     role: { type: 'string', pattern: /^user|admin$/ },
