@@ -1,6 +1,6 @@
 {
   "name": "nexusdocs-client",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Client SDK for nexusdocs-server",
   "main": "lib/index.js",
   "scripts": {
@@ -21,10 +21,13 @@
   "devDependencies": {
     "@babel/cli": "^7.7.7",
     "@babel/core": "^7.7.7",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-proposal-json-strings": "^7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/plugin-transform-runtime": "^7.7.6",
     "@babel/preset-env": "^7.7.7",
-    "@babel/preset-stage-3": "^7.0.0",
-    "babel-eslint": "^8.2.6",
+    "babel-eslint": "^9.0.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "eslint": "^4.19.1",
@@ -46,5 +49,6 @@
     "request": "^2.88.0",
     "type-is": "^1.6.18",
     "url-parse": "^1.4.7"
-  }
+  },
+  "gitHead": "f4936a2354aa2ff8b431e9dd50fd61e3066ead50"
 }
