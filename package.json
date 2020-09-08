@@ -1,5 +1,6 @@
 {
 	"devDependencies": {
-		"lerna": "^2.5.1"
-	}
+		"lerna": "^3.19.0"
+	},
+	"name": "nexusdocs"
 }
