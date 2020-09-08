@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import mime from 'mime-types';
 import { Transform } from 'stream';
 
 import { app } from 'init/application';
@@ -20,7 +19,7 @@ export default class UploadStream extends Transform {
     this.filename = filename || id;
     this.contentType = contentType;
     this.length = 0;
-    this.hasher = crypto.createHash('md5');
+    this.hash = crypto.createHash('md5');
     this.metadata = {};
     if (uploadStream) {
       this.initStream();
@@ -30,7 +29,7 @@ export default class UploadStream extends Transform {
   }
 
   _transform(data, encoding, callback) {
-    this.hasher.update(data);
+    this.hash.update(data);
     this.length += Buffer.byteLength(data);
     this.push(data);
     callback();
@@ -41,13 +40,22 @@ export default class UploadStream extends Transform {
     FileParser.parse(this.filename, this)
     .catch(error => this.emit('error', error));
     this.uploadStream.on('error', (error) => {
+      console.error('UploadStream, error: ', error);
       this.emit('error', error);
     });
     this.pipe(this.uploadStream);
-    promisifyEvent(this, ['metadata', 'finish'])
+    Promise.all([
+      promisifyEvent(this, 'metadata'),
+      this.uploadStream.autoEnd
+        ? promisifyEvent(this.uploadStream, 'upload', { ignoreErrors: true })
+        : promisifyEvent(this, 'finish', { ignoreErrors: true })
+    ])
     .then(([metadata]) => {
       this.metadata = metadata;
       this.finish();
+    })
+    .catch(err => {
+      console.error('error in initStream():', err);
     });
     setImmediate(() => {
       this.start();
@@ -109,7 +117,7 @@ export default class UploadStream extends Transform {
   async finish() {
     this.dateUploaded = new Date;
     this.size = this.length;
-    this.md5 = this.hasher.digest('hex');
+    this.md5 = this.hash.digest('hex');
     const info = {
       _id: this.id,
       ...this.getFileInfo(),

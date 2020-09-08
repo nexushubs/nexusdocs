@@ -25,14 +25,14 @@ export class ResumableStorage {
             md5,
           };
           const uploadStream = await namespace.openUploadStream(uploadOptions);
-          const resumableReadStream = resumable.createReadStream(status, uploadStream);
+          resumable.createReadStream(status, uploadStream);
+          uploadStream.on('error', callback);
           uploadStream.on('file', async data => {
             callback(null, {
               resumable: status,
               ...data,
             });
           });
-          uploadStream.on('error', error => callback);
         } catch (error) {
           callback(error);
         }

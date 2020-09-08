@@ -33,11 +33,13 @@ export default class AliOSSProviderBucket extends BaseBucket {
       ...params,
       bucket: bucketName,
     });
+    this.autoEnd = false;
   }
 
-  _openUploadStream(id, options) {
+  async _openUploadStream(id, options) {
     const stream = new PassThrough;
     const putOptions = {
+      timeout: '10s',
       headers: {
         'content-type': options.contentType,
       },
@@ -46,7 +48,14 @@ export default class AliOSSProviderBucket extends BaseBucket {
       const filename = `${id}${path.extname(options.filename)}`;
       putOptions.headers['content-disposition'] = contentDisposition(filename);
     }
-    this.bucket.putStream(id, stream, putOptions);
+    this.bucket.putStream(id, stream, putOptions)
+    .then(() => {
+      stream.emit('upload');
+    })
+    .catch(err => {
+      console.error('OSS put error', err);
+      stream.emit('error', err);
+    });
     return stream;
   }
 
@@ -54,6 +63,7 @@ export default class AliOSSProviderBucket extends BaseBucket {
     const stream = new PassThrough;
     const result = await this.bucket.getStream(id, stream)
     .catch(err => {
+      console.error('OSS get error', err);
       stream.emit('error', err);
     });
     return result.stream;

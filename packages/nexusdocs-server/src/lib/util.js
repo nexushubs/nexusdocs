@@ -39,15 +39,17 @@ export function promisifyAll(object, methods) {
   return newObject;
 }
 
-export function promisifyEvent(emitter, event) {
+export function promisifyEvent(emitter, event, options = {}) {
   if (_.isArray(event)) {
     return Promise.all(event.map(name => {
-      return promisifyEvent(emitter, name);
-    }))
+      return promisifyEvent(emitter, name, options);
+    }));
   }
   return new Promise((resolve, reject) => {
     emitter.once(event, resolve);
-    emitter.once('error', reject);
+    if (!options.ignoreErrors) {
+      emitter.once('error', reject);
+    }
   });
 }
 

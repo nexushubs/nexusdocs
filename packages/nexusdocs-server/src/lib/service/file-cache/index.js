@@ -73,7 +73,7 @@ export default class FileCache extends BaseService {
     const query = {
       expireAt: { $lt: now },
     };
-    console.log('# FileCache: cleaning up expired cache...');
+    // console.log('# FileCache: cleaning up expired cache...');
     const expiredCaches = await Cache.collection.find(query, { files_id: 1 }).toArray();
     const cleanFilePromise = expiredCaches.reduce((promise, cache) => {
       return promise.then(() => namespace.deleteFile(cache.files_id));
@@ -82,7 +82,9 @@ export default class FileCache extends BaseService {
       cleanFilePromise,
       Cache.collection.remove(query),
     ]).then(() => {
-      console.log(`# FileCache: ${expiredCaches.length} removed`);
+      if (expiredCaches.length) {
+        console.log(`# FileCache: ${expiredCaches.length} removed`);
+      }
     });
   }
 

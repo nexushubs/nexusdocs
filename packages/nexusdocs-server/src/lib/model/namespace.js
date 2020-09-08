@@ -1,12 +1,10 @@
 import _ from 'lodash';
-import { Writable } from 'stream';
 import archiver from 'archiver';
 import getNewFilename from 'new-filename';
-import { PassThrough } from 'stream';
 import qs from 'qs';
 
 import BaseModel from 'lib/base-model';
-import { bucketName, isObjectId } from 'lib/schema';
+import { isObjectId } from 'lib/schema';
 import { ValidationError, buildValidationError } from 'lib/errors';
 import { ApiError } from '../../../lib/lib/errors';
 
@@ -73,9 +71,8 @@ export default class Namespace extends BaseModel {
     if (!this._active) {
       throw new Error('could not open upload stream on none instance');
     }
-    const { filename, fileId, md5 } = options;
+    const { md5 } = options;
     const bucket = await this.getBucket();
-    let uploadStream = null;
     if (md5 && /[0-9a-f]{32}/i.test(md5)) {
       // if file md5 is provided and match, skip upload to provider
       const { FileStore } = this.model();
@@ -91,16 +88,14 @@ export default class Namespace extends BaseModel {
         };
       }
     }
-    uploadStream = await bucket.openUploadStream(options);
+    const uploadStream = await bucket.openUploadStream(options);
     uploadStream.on('upload', async info => {
-      // if there is a file with the same md5 hash,
-      // delete uploaded one from provider and point the file to the original one
       try {
         await this.addStore(bucket, info);
+        uploadStream.emit('file', info);
       } catch(err) {
         uploadStream.emit('error', err);
       }
-      uploadStream.emit('file', info);
     });
     return uploadStream;
   }
@@ -124,7 +119,7 @@ export default class Namespace extends BaseModel {
         try {
           await bucket.delete(info._id);
         } catch (err) {
-          console.error(err);
+          console.error('Error deleting file from bucket', err);
         }
       }
       await FileStore.collection.update({
@@ -241,7 +236,7 @@ export default class Namespace extends BaseModel {
    */
   async createArchiveStream(files, options = {}) {
     const { level = 6 } = options;
-    // TODO move acreating archive operation to task queue
+    // TODO move creating archive operation to task queue
     const { File } = this.model();
     const archive = new archiver('zip', {
       zlib: { level },
@@ -287,7 +282,7 @@ export default class Namespace extends BaseModel {
     const storeStream = await bucket.openUploadStream({
       filename,
     });
-    const arvhive = new archiver('zip', {
+    const archiveStream = new archiver('zip', {
       zlib: { level: 6 },
     });
     const filenames = [];
@@ -298,27 +293,27 @@ export default class Namespace extends BaseModel {
         const data = await this.addArchive(info);
         resolve(data);
       });
-      arvhive.on('warning', reject);
-      arvhive.on('error', reject);
-      arvhive.pipe(storeStream);
+      archiveStream.on('warning', reject);
+      archiveStream.on('error', reject);
+      archiveStream.pipe(storeStream);
       await Promise.all(_.map(files, async fileId => {
         // console.log('next file:', fileId);
         const file = await File.get(fileId);
         if (!file) {
           const err = new ApiError(404, `file not find: ${fileId}`);
-          arvhive.emit('error', err);
+          archiveStream.emit('error', err);
         }
         const fileStream = await bucket.openDownloadStream(file.store_id);
         let filename = file.filename;
         filename = getNewFilename(filenames, filename);
         // console.log('appending:', filename);
-        arvhive.append(fileStream, {
+        archiveStream.append(fileStream, {
           name: filename,
           date: file.dateUploaded,
         });
       }));
       // console.log('arvhive.finalize()');
-      arvhive.finalize();
+      archiveStream.finalize();
     });
   }
 

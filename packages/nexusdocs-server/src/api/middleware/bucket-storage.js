@@ -13,10 +13,10 @@ export class BucketStorage {
         md5,
       };
       const uploadStream = await namespace.openUploadStream(uploadOptions);
+      uploadStream.on('error', callback);
       uploadStream.on('file', data => {
         callback(null, data);
       });
-      uploadStream.on('error', err => callback);
       file.stream.pipe(uploadStream);
     } catch (err) {
       callback(err);

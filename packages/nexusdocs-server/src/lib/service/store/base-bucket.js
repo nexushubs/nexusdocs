@@ -1,13 +1,9 @@
-import crypto from 'crypto';
 import EventEmitter from 'events';
-import fs from 'fs';
-import path from 'path';
 import uuid from 'uuid';
 import mimeTypes from 'mime-types';
-import { Writable, Readable } from 'stream';
+import { Readable } from 'stream';
 import _ from 'lodash';
 
-import { uuidRegexPattern, promisifyStream } from 'lib/util';
 import UploadStream from './upload-stream';
 
 export default class BaseBucket extends EventEmitter {
@@ -16,6 +12,7 @@ export default class BaseBucket extends EventEmitter {
     super();
     this.provider = provider;
     this.name = bucketName;
+    this.autoEnd = true;
   }
 
   support(type, commands) {
@@ -33,7 +30,7 @@ export default class BaseBucket extends EventEmitter {
     return this.name === 'gridfs';
   }
 
-  openUploadStream(options = {}) {
+  async openUploadStream(options = {}) {
     const { filename, contentType, fileId, md5, size, skip } = options;
     const id = uuid.v4();
     const uploadOptions = {
@@ -42,7 +39,7 @@ export default class BaseBucket extends EventEmitter {
     };
     let providerUploadStream = null;
     if (!skip) {
-      providerUploadStream = this._openUploadStream(id, { ...uploadOptions });
+      providerUploadStream = await this._openUploadStream(id, { ...uploadOptions });
     }
     const uploadStream = new UploadStream(id, providerUploadStream, {
       ...uploadOptions,
@@ -53,10 +50,10 @@ export default class BaseBucket extends EventEmitter {
     return uploadStream;
   }
     
-  openDownloadStream(id) {
+  async openDownloadStream(id) {
     let downloadStream;
     try {
-      downloadStream = this._openDownloadStream(id);
+      downloadStream = await this._openDownloadStream(id);
     } catch(e) {
       downloadStream = new Readable();
       downloadStream.emit('error', e);
