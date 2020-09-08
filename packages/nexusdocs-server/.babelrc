@@ -1,17 +1,27 @@
 {
   "presets": [
-    ["@babel/preset-env", {
-      "targets": {
-        "node": "8.8"
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "8.8"
+        }
       }
-    }],
-    "@babel/preset-stage-3"
+    ]
   ],
   "plugins": [
     "@babel/plugin-transform-runtime",
-    "transform-class-properties",
-    ["module-resolver", {
-      "root": ["./src"]
-    }]
+    "@babel/plugin-proposal-class-properties",
+    [
+      "module-resolver",
+      {
+        "root": [
+          "./src"
+        ]
+      }
+    ],
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-syntax-import-meta",
+    "@babel/plugin-proposal-json-strings"
   ]
 }
