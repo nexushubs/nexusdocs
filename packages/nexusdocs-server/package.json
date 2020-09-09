@@ -5,10 +5,11 @@
   "main": "lib/app.js",
   "scripts": {
     "start": "node lib/app start",
-    "debug": "node_modules/.bin/nodemon --inspect --delay 1000ms -i src lib/app.js start",
-    "build": "node_modules/.bin/babel --out-dir lib src --source-maps",
-    "nodemon": "node_modules/.bin/nodemon --delay 1000ms -i src lib/app.js start",
-    "watch": "node_modules/.bin/babel --out-dir lib src --source-maps --watch",
+    "clean": "rm -rf lib/*",
+    "debug": "nodemon --inspect --delay 1000ms -i src lib/app.js start",
+    "build": "babel --out-dir lib src --source-maps",
+    "nodemon": "nodemon --delay 1000ms -i src lib/app.js start",
+    "watch": "babel --out-dir lib src --source-maps --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "https://github.com/nexushubs/nexusdocs/tree/master/packages/nexusdocs-server",

@@ -21,3 +21,4 @@ node_modules
 database
 .vscode
 .env
+.envrc

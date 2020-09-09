@@ -1,3 +1,26 @@
-node_modules
+**/.DS_Store
+
+# Logs
+logs
+**/*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# testing
+lib-cov
+coverage
+
+# nodejs
+**/node_modules
+
+# build
+lib
+
+# application
 database
-npm-debug.log
+.vscode
+.env
+.envrc
