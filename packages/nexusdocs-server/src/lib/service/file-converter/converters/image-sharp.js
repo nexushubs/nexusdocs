@@ -58,24 +58,25 @@ export default class ImageSharpConverter extends BaseConverter {
     if (!_.isUndefined(height)) {
       height = parseInt(height);
     }
-    commands.push(['resize', width, height]);
+    const resizeOption = { width, height, withoutEnlargement: true };
     switch (method) {
       case '!':
-        commands.push('ignoreAspectRatio');
+        resizeOption.fit = sharp.fit.fill;
         break;
       case '>':
-        commands.push('withoutEnlargement');
+        resizeOption.withoutEnlargement = true;
         break;
       case '^':
-        commands.push('min');
+        resizeOption.fit = sharp.fit.outside;
         break;
       case '%':
       case '@':
       case '<':
         throw new ApiError(400, null, 'ImageConverter.resize: geometry qualifiers is not supported')
       default:
-        commands.push('max');
+        resizeOption.fit = sharp.fit.inside;
     }
+    commands.push(['resize', resizeOption]);
   }
 
   _quality(quality) {
@@ -135,10 +136,6 @@ export default class ImageSharpConverter extends BaseConverter {
         quality: this.quality,
       }
       formatCommand.push(options);
-    }
-    let enlargeCommand = _.find(commands, c => c[0] === 'withoutEnlargement');
-    if (!enlargeCommand) {
-      commands.push('withoutEnlargement');
     }
   }
 

@@ -44,7 +44,7 @@
     "camelcase": "^4.1.0",
     "cli-table": "^0.3.1",
     "commander": "^2.15.1",
-    "config": "^1.30.0",
+    "config": "^3.3.2",
     "content-disposition": "^0.5.2",
     "cors": "^2.8.4",
     "dataurl": "^0.1.0",
@@ -66,11 +66,11 @@
     "new-filename": "^1.0.1",
     "request": "^2.87.0",
     "schema-inspector": "^1.6.8",
-    "sharp": "^0.18.4",
+    "sharp": "^0.26.1",
     "source-map-support": "^0.5.6",
     "statuses": "^1.5.0",
     "uppercamelcase": "^3.0.0",
     "uuid": "^3.2.1",
-    "zip-stream-parser": "^0.2.0"
+    "zip-stream-parser": "^0.2.1"
   }
 }
