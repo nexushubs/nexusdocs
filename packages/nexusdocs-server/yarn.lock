@@ -777,17 +777,12 @@ async@^1.4.0:
   resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
   integrity sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=
 
-async@^2.6.3:
+async@^2.6.3, async@~2.6.3:
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.3.tgz#d72625e2344a3656e3a3ad4fa749fa83299d82ff"
   integrity sha512-zflvls11DCy+dQWzTW2dzuilv8Z5X/pjfmZOWba6TNIVDm+2UDaJmXSOXlasHKfNBs8oo3M0aT50fDEWfKZjXg==
   dependencies:
     lodash "^4.17.14"
-
-async@^3.1.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/async/-/async-3.2.0.tgz#b3a2685c5ebb641d3de02d161002c60fc9f85720"
-  integrity sha512-TR2mEZFVOj2pLStYxLht7TyfuRzaydfpxr3k9RpHIzMgw7A64dzsdqCxH1WJyQdoe8T10nDXd9wnEigmiuHIZw==
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -4318,12 +4313,12 @@ sax@>=0.6.0, sax@^1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-schema-inspector@^1.6.8:
-  version "1.6.9"
-  resolved "https://registry.yarnpkg.com/schema-inspector/-/schema-inspector-1.6.9.tgz#331268839998c2a51c742fb6c5f47226639eae8a"
-  integrity sha512-MNS3SOn6noecIv9R+gwroIgiOLQoRY1IRXToFvVBo2QMfnXy1E+SGRVWJFsJPqgy0lAivUfPLaVLhvAI35HKRg==
+schema-inspector@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/schema-inspector/-/schema-inspector-2.0.0.tgz#f124f2d66e2d68c93d38d3dd7e0f4cf3d1e4ccd7"
+  integrity sha512-Qa0fZ8vfCNzwPWZPfXVtjqYKN7rC2jFrHia2UvBvmaXTdwiA9hnTnWh30MP47Tw5ZejkuH0QqUpDK4NqPoBk4w==
   dependencies:
-    async "^3.1.0"
+    async "~2.6.3"
 
 schema-utils@^0.4.0:
   version "0.4.7"
