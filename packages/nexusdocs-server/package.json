@@ -93,7 +93,7 @@
     "node-fetch": "^2.6.0",
     "pdfjs-dist": "^2.2.228",
     "request": "^2.88.0",
-    "sanitize-html": "^1.20.1",
+    "sanitize-html": "^2.3.2",
     "schema-inspector": "^1.6.8",
     "sharp": "^0.23.4",
     "source-map-support": "^0.5.16",
