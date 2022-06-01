@@ -95,7 +95,7 @@
     "request": "^2.88.0",
     "sanitize-html": "^1.20.1",
     "schema-inspector": "^1.6.8",
-    "sharp": "^0.23.4",
+    "sharp": "^0.30.5",
     "source-map-support": "^0.5.16",
     "statuses": "^1.5.0",
     "uppercamelcase": "^3.0.0",
